@@ -105,7 +105,12 @@ Phát biểu theo điều **phải đúng**, không theo cách cài đặt.
 - **R5** — Hệ thống không bao giờ nhận nhầm tiếng của chính nó là ngắt lời.
 - **R6** — Hoàn tất được năm luồng nghiệp vụ ở §4.1, tuân thủ quy tắc ở §4.2.
 - **R7** — Mọi quyết định chuyển lượt được ghi log đủ để tái dựng và phân tích sau.
-- **R8** — Baseline dùng ngưỡng im lặng được cài song song, chạy trên **cùng** ASR, TTS và kịch bản, bật tắt bằng cấu hình.
+- **R8** — **Ba** baseline được cài song song, chạy trên **cùng** ASR, TTS và kịch bản, bật tắt bằng cấu hình:
+  - **B1 — ngưỡng im lặng.** Cách làm hiện hành ở §1. Quét nhiều giá trị, không chọn một (§9.3).
+  - **B2 — endpointer âm thanh mã nguồn mở có sẵn.** Mô hình đã công bố hỗ trợ tiếng Việt, chạy CPU, dùng nguyên trọng số, không tinh chỉnh.
+  - **B3 — endpointer ngữ nghĩa trên văn bản ASR.** Mô hình mã nguồn mở có bản tiếng Việt riêng, chạy CPU, dùng nguyên trọng số, không tinh chỉnh.
+
+  B1 chứng minh luận điểm ở §1: không ngưỡng nào thắng được. B2 và B3 trả lời câu hỏi “tại sao không dùng mô hình có sẵn” — câu hỏi này đã hợp lệ từ 2025, khi các endpointer đa ngôn ngữ bắt đầu liệt kê tiếng Việt. Tên và phiên bản mô hình cụ thể ghi ở `docs/adr/`, không chốt trong tài liệu này.
 
 ### Nên có
 
@@ -115,7 +120,7 @@ Phát biểu theo điều **phải đúng**, không theo cách cài đặt.
 
 ## 6. Ràng buộc
 
-- **Thời gian thực.** Suy luận phải theo kịp luồng audio trên máy tính xách tay thông thường, không phải máy có GPU. Ngân sách cụ thể ghi trong `configs/`, kiểm tra bằng `make bench`.
+- **Thời gian thực.** Suy luận phải theo kịp luồng audio trên máy tính xách tay thông thường, không phải máy có GPU. Ngân sách cụ thể ghi trong `configs/`, kiểm tra bằng `uv run pytest -m latency`.
 - **Ngắt lời phải nhanh hơn ngưỡng cảm nhận của con người**, nếu không tính năng mất ý nghĩa.
 - **Không phụ thuộc dịch vụ đám mây trong đường chạy chính.** Phụ thuộc mạng làm hỏng phép đo độ trễ và làm demo mong manh.
 - **Dữ liệu.** Chỉ dùng hội thoại đóng vai theo kịch bản, có đồng ý. Không dùng ghi âm cuộc gọi thật của khách hàng bất kỳ công ty nào. NetCo là công ty giả định.
