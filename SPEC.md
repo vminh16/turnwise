@@ -145,12 +145,12 @@ Phát biểu theo điều **phải đúng**, không theo cách cài đặt.
 
 ## 8. Ranh giới giữa các thành phần
 
-Mô tả trách nhiệm, không mô tả cách cài đặt. Tên module khớp `CLAUDE.md`.
+Mô tả trách nhiệm, không mô tả cách cài đặt. Tên module khớp `AGENTS.md`.
 
 - **`audio`** — nhận âm thanh vào, tách tiếng bot khỏi tiếng khách, cung cấp đặc trưng theo khung đều đặn. Không biết gì về hội thoại.
 - **`turn`** — nhận đặc trưng, trả về đánh giá về trạng thái lượt nói: *giữ lượt*, *nhận lượt*, hay *đây chỉ là tiếng đệm*. **Mỗi nguồn tín hiệu phải trả về được "không kết luận" thay vì đoán bừa.** Không biết gì về nghiệp vụ.
 - **`dialog`** — nhận quyết định lượt nói và văn bản, chạy máy trạng thái nghiệp vụ §4, sinh câu trả lời. Không biết gì về xử lý tín hiệu.
-- **`metrics`** — nhận sự kiện từ mọi tầng, ghi log có timestamp, dựng bảng theo dõi. Chỉ đọc, không tác động ngược.
+- **`telemetry`** — nhận sự kiện từ mọi tầng, ghi log có timestamp, dựng bảng theo dõi. Chỉ đọc, không tác động ngược.
 
 Ranh giới này giữ để thay một tầng mà không đụng tầng khác — điều kiện cần để chạy A/B ở R8.
 
