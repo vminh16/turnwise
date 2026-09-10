@@ -1,0 +1,110 @@
+[project]
+name = "turnwise"
+version = "0.1.0"
+description = "Real-time turn-taking and barge-in for Vietnamese voice agents"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Nguyen Van Minh" }]
+
+# Runtime path only. Anything offline lives in an optional group below.
+dependencies = [
+    "numpy>=2.1",
+    "scipy>=1.14",
+    "sounddevice>=0.5.1",   # PortAudio capture/playback; WASAPI on Windows
+    "soundfile>=0.13",      # libsndfile; fixture wav I/O, never on the runtime path
+    "pydantic-settings>=2.7",
+    "pyyaml>=6.0.2",
+    "rich>=13.9",           # telemetry dashboard in the terminal
+    "onnxruntime>=1.20",    # ONNX scorers + baselines, CPU only
+    "aec-audio-processing>=1.0.1",  # WebRTC AEC/NS/AGC bindings, prebuilt Windows wheels
+    "praat-parselmouth>=0.4.7",     # F0 + tone analysis, the core research signal
+]
+
+[project.optional-dependencies]
+# Not installed by default. Add with: uv sync --extra <name>
+asr = ["faster-whisper>=1.1"]          # CTranslate2 backend, no torch
+tts = ["piper-tts>=1.2"]               # local ONNX VITS, has a vi_VN voice
+transport = ["aiortc>=1.9"]            # WebRTC client at localhost:8080
+research = [                            # offline only: training/, evaluation/, notebooks/
+    "torch>=2.5",
+    "torchaudio>=2.5",
+    "librosa>=0.10.2",
+    "matplotlib>=3.9",
+    "pandas>=2.2",
+]
+
+[project.scripts]
+turnwise = "turnwise.agent:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    "mypy>=1.14",
+    "pre-commit>=4.0",
+    "types-pyyaml>=6.0.12",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/turnwise"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "training", "evaluation", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "RUF", "T20"]
+ignore = [
+    "ANN401",  # Any is sometimes the honest annotation
+    "B008",    # pydantic Field() in defaults is idiomatic
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ANN"]           # test bodies do not need annotations
+"notebooks/**" = ["T20", "ANN"]
+"scripts/**" = ["T20"]         # thin CLIs may print
+"examples/**" = ["T20"]        # examples are meant to be read and run
+
+[tool.ruff.lint.isort]
+known-first-party = ["turnwise"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src", "tests", "training", "evaluation", "scripts"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+# strict on the shipped package
+module = "turnwise.*"
+strict = true
+
+[[tool.mypy.overrides]]
+# lenient offline code, per AGENTS.md
+module = ["training.*", "evaluation.*", "scripts.*"]
+disallow_untyped_defs = false
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["sounddevice.*", "soundfile.*", "parselmouth.*", "aec_audio_processing.*", "onnxruntime.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+asyncio_mode = "auto"
+markers = [
+    "latency: timing assertions; slow and machine-dependent, run by `task bench`",
+    "scenario: replays scenarios/*.yaml, run by `task sim`",
+]
+
+[tool.coverage.run]
+source = ["src/turnwise"]
