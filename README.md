@@ -62,6 +62,7 @@ uv run python -c "import sounddevice; print(sounddevice.query_devices())"
 | `SPEC.md` | The problem, business rules, requirements and acceptance criteria. Read before changing scope. |
 | `AGENTS.md` | How to build: commands, layer boundaries, conventions, pitfalls. |
 | `PROJECT-STRUCTURE.md` | Repository layout and the reasoning behind it. |
+| `docs/roadmap.md` | Phase order and why: what to build first, what blocks what, where the project is most likely to die. |
 | `docs/adr/` | Method and architecture decisions, with the alternatives that were rejected. |
 | `docs/runbook/` | Operational procedures: data collection, running an evaluation. |
 

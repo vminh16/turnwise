@@ -75,6 +75,7 @@ turnwise/
 ├── docs/
 │   ├── adr/                        # 0001 format, 0002 prior art + baselines, 0003 the turn seam
 │   ├── agents/                     # issue tracker, triage labels, domain doc conventions
+│   ├── roadmap.md                  # phase order 0-6 and what blocks what
 │   ├── runbook/
 │   │   ├── collect-data.md
 │   │   └── run-evaluation.md
