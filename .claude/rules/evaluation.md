@@ -42,7 +42,12 @@ Model names and versions belong in `docs/adr/`, not in `SPEC.md` and not hardcod
 ## The headline metric
 
 Error rate split by the lexical tone of the final syllable (SPEC §9.1). Every other number is
-context for this one. It requires the per-decision tone label recorded by `telemetry.collector`,
+context for this one.
+
+It matters because it is directional, not because it sounds academic: errors spread evenly point at
+thresholds and dialogue flow, errors concentrated in a few tones name exactly what the adaptation
+phase has to fix. A shipped assistant that fails on one tone fails for every caller whose account
+number ends in it. It requires the per-decision tone label recorded by `telemetry.collector`,
 so an evaluation run against telemetry that lacks tone labels is incomplete, not partial.
 
 ## Numbers, not prose

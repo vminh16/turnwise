@@ -4,9 +4,17 @@
 *Nhịp nói chuyện — trợ lý giọng nói có xử lý ngắt lời và chuyển lượt cho tổng đài tiếng Việt*
 
 Turnwise predicts when a caller has finished speaking, instead of waiting out a fixed silence
-threshold, and lets the caller interrupt the bot mid-sentence. It targets a Vietnamese customer
-service call centre, and it is built as a research project: the method is chosen from measurements,
-not assumed.
+threshold, and lets the caller interrupt the bot mid-sentence.
+
+This is applied research with a working application as the destination. The deliverable is a
+**simulated** customer service assistant for NetCo, a fictional home internet provider: five
+business flows, barge-in, a live metrics view, running on a laptop and demonstrable to someone who
+has never seen it. It is not a commercial product and is never connected to a real call centre.
+
+The measurement work exists to serve that application, not to be submitted anywhere. Baselines
+answer the questions anyone looking at the product will ask: is the conventional silence threshold
+genuinely broken, is an off-the-shelf model already good enough for Vietnamese, and if not, exactly
+where does it fail. `docs/roadmap.md` covers the phase order.
 
 > **Status: scaffolding.** Tooling, conventions and the specification are in place. The pipeline
 > itself is not implemented yet. Nothing here has been measured — every number in this repository

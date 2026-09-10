@@ -28,7 +28,7 @@ Avoid `cadence` (collides with Uber Cadence) and `duplex` (collides with Google 
 
 ## Structure
 
-Modelled on production voice-agent repos — `pipecat-ai/pipecat` and `livekit-examples/agent-starter-python` — with the additions a research project needs.
+Modelled on production voice-agent repos — `pipecat-ai/pipecat` and `livekit-examples/agent-starter-python` — with the additions an applied research project needs: the measurement apparatus has to live beside the application, because the application's design decisions come out of it.
 
 ```
 turnwise/
