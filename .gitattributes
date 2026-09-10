@@ -1,0 +1,7 @@
+# Normalise line endings so Windows checkouts and the pre-commit mixed-line-ending
+# hook do not fight each other.
+* text=auto eol=lf
+
+*.png binary
+*.wav binary
+*.onnx binary

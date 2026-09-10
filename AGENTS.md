@@ -21,15 +21,27 @@ Research contribution under investigation: Vietnamese encodes lexical tone in F0
 
 ## Commands
 
+Everything runs through `uv`. There is no task runner to install — `uv run` executes inside
+the project `.venv`, so these work identically on Windows, macOS and Linux.
+
 ```bash
-task setup            # uv sync, install pre-commit hooks, create data/ tree
-task dev              # run the agent locally; WebRTC client at localhost:8080
-task test             # full pytest suite
-task bench            # latency budget check on the live path
-task lint             # ruff check + ruff format --check + mypy
-task eval             # regenerate metrics report and figures into reports/
-task sim              # replay scenarios/*.yaml against the agent, no microphone needed
+uv sync                          # create .venv and install dependencies (setup)
+uv run pre-commit install        # install git hooks, once per clone
+
+uv run turnwise dev              # run the agent locally; WebRTC client at localhost:8080
+uv run pytest                    # full test suite
+uv run pytest -m latency         # latency budget check on the live path (bench)
+uv run pytest -m scenario        # replay scenarios/*.yaml, no microphone needed (sim)
+
+uv run ruff check . && uv run ruff format --check . && uv run mypy   # lint
+
+uv run python evaluation/run_baseline.py   # sweep the three baselines of SPEC R8
+uv run python evaluation/run_system.py     # score the system, regenerate reports/
 ```
+
+Optional dependency groups are declared in `pyproject.toml` and installed on demand:
+`uv sync --extra asr`, `--extra tts`, `--extra transport`, `--extra research`. The last one
+pulls torch and is only needed by `training/` and `evaluation/`, never by the runtime path.
 
 Run a single test while iterating instead of the whole suite:
 
@@ -37,9 +49,9 @@ Run a single test while iterating instead of the whole suite:
 uv run pytest tests/unit/test_fusion.py -k backchannel -x
 ```
 
-`task bench` is **required** for any change under `src/turnwise/audio/` or `src/turnwise/turn/`. It fails if the per-frame latency budget in `configs/default.yaml` is exceeded.
+`uv run pytest -m latency` is **required** for any change under `src/turnwise/audio/` or `src/turnwise/turn/`. It fails if the per-frame latency budget in `configs/default.yaml` is exceeded.
 
-`task sim` is the fastest feedback loop. Use it before reaching for a microphone — scenario replay is deterministic and runs in CI.
+`uv run pytest -m scenario` is the fastest feedback loop. Use it before reaching for a microphone — scenario replay is deterministic and runs in CI.
 
 ## Architecture
 
@@ -62,7 +74,7 @@ audio  →  turn  →  dialog
 
 ## Development Notes
 
-- Python 3.11+, `uv` for dependency management, `task` (Taskfile) for commands. Commit `uv.lock`.
+- Python 3.12+, `uv` for dependency management and for running every command. Commit `uv.lock`.
 - Modern syntax only: `X | None` not `Optional[X]`, `list[str]` not `List[str]`.
 - Type annotations on every public function in `src/`. mypy strict on `src/`, lenient on `training/` and `evaluation/`.
 - **No hardcoded constants.** Every threshold, frame size, and hyperparameter belongs in `configs/`. If you must edit code to run a different experiment, the design is wrong.
@@ -84,7 +96,7 @@ audio  →  turn  →  dialog
 ## Gotchas
 
 - **The bot hears itself.** If the bot stops speaking the instant it starts, check echo cancellation before debugging any model.
-- **Latency measured offline is not real latency.** File-based timing omits buffering, TTS startup, and network jitter. Only `task bench` numbers count.
+- **Latency measured offline is not real latency.** File-based timing omits buffering, TTS startup, and network jitter. Only `uv run pytest -m latency` numbers count.
 - **F0 must be normalised per speaker before pooling.** Male ~100 Hz, female ~200 Hz. Pool raw values and the model learns gender, not the target signal.
 - **Scorer state must be reset between turns.** Leaked state corrupts scores without crashing — a silent bug that costs hours.
 - **Never run inference inside the audio callback.** The callback only pushes frames into the ring buffer.
@@ -92,9 +104,9 @@ audio  →  turn  →  dialog
 
 ## Before Marking Done
 
-1. `task lint && task test` pass.
-2. `task bench` passes if the audio or turn path changed.
-3. `task sim` passes the scenario suite.
+1. Lint and tests pass: `uv run ruff check . && uv run ruff format --check . && uv run mypy && uv run pytest`.
+2. `uv run pytest -m latency` passes if the audio or turn path changed.
+3. `uv run pytest -m scenario` passes the scenario suite.
 4. Any metric-affecting change includes before/after numbers in the commit body — numbers, not prose.
 5. A new method or architecture choice has a one-page record in `docs/adr/`.
 6. Nothing under `data/holdout/` was read by a training or tuning script.
