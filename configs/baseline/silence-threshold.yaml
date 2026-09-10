@@ -1,0 +1,19 @@
+# B1 — baseline ngưỡng im lặng. Chồng lên configs/default.yaml.
+#
+# File này QUÉT nhiều giá trị, không chọn một. Đó là toàn bộ lý do nó tồn tại.
+# Báo cáo một ngưỡng đã tinh chỉnh mời gọi câu hỏi "sao không chỉnh tốt hơn?";
+# quét cả dải chứng minh không ngưỡng nào thắng — luận điểm trung tâm ở SPEC §1.
+# Xem SPEC §9.3 quy tắc 2 và .claude/rules/evaluation.md.
+
+turn:
+  decider: silence_threshold
+
+  # Mỗi giá trị là một lần chạy độc lập, cho một điểm trên đường cong đánh đổi
+  # (tỉ lệ cắt lời × độ trễ). Dải 200–1200ms bao trọn 500–800ms mà tổng đài hiện
+  # hành đang dùng (SPEC §1), cộng biên hai đầu để thấy cả hai kiểu hỏng:
+  # dưới 300ms cắt lời liên tục, trên 1000ms chậm tới mức khách bỏ máy.
+  # Đây là dải quét — một lựa chọn thiết kế — không phải số đo.
+  silence_threshold_sweep_ms: [200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
+
+  # Baseline không chấm điểm gì, nên không có scorer nào để tắt hay bật.
+  scorers: []

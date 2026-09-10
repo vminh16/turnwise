@@ -1,0 +1,13 @@
+# Chạy trên máy phát triển. Chồng lên configs/default.yaml.
+# Dùng khi chạy `uv run turnwise dev`.
+
+audio:
+  # Micro thật, thiết bị mặc định của hệ điều hành.
+  input_device: null
+  output_device: null
+
+telemetry:
+  enabled: true
+
+logging:
+  level: DEBUG

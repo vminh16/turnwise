@@ -1,0 +1,78 @@
+# Nguồn sự thật duy nhất cho mọi hằng số của Turnwise.
+#
+# Đọc qua src/turnwise/config.py (pydantic-settings) và không ở đâu khác.
+# Biến môi trường có tiền tố TURNWISE_ ghi đè lên file này — xem .env.example.
+#
+# Hai loại số, đừng lẫn:
+#   - LỰA CHỌN THIẾT KẾ: chọn được, ghi kèm lý do. Nằm ở file này.
+#   - SỐ ĐO: phải đo ở Giai đoạn 0. Để `null` cho tới khi có số thật.
+# SPEC.md §9.1 cấm điền số đoán, kể cả số lấy từ bài báo khác.
+
+audio:
+  # 16 kHz mono là định dạng vào của cả hai baseline ONNX ở SPEC R8, và là tốc độ
+  # lấy mẫu chuẩn của mọi mô hình VAD/endpointer chạy CPU. Lấy mẫu cao hơn chỉ tốn
+  # băng thông mà không mô hình nào dùng tới.
+  sample_rate_hz: 16000
+  channels: 1
+
+  # RÀNG BUỘC CỨNG, không phải lựa chọn. WebRTC audio processing (aec_audio_processing)
+  # xử lý đúng 160 mẫu mỗi lần ở 16 kHz. Đổi số này là AEC ngừng hoạt động.
+  # Kiểm chứng: AudioProcessor().get_frame_size() -> 160.
+  capture_frame_ms: 10
+
+  # Khung đặc trưng mà audio/source.py phát ra, gộp từ khung capture. Chọn 20ms vì
+  # nó là bội số nguyên của 10ms và đủ ngắn để R3 (dừng khi bị ngắt lời) còn nghĩa lý.
+  feature_frame_ms: 20
+
+  # Ring buffer cố định, cấp phát sẵn, không bao giờ lớn thêm. 3 giây đủ để một scorer
+  # nhìn lại ngữ cảnh mà không giữ audio lâu — SPEC §6 cấm ghi audio ra đĩa lúc chạy.
+  ring_buffer_ms: 3000
+
+  # Windows: chọn thiết bị thuộc host API này. MME và DirectSound thêm hàng chục ms
+  # đệm mà không unit test nào thấy được. Bỏ qua trên nền tảng khác.
+  preferred_host_api: WASAPI
+
+  # Bỏ trống để dùng thiết bị mặc định của hệ điều hành.
+  input_device: null
+  output_device: null
+
+echo_cancellation:
+  # SPEC R5: bot không bao giờ được coi tiếng của chính nó là ngắt lời. Toàn bộ yêu cầu
+  # đó phụ thuộc tầng này. Tắt AEC là hỏng R5, không phải "giảm chất lượng".
+  enabled: true
+  noise_suppression: true
+  noise_suppression_level: 2
+  automatic_gain_control: true
+
+latency:
+  # Ngân sách xử lý cho một khung capture 10ms. 5ms cho hệ số thời gian thực 0.5, tức
+  # còn một nửa thời gian dự phòng cho jitter của hệ điều hành trên laptop không GPU
+  # (SPEC §6). Đây là mục tiêu tự đặt, không phải số đo — kiểm tra bằng
+  # `uv run pytest -m latency`. Nếu ngân sách này sai thì đó là một ADR, không phải
+  # một lần sửa số.
+  budget_per_frame_ms: 5.0
+
+turn:
+  # Adapter nào ở src/turnwise/turn/deciders/ được dựng lên. Đây là công tắc mà SPEC R8
+  # yêu cầu: đổi một dòng là chuyển giữa hệ đề xuất và ba baseline, mọi thứ khác giữ nguyên.
+  # fused | silence_threshold | acoustic_onnx | semantic_onnx
+  decider: fused
+
+  # Danh sách scorer mà adapter `fused` dựng lên. Để trống vì chưa scorer nào tồn tại;
+  # tắt một scorer để làm ablation nghĩa là bỏ tên nó khỏi danh sách này, không phải
+  # thêm cờ vào code (SPEC §9.3 quy tắc 3).
+  scorers: []
+
+  decision:
+    # SỐ ĐO — đo ở Giai đoạn 0. Điền số đoán vào đây là làm hỏng mọi kết luận về sau.
+    take_threshold: null
+    backchannel_threshold: null
+
+telemetry:
+  # Mọi TurnDecision được ghi ở đúng một chỗ (ADR-0003). Thư mục này nằm ngoài git.
+  dir: reports/telemetry
+  enabled: true
+
+logging:
+  # AGENTS.md: ghi log qua logging.getLogger(__name__), không bao giờ print().
+  level: INFO

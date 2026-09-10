@@ -1,0 +1,17 @@
+# Chạy trong container. Chồng lên configs/default.yaml.
+#
+# Container không có thiết bị âm thanh, nên audio đi vào qua transport thay vì
+# qua PortAudio. Số độ trễ đo trong container KHÔNG dùng để báo cáo được:
+# SPEC §9.3 quy tắc 4 yêu cầu đo trên hệ chạy trực tiếp.
+
+audio:
+  input_device: null
+  output_device: null
+  # Không có WASAPI trong container Linux; để hệ điều hành tự chọn.
+  preferred_host_api: null
+
+telemetry:
+  enabled: true
+
+logging:
+  level: INFO
