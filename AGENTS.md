@@ -104,6 +104,7 @@ audio  →  turn  →  dialog
 - **Scorer state must be reset between turns.** Leaked state corrupts scores without crashing — a silent bug that costs hours.
 - **Never run inference inside the audio callback.** The callback only pushes frames into the ring buffer.
 - **Never report interruption rate without latency, or latency without interruption rate.** They trade off; either alone is meaningless.
+- **A Windows console cannot print Vietnamese.** The default code page on a Vietnamese Windows install is cp1258, which has no encoding for most accented characters; a single log line containing "dạ" raises `UnicodeEncodeError` and kills the process. `agent.main()` reconfigures stdout and stderr to UTF-8 with `errors="replace"` before anything else runs. Keep user-facing CLI strings in English; Vietnamese belongs in comments, docstrings and telemetry payloads.
 
 ## Before Marking Done
 

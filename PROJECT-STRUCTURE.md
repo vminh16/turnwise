@@ -11,7 +11,7 @@ One word, pronounceable, and it names the domain: turn-taking. The `-wise` suffi
 | GitHub | `github.com/vminh16/turnwise` |
 | Python package | `turnwise` |
 | Module path | `src/turnwise/` |
-| CLI | `turnwise dev`, `turnwise sim` |
+| CLI | `turnwise dev` |
 | Container image | `turnwise:0.1.0` |
 
 Full title for the README: **Turnwise — real-time turn-taking and barge-in for Vietnamese voice agents**
