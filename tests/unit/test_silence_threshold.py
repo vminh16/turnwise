@@ -1,0 +1,133 @@
+"""B1 phải cắm vừa seam `TurnDecider` — phép thử rẻ nhất cho toàn bộ thiết kế tầng turn."""
+
+import numpy as np
+import pytest
+
+from turnwise.config import load_settings
+from turnwise.turn.base import TurnDecider
+from turnwise.turn.deciders.silence_threshold import SilenceThresholdDecider
+from turnwise.types import FeatureFrame, TurnOutcome
+
+FRAME_S = 0.02
+LOUD = 0.2  # khoảng -14 dBFS
+QUIET = 0.0
+
+
+def frames(pattern: str) -> list[FeatureFrame]:
+    """`pattern`: mỗi ký tự là một khung — 's' có tiếng, '.' im lặng."""
+    rng = np.random.default_rng(0)
+    out = []
+    for index, mark in enumerate(pattern):
+        amplitude = LOUD if mark == "s" else QUIET
+        samples = (rng.standard_normal(320) * amplitude).astype(np.float32)
+        out.append(
+            FeatureFrame(
+                index=index,
+                start_s=index * FRAME_S,
+                duration_s=FRAME_S,
+                samples=samples,
+            )
+        )
+    return out
+
+
+@pytest.fixture
+def baseline() -> tuple[int, float]:
+    turn = load_settings("configs/baseline/silence-threshold.yaml").turn
+    assert turn.silence_threshold_sweep_ms is not None
+    assert turn.silence_floor_dbfs is not None
+    return turn.silence_threshold_sweep_ms[0], turn.silence_floor_dbfs
+
+
+def test_b1_fits_the_seam(baseline: tuple[int, float]) -> None:
+    """Nếu B1 không cắm vừa TurnDecider thì thiết kế sai, và biết bây giờ là rẻ nhất."""
+    assert isinstance(SilenceThresholdDecider(*baseline), TurnDecider)
+
+
+def test_decides_on_every_frame(baseline: tuple[int, float]) -> None:
+    """SPEC R1 đòi ước lượng liên tục; một chuỗi HOLD liền mạch là kết quả đầy đủ."""
+    decider = SilenceThresholdDecider(*baseline)
+    given = frames("ssss..ssss")
+    decisions = [decider.decide(frame) for frame in given]
+
+    assert len(decisions) == len(given)
+    for frame, decision in zip(given, decisions, strict=True):
+        assert decision.decider == "silence_threshold"
+        assert decision.frame_index == frame.index
+        assert decision.at_s == frame.start_s
+        assert decision.scores == {}
+        assert decision.final_tone is None
+
+
+def test_takes_exactly_when_silence_reaches_the_threshold() -> None:
+    """200ms ngưỡng, khung 20ms: nhận lượt ở đúng khung im lặng thứ 10."""
+    decider = SilenceThresholdDecider(200, -45.0)
+    outcomes = [decider.decide(frame).outcome for frame in frames("ss" + "." * 12)]
+
+    assert outcomes[:11] == [TurnOutcome.HOLD] * 11
+    assert outcomes[11] is TurnOutcome.TAKE
+
+
+def test_speech_resets_the_silence_counter() -> None:
+    """Ngập ngừng ngắn hơn ngưỡng không được tính là đã xong lượt."""
+    decider = SilenceThresholdDecider(200, -45.0)
+    outcomes = [decider.decide(frame).outcome for frame in frames("ss.....ss.....")]
+    assert TurnOutcome.TAKE not in outcomes
+
+
+def test_silence_alone_is_not_a_finished_turn() -> None:
+    """Chưa nghe thấy tiếng nào thì im lặng bao lâu cũng không phải bằng chứng."""
+    decider = SilenceThresholdDecider(200, -45.0)
+    outcomes = [decider.decide(frame).outcome for frame in frames("." * 50)]
+    assert set(outcomes) == {TurnOutcome.HOLD}
+
+
+def test_take_holds_until_reset() -> None:
+    decider = SilenceThresholdDecider(200, -45.0)
+    outcomes = [decider.decide(frame).outcome for frame in frames("ss" + "." * 20)]
+    assert outcomes[-1] is TurnOutcome.TAKE
+    assert outcomes[11:] == [TurnOutcome.TAKE] * len(outcomes[11:])
+
+
+def test_reset_leaves_no_state_behind() -> None:
+    """Trạng thái rò rỉ làm sai điểm mà không crash — loại lỗi đắt nhất của dự án."""
+    decider = SilenceThresholdDecider(200, -45.0)
+    given = frames("ss" + "." * 12)
+
+    first = [decider.decide(frame).outcome for frame in given]
+    decider.reset()
+    second = [decider.decide(frame).outcome for frame in given]
+
+    assert first == second
+
+
+def test_never_reports_a_backchannel() -> None:
+    """B1 không phân biệt được tiếng đệm. Nó hỏng R4, và đó là số liệu cần đo."""
+    decider = SilenceThresholdDecider(200, -45.0)
+    outcomes = {decider.decide(frame).outcome for frame in frames("s.s..ss...." * 5)}
+    assert TurnOutcome.BACKCHANNEL not in outcomes
+
+
+def test_a_wider_threshold_takes_later() -> None:
+    """Ngưỡng đến từ dải quét trong configs/, không từ hằng số trong code."""
+    given = frames("ss" + "." * 60)
+    taken_at = []
+    for threshold_ms in (200, 600, 1000):
+        decider = SilenceThresholdDecider(threshold_ms, -45.0)
+        outcomes = [decider.decide(frame).outcome for frame in given]
+        taken_at.append(outcomes.index(TurnOutcome.TAKE))
+    assert taken_at == sorted(taken_at)
+    assert len(set(taken_at)) == len(taken_at)
+
+
+def test_every_swept_threshold_is_usable(baseline: tuple[int, float]) -> None:
+    turn = load_settings("configs/baseline/silence-threshold.yaml").turn
+    assert turn.silence_threshold_sweep_ms is not None
+    for threshold_ms in turn.silence_threshold_sweep_ms:
+        decider = SilenceThresholdDecider(threshold_ms, baseline[1])
+        assert isinstance(decider, TurnDecider)
+
+
+def test_a_non_positive_threshold_is_refused() -> None:
+    with pytest.raises(ValueError, match="phải dương"):
+        SilenceThresholdDecider(0, -45.0)

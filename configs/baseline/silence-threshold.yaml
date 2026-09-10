@@ -17,3 +17,18 @@ turn:
 
   # Baseline không chấm điểm gì, nên không có scorer nào để tắt hay bật.
   scorers: []
+
+  # Ngưỡng năng lượng phân biệt có tiếng với im lặng, tính bằng dBFS trên khung.
+  # Đây là LỰA CHỌN THIẾT KẾ, không phải số đo: -45 dBFS là mức sàn ồn thường thấy
+  # của micro laptop trong phòng yên, đủ thấp để không cắt mất phần đuôi nhỏ tiếng
+  # của một phát ngôn, đủ cao để tiếng quạt không bị tính là tiếng nói.
+  #
+  # B1 dùng cổng năng lượng chứ không dùng VAD học máy, vì đó đúng là thứ tổng đài
+  # hiện hành làm (SPEC §1). Một baseline mạnh hơn cách cũ thật sẽ không còn là
+  # baseline của cách cũ nữa.
+  #
+  # Ghi chú kỹ thuật: `aec_audio_processing.AudioProcessor.has_voice()` không dùng
+  # được — bản WebRTC APM này đã bỏ module voice_detection, hàm còn tên nhưng trả
+  # False cho mọi đầu vào (đo ngày 2026-09-10: 0/60 khung trên tín hiệu giống tiếng
+  # nói ở 16 kHz, mọi mức aggressiveness).
+  silence_floor_dbfs: -45.0

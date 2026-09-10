@@ -114,6 +114,9 @@ class TurnConfig(_Section):
     """Chỉ overlay B1 đặt khoá này. Mỗi giá trị là một lần chạy riêng, cho một điểm
     trên đường cong đánh đổi (SPEC §9.3 quy tắc 2)."""
 
+    silence_floor_dbfs: float | None = None
+    """Cũng chỉ overlay B1 đặt. Ngưỡng năng lượng chia có tiếng với im lặng."""
+
 
 class TelemetryConfig(_Section):
     dir: Path
