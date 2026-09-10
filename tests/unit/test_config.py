@@ -63,3 +63,20 @@ def test_feature_frame_must_be_whole_capture_frames(tmp_path: Path) -> None:
 
 def test_default_config_path_points_at_the_committed_file() -> None:
     assert DEFAULT_CONFIG_PATH.is_file()
+
+
+def test_only_the_config_module_reads_yaml_or_the_environment() -> None:
+    """AGENTS.md: cấu hình vào chương trình qua đúng một cửa.
+
+    Một module đọc thẳng YAML hay `os.environ` sẽ chạy đúng trong test của chính nó,
+    và lặng lẽ bỏ qua overlay lẫn biến môi trường khi chạy thật.
+    """
+    package = Path(__file__).resolve().parents[2] / "src" / "turnwise"
+    tokens = ("os.environ", "getenv", "import yaml", "dotenv")
+    offenders = sorted(
+        path.relative_to(package).as_posix()
+        for path in package.rglob("*.py")
+        if path.name != "config.py"
+        and any(token in path.read_text(encoding="utf-8") for token in tokens)
+    )
+    assert not offenders, offenders
