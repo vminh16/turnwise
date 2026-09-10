@@ -103,10 +103,11 @@ turnwise/
 │   ├── config.py                   # pydantic-settings; the only place YAML/env is read
 │   ├── types.py                    # shared dataclasses and protocols
 │   ├── audio/
-│   │   ├── capture.py
-│   │   ├── ring_buffer.py
-│   │   ├── features.py
-│   │   └── aec.py                  # echo cancellation — required for barge-in
+│   │   ├── source.py               # THE external seam: frames() -> FeatureFrame
+│   │   ├── capture.py              # internal; PortAudio callback, real-time thread
+│   │   ├── ring_buffer.py          # internal; fixed size, preallocated
+│   │   ├── features.py             # internal
+│   │   └── aec.py                  # internal; echo cancellation — required for barge-in
 │   ├── turn/
 │   │   ├── base.py                 # TurnDecider + Scorer protocols; abstain is first-class
 │   │   ├── deciders/               # THE external seam: one adapter per system under test
@@ -190,6 +191,14 @@ turnwise/
 **Manifests checked in, data not.** JSONL with path, sha256, speaker id, and labels. The dataset stays out of git; reproducibility does not.
 
 **Holdout isolation enforced by CI, not discipline.** `holdout-guard.yml` runs `check_holdout_isolation.py`, which scans training and tuning scripts for references to that path and fails the build. A rule in a document gets forgotten; a red build does not.
+
+**`audio/` presents one interface, not four.** All `turn/` needs is the next feature frame with
+the bot's own voice removed. Device order, ring-buffer overrun policy and near-end/far-end
+alignment exist only because PortAudio runs on a real-time thread; they are implementation, and
+exposing them makes every caller learn them. `source.py` is the external seam; the other four
+modules are internal seams used by the layer's own tests. A file-backed frame source is the second
+adapter at that seam, which is what lets `uv run pytest -m scenario` run the whole scenario suite
+without a microphone.
 
 **One seam for every system under test.** `SPEC.md` R8 requires the three baselines and the
 proposed system to run on the same ASR, TTS and scenarios, switched by configuration. That is only

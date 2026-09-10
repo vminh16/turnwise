@@ -64,6 +64,7 @@ audio  →  turn  →  dialog
 ```
 
 - **`src/turnwise/audio/`** — capture, ring buffer, feature extraction, acoustic echo cancellation. Knows nothing about conversation.
+  The external seam is `audio/source.py`, a frame source; the rest is internal. A file-backed source is what lets the scenario suite run without a microphone.
 - **`src/turnwise/turn/`** — consumes features, emits a turn decision: hold, take, or backchannel. Knows nothing about business flows. Every scorer must be able to return "no opinion" rather than guess.
   The external seam is `turn/deciders/`: the proposed system and the three baselines of `SPEC.md` R8 are four adapters behind one interface, chosen by config. `scorers/` and `fusion.py` are internal to the proposed system's adapter.
 - **`src/turnwise/dialog/`** — state machine for the five business flows, slot filling, stub backend. Knows nothing about signal processing.

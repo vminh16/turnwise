@@ -9,6 +9,15 @@ paths:
 This layer knows nothing about conversation. It turns a device stream into evenly spaced
 feature frames, and nothing else.
 
+## The seam
+
+`source.py` is the external seam: a frame source handing out feature frames with the bot's own
+voice already removed. `capture.py`, `ring_buffer.py`, `aec.py` and `features.py` are internal —
+used by this layer's own tests, never imported from `turn/`, `dialog/` or `transport/`.
+
+A file-backed frame source is the second adapter at that seam, and it is what makes the scenario
+suite run without a microphone.
+
 ## The callback is sacred
 
 The `sounddevice` callback runs on a real-time thread owned by PortAudio. Inside it:
