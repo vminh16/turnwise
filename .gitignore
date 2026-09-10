@@ -1,0 +1,19 @@
+# Turnwise .gitignore (per PROJECT-STRUCTURE.md)
+data/
+!data/manifests/
+models/
+reports/
+.venv/
+__pycache__/
+*.egg-info/
+
+# Python / Tools cache
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+.env
