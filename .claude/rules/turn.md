@@ -9,6 +9,16 @@ paths:
 Consumes feature frames, emits a turn decision: hold, take, or backchannel. It knows nothing
 about business flows and nothing about which device produced the audio.
 
+## The seam
+
+`turn/deciders/` is the external seam. Four adapters sit behind one interface: the proposed
+system (`fused.py`) and the three baselines of SPEC R8 (`silence_threshold.py`,
+`acoustic_onnx.py`, `semantic_onnx.py`). `evaluation/` picks one by config and never contains a
+decision path of its own.
+
+`scorers/` and `fusion.py` are internal seams, used by the proposed system's adapter and by its
+own tests. Nothing outside `turn/` imports them.
+
 ## The scorer contract
 
 Every scorer implements the protocol in `base.py` and obeys three rules:
@@ -30,11 +40,16 @@ Every scorer implements the protocol in `base.py` and obeys three rules:
 - Abstaining scorers are excluded from the combination, not counted as zero.
 - If every scorer abstains, fusion returns hold. Silence is not evidence of a finished turn.
 
-## Telemetry
+## The decision is a value
 
-Every decision goes through `telemetry.collector` with a timestamp **and the per-scorer scores
-that produced it**, including which scorers abstained. Without the per-scorer breakdown a wrong
-decision cannot be attributed, and the ablation table cannot be built.
+A decider returns a `TurnDecision` (defined in `types.py`) carrying the outcome, the per-scorer
+scores, which scorers abstained, and the final-syllable tone. It does **not** call telemetry —
+this layer must not know telemetry exists, which is what SPEC §8 means by "read-only, never feeds
+back". The wiring records the returned value in one place.
+
+Without the per-scorer breakdown a wrong decision cannot be attributed and the ablation table
+cannot be built, so those fields are part of the return type rather than something a scorer is
+trusted to remember to log.
 
 ## F0 and Vietnamese tone
 

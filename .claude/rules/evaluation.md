@@ -30,8 +30,12 @@ it once. Every intermediate decision uses the validation split instead.
 - **B2** an existing open-source acoustic endpointer, weights unmodified.
 - **B3** an existing open-source semantic endpointer over ASR text, weights unmodified.
 
-All three run on the same ASR, TTS and scenarios as the system, switched by config alone. B3's
-numbers are meaningless without the ASR latency that fed it — report them together.
+All three are adapters in `src/turnwise/turn/deciders/`, alongside the proposed system. This
+directory contains no decision path of its own: it selects a decider by config, runs it, and
+scores the result. That is what makes "same ASR, TTS and scenarios" structurally true rather than
+a promise.
+
+B3's numbers are meaningless without the ASR latency that fed it — report them together.
 
 Model names and versions belong in `docs/adr/`, not in `SPEC.md` and not hardcoded here.
 

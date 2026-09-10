@@ -65,6 +65,7 @@ audio  →  turn  →  dialog
 
 - **`src/turnwise/audio/`** — capture, ring buffer, feature extraction, acoustic echo cancellation. Knows nothing about conversation.
 - **`src/turnwise/turn/`** — consumes features, emits a turn decision: hold, take, or backchannel. Knows nothing about business flows. Every scorer must be able to return "no opinion" rather than guess.
+  The external seam is `turn/deciders/`: the proposed system and the three baselines of `SPEC.md` R8 are four adapters behind one interface, chosen by config. `scorers/` and `fusion.py` are internal to the proposed system's adapter.
 - **`src/turnwise/dialog/`** — state machine for the five business flows, slot filling, stub backend. Knows nothing about signal processing.
 - **`src/turnwise/telemetry/`** — receives timestamped events from every layer. Read-only; never feeds back into the pipeline.
 - **`src/turnwise/transport/`** — WebRTC and process wiring. Thin.
@@ -80,7 +81,8 @@ audio  →  turn  →  dialog
 - **No hardcoded constants.** Every threshold, frame size, and hyperparameter belongs in `configs/`. If you must edit code to run a different experiment, the design is wrong.
 - Configuration loads through `src/turnwise/config.py` (pydantic-settings). Do not read YAML or env vars anywhere else.
 - Logging via `logging.getLogger(__name__)`. Never `print()`.
-- Every turn decision is recorded through `telemetry.collector` with a timestamp and per-scorer scores. Without this log, failures cannot be analysed.
+- A turn decision is a value: `TurnDecision` in `types.py` carries the outcome, the per-scorer scores, which scorers abstained, and the final-syllable tone. Scorers and fusion return it; they never call telemetry.
+- Exactly one place — the wiring in `transport/` — writes each `TurnDecision` to `telemetry.collector` with its timestamp. Without this log, failures cannot be analysed.
 - Comments and docstrings may be written in Vietnamese; identifiers are English.
 - Small commits, one idea each. Real-time audio bugs are hard to bisect through large commits.
 - Branches: `feat/`, `fix/`, `exp/` for throwaway experiments.

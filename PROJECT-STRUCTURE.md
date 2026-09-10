@@ -108,9 +108,14 @@ turnwise/
 │   │   ├── features.py
 │   │   └── aec.py                  # echo cancellation — required for barge-in
 │   ├── turn/
-│   │   ├── base.py                 # scorer protocol; abstain is a first-class return value
-│   │   ├── scorers/                # one module per signal source
-│   │   └── fusion.py
+│   │   ├── base.py                 # TurnDecider + Scorer protocols; abstain is first-class
+│   │   ├── deciders/               # THE external seam: one adapter per system under test
+│   │   │   ├── fused.py            #   the proposed system: scorers + fusion
+│   │   │   ├── silence_threshold.py#   B1, swept by configs/baseline/
+│   │   │   ├── acoustic_onnx.py    #   B2, existing open-source model, weights unmodified
+│   │   │   └── semantic_onnx.py    #   B3, existing open-source model over ASR text
+│   │   ├── scorers/                # internal seam; one module per signal source
+│   │   └── fusion.py               # internal; combines scores, excludes abstentions
 │   ├── dialog/
 │   │   ├── machine.py              # the five business flows
 │   │   ├── slots.py
@@ -128,7 +133,7 @@ turnwise/
 │   └── export.py
 │
 ├── evaluation/
-│   ├── run_baseline.py             # sweeps thresholds; never selects one
+│   ├── run_baseline.py             # selects deciders by config; sweeps B1, never picks one
 │   ├── run_system.py
 │   ├── metrics.py
 │   └── figures.py
@@ -185,6 +190,21 @@ turnwise/
 **Manifests checked in, data not.** JSONL with path, sha256, speaker id, and labels. The dataset stays out of git; reproducibility does not.
 
 **Holdout isolation enforced by CI, not discipline.** `holdout-guard.yml` runs `check_holdout_isolation.py`, which scans training and tuning scripts for references to that path and fails the build. A rule in a document gets forgotten; a red build does not.
+
+**One seam for every system under test.** `SPEC.md` R8 requires the three baselines and the
+proposed system to run on the same ASR, TTS and scenarios, switched by configuration. That is only
+structurally true if all four sit behind the same interface, so `turn/deciders/` holds one adapter
+each and `evaluation/` merely chooses which one to instantiate. Put the baselines in `evaluation/`
+instead and you get two pipelines whose numbers are compared by discipline rather than by
+construction — the failure mode that never crashes and invalidates every conclusion. Four adapters
+also settle the question of whether the seam is real: one adapter is a hypothesis, four is not.
+
+**The turn decision is a value, not a side effect.** `turn/` returns a `TurnDecision` carrying the
+outcome, the per-scorer scores, which scorers abstained, and the final-syllable tone. Exactly one
+place writes it to `telemetry`. Scorers that call the collector themselves spread a side effect
+across the layer, force every scorer test to build a fake, and let a forgotten call silently drop a
+column from the ablation table. Returning the record instead keeps `turn/` unaware that telemetry
+exists, which is what `SPEC.md` §8 means by "read-only, never feeds back".
 
 **`configs/baseline/` sweeps rather than selects.** The baseline is a curve, not a point. Encoding that in the layout makes the correct experiment the path of least resistance.
 
