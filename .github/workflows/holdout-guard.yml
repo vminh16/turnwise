@@ -1,0 +1,25 @@
+name: holdout-guard
+
+# data/holdout/ is a locked evaluation set. Only evaluation/ may read it, and only when
+# producing the final report (SPEC.md §6). This job is the enforcement; the rule in the docs
+# is only the explanation.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  isolation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: No training or tuning code may reference data/holdout/
+        run: uv run python scripts/check_holdout_isolation.py

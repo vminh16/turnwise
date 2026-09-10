@@ -1,0 +1,36 @@
+name: sim
+
+# Scenario replay: deterministic, no microphone, no model downloads.
+# This is the gate that catches a broken barge-in without a human in the loop.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  scenarios:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Replay scenarios/*.yaml
+        # TODO: drop the exit-code-5 branch once the first scenario test exists.
+        # pytest exits 5 when no test matches the marker; that is "not written yet",
+        # not "passing", so it is reported explicitly rather than hidden.
+        run: |
+          set +e
+          uv run pytest -m scenario
+          code=$?
+          set -e
+          if [ "$code" -eq 5 ]; then
+            echo "::warning::no scenario tests yet — scenarios/*.yaml and tests/scenarios/ are still empty"
+            exit 0
+          fi
+          exit "$code"

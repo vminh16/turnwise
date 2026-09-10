@@ -1,0 +1,41 @@
+name: bench
+
+# Latency regression gate for the audio and turn paths.
+#
+# CI runners are noisy and slower than a laptop, so a failure here means the budget in
+# configs/default.yaml was blown by a wide margin. The numbers that go in a report come from
+# `uv run pytest -m latency` on a real machine, never from this runner (SPEC.md §9.3 rule 4).
+
+on:
+  pull_request:
+    paths:
+      - "src/turnwise/audio/**"
+      - "src/turnwise/turn/**"
+      - "configs/**"
+      - "tests/latency/**"
+  workflow_dispatch:
+
+jobs:
+  latency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Latency budget
+        # TODO: drop the exit-code-5 branch once the first latency test exists.
+        run: |
+          set +e
+          uv run pytest -m latency
+          code=$?
+          set -e
+          if [ "$code" -eq 5 ]; then
+            echo "::warning::no latency tests yet — tests/latency/ is still empty"
+            exit 0
+          fi
+          exit "$code"
