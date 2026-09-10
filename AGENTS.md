@@ -114,21 +114,21 @@ audio  →  turn  →  dialog
 5. A new method or architecture choice has a one-page record in `docs/adr/`.
 6. Nothing under `data/holdout/` was read by a training or tuning script.
 
-## Skills
+## Path-scoped rules
 
-Use the following skills when working on related files:
+Detail that only matters in one part of the tree lives in `.claude/rules/`. Each file carries a
+`paths:` frontmatter and enters context only when a matching file is opened, so this file stays
+short.
 
-| File(s) | Skill |
-|---------|-------|
-| `src/turnwise/audio/**` | `realtime-audio` — ring buffers, echo cancellation, latency budgets |
-| `src/turnwise/turn/**` | `turn-taking` — scorer contract, abstain semantics, fusion |
-| `scenarios/*.yaml` | `scenario-authoring` — writing conversation replays that exercise barge-in |
-| `training/**`, `evaluation/**` | `experiment-hygiene` — locked holdout, ablation protocol, reporting rules |
-| `docs/adr/*.md` | `/adr` — architecture decision record template |
+| Rule | Applies to | Covers |
+|---|---|---|
+| `.claude/rules/audio.md` | `src/turnwise/audio/**`, `tests/latency/**` | what may run inside the PortAudio callback, buffer discipline, the latency budget, AEC, WASAPI on Windows |
+| `.claude/rules/turn.md` | `src/turnwise/turn/**` | the decider seam, the scorer contract, abstain semantics, `TurnDecision` as a value, F0 and tone |
+| `.claude/rules/training.md` | `training/**`, `notebooks/**` | the locked holdout, seeds and checkpoints, splitting by speaker |
+| `.claude/rules/evaluation.md` | `evaluation/**`, `reports/**`, `configs/baseline/**` | the five reporting rules, the three baselines, the headline metric |
 
-Per-directory conventions live in `.claude/rules/` and load only when Claude opens matching files. Keep detail there, not in this file.
-
-When spawning subagents, pass the conventions from the relevant skill into the agent's prompt.
+When spawning subagents, pass the relevant rule into the agent's prompt — subagents do not load
+these automatically.
 
 ## Contributing
 

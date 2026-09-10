@@ -45,6 +45,9 @@ uv run ruff check . && uv run ruff format --check . && uv run mypy
 Optional dependency groups, installed on demand: `uv sync --extra asr | tts | transport | research`.
 The `research` extra pulls torch and is only used offline by `training/` and `evaluation/`.
 
+`data/`, `models/` and `reports/` are not in git and are not created by setup; the code that writes
+into them creates them on first use.
+
 On Windows, prefer an audio device on the WASAPI host API; MME and DirectSound add buffering that
 will not appear in unit tests but will break the latency budget. List devices with:
 

@@ -38,9 +38,7 @@ turnwise/
 │   │   ├── turn.md                 #   paths: src/turnwise/turn/**   — scorer contract, abstain semantics
 │   │   ├── training.md             #   paths: training/**            — seeds, checkpoints, reproducibility
 │   │   └── evaluation.md           #   paths: evaluation/**          — locked holdout, reporting rules
-│   ├── skills/                     # realtime-audio, turn-taking, scenario-authoring, experiment-hygiene
-│   ├── agents/                     # subagent definitions, e.g. a reviewer that only reads diffs
-│   └── settings.json               # permissions, hooks
+│   └── settings.json               # permissions; denies reads of data/holdout/, .env, models/
 │
 ├── .github/
 │   ├── workflows/
@@ -75,8 +73,8 @@ turnwise/
 │   └── manifests/                  # CHECKED IN: jsonl of path + sha256 + speaker + labels
 │
 ├── docs/
-│   ├── adr/
-│   │   └── 0001-record-architecture-decisions.md
+│   ├── adr/                        # 0001 format, 0002 prior art + baselines, 0003 the turn seam
+│   ├── agents/                     # issue tracker, triage labels, domain doc conventions
 │   ├── runbook/
 │   │   ├── collect-data.md
 │   │   └── run-evaluation.md
@@ -178,7 +176,7 @@ turnwise/
 
 **`examples/`.** Pipecat keeps one. Minimal runnable snippets, one concern each, are the cheapest documentation that cannot go stale — CI runs them.
 
-**`.claude/skills/` checked in.** Both repos version their agent skills with the code. Conventions travel with the branch that changes them.
+**`.claude/rules/` checked in, and no `.claude/skills/`.** Versioning agent conventions with the code is the point: they travel with the branch that changes them. Rules earn that on their own — each one declares a `paths:` frontmatter and loads only when a matching file is opened, which is exactly the behaviour a per-directory convention wants. Skills are for multi-step procedures invoked on demand; this project has none yet that a rule does not already cover, so the directory is not created until one exists.
 
 **`data/test/` renamed to `data/holdout/`.** `tests/` and `data/test/` in the same repo invite the exact confusion the lock is meant to prevent. `holdout` says what it is.
 
@@ -226,16 +224,23 @@ exists, which is what `SPEC.md` §8 means by "read-only, never feeds back".
 ## Scaffold
 
 ```bash
-mkdir -p turnwise/{.claude/{rules,skills,agents},.github/{workflows,ISSUE_TEMPLATE}} \
-         turnwise/configs/{baseline,ablation,deploy} \
-         turnwise/{scenarios,notebooks,examples,scripts,reports} \
-         turnwise/data/{raw,interim,processed,holdout,manifests} \
-         turnwise/docs/{adr,runbook} \
-         turnwise/models/{checkpoints,exported} \
-         turnwise/src/turnwise/{audio,turn/scorers,dialog,telemetry,transport} \
-         turnwise/{training,evaluation} \
-         turnwise/tests/{unit,integration,latency,scenarios,fixtures}
+mkdir -p turnwise/{.claude/rules,.github/{workflows,ISSUE_TEMPLATE}}          turnwise/configs/{baseline,ablation,deploy}          turnwise/{scenarios,notebooks,examples,scripts}          turnwise/data/manifests          turnwise/docs/{adr,agents,runbook}          turnwise/src/turnwise/{audio,turn/{scorers,deciders},dialog,telemetry,transport}          turnwise/{training,evaluation}          turnwise/tests/{unit,integration,latency,scenarios,fixtures}
 
 cd turnwise && git init && uv init --lib --name turnwise
-printf 'data/\n!data/manifests/\nmodels/\nreports/\n.venv/\n__pycache__/\n*.egg-info/\n' > .gitignore
+printf 'data/
+!data/manifests/
+models/
+reports/
+.venv/
+__pycache__/
+*.egg-info/
+' > .gitignore
+printf '* text=auto eol=lf
+' > .gitattributes
 ```
+
+Git does not track empty directories, so every directory that must survive a clone carries a
+`.gitkeep`. `data/`, `models/` and `reports/` are gitignored and deliberately have none: they hold
+outputs, and the code that writes into them creates them on first use. A clone therefore has no
+`data/raw/` until the collection pipeline runs, which is correct — an empty tree of data
+directories invites the belief that data is present.
