@@ -117,6 +117,14 @@ class TurnConfig(_Section):
     silence_floor_dbfs: float | None = None
     """Cũng chỉ overlay B1 đặt. Ngưỡng năng lượng chia có tiếng với im lặng."""
 
+    silence_threshold_ms: int | None = None
+    """Ngưỡng im lặng của **một** lần chạy B1.
+
+    Dải quét ở trên liệt kê các giá trị; mỗi lần chạy lấy đúng một giá trị vào đây.
+    Có trường này thì một lần chạy được mô tả trọn vẹn bằng cấu hình, và `deciders.build()`
+    dựng được adapter mà không cần ai truyền tham số riêng bên cạnh config.
+    """
+
 
 class TelemetryConfig(_Section):
     dir: Path

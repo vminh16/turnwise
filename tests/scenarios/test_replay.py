@@ -1,10 +1,11 @@
 """Phát lại năm kịch bản của SPEC §10 qua B1. Không cần micro, và phải tất định."""
 
+import hashlib
 from pathlib import Path
 
 import pytest
 
-from evaluation.scenario import Scenario, load_all, replay
+from evaluation.scenario import Scenario, load_all, replay, synthesize
 from turnwise.config import TelemetryConfig, load_settings
 from turnwise.telemetry.collector import TelemetryCollector
 from turnwise.turn.deciders.silence_threshold import SilenceThresholdDecider
@@ -47,18 +48,38 @@ def test_every_scenario_replays_through_the_file_source(
         assert [decision.frame_index for decision in decisions] == list(range(len(decisions)))
 
 
+def test_the_stimulus_itself_is_deterministic(scenarios: list[Scenario]) -> None:
+    """So **mẫu tín hiệu**, không so quyết định.
+
+    So chuỗi quyết định không chứng minh được gì: chênh 31 dB giữa `speech_dbfs` và
+    `noise_floor_dbfs` lớn tới mức cổng năng lượng của B1 cho cùng kết quả kể cả khi
+    hạt giống ngẫu nhiên thay đổi. Phép so duy nhất có sức nặng là trên chính tín hiệu.
+    """
+    audio = load_settings().audio
+    for scenario in scenarios:
+        first = synthesize(scenario, audio)
+        second = synthesize(scenario, audio)
+        assert hashlib.sha256(first.tobytes()).hexdigest() == (
+            hashlib.sha256(second.tobytes()).hexdigest()
+        )
+
+
 def test_replay_is_deterministic(
     scenarios: list[Scenario], b1: SilenceThresholdDecider, tmp_path: Path
 ) -> None:
-    """Hai lần chạy cùng kịch bản phải ra cùng một chuỗi quyết định.
+    """Hai lần phát lại cùng kịch bản ra cùng chuỗi quyết định, kèm cùng mốc thời gian.
 
     Không tất định thì mọi khác biệt giữa hai cấu hình lẫn vào nhiễu, và đường cong
     đánh đổi ở pha 0.6 không so sánh được với chính nó.
     """
     audio = load_settings().audio
     for scenario in scenarios:
-        first = [d.outcome for d in replay(scenario, b1, audio, tmp_path / "a")]
-        second = [d.outcome for d in replay(scenario, b1, audio, tmp_path / "b")]
+        first = [
+            (d.outcome, d.frame_index, d.at_s) for d in replay(scenario, b1, audio, tmp_path / "a")
+        ]
+        second = [
+            (d.outcome, d.frame_index, d.at_s) for d in replay(scenario, b1, audio, tmp_path / "b")
+        ]
         assert first == second
 
 

@@ -110,7 +110,7 @@ def test_recording_after_close_is_a_no_op(config: TelemetryConfig) -> None:
     assert len(collector.path.read_text(encoding="utf-8").splitlines()) == 1
 
 
-@pytest.mark.parametrize("name", [(), ("",), ("a/b",), ("..",)])
+@pytest.mark.parametrize("name", [(), ("",), ("a/b",), ("a\b",), ("..",), ("C:",)])
 def test_a_bad_name_is_refused(config: TelemetryConfig, name: tuple[str, ...]) -> None:
     with pytest.raises(ValueError):
         TelemetryCollector(config, *name)
@@ -138,3 +138,17 @@ def test_the_turn_layer_does_not_know_telemetry_exists() -> None:
         if any(name.startswith("turnwise.telemetry") for name in imported_modules(path))
     )
     assert not offenders, offenders
+
+
+def test_a_dot_in_the_name_is_not_a_suffix(config: TelemetryConfig) -> None:
+    """`with_suffix` cắt từ dấu chấm cuối: "v1.2" và "v1.9" sẽ cùng ghi vào v1.jsonl."""
+    with TelemetryCollector(config, "run", "v1.2") as collector:
+        collector.record(decision(0))
+
+    assert collector.path.name == "v1.2.jsonl"
+
+
+def test_a_drive_prefix_cannot_escape_the_telemetry_directory(config: TelemetryConfig) -> None:
+    """`Path.joinpath(config.dir, "C:")` nhảy ra ngoài thư mục mà không báo lỗi."""
+    with pytest.raises(ValueError):
+        TelemetryCollector(config, "C:")

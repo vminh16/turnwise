@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from types import TracebackType
 from typing import IO, Any, Self
 
@@ -32,6 +33,10 @@ from turnwise.types import TurnDecision
 logger = logging.getLogger(__name__)
 
 SUFFIX = ".jsonl"
+
+_SAFE_NAME = re.compile(r"[A-Za-z0-9._-]+")
+"""Phần tên hợp lệ. Chặn dấu phân cách đường dẫn lẫn tiền tố ổ đĩa Windows: `"C:"`
+đi qua `Path.joinpath` sẽ nhảy hẳn ra ngoài `telemetry.dir` mà không có lỗi nào."""
 
 
 class TelemetryCollector:
@@ -50,11 +55,13 @@ class TelemetryCollector:
         if not name:
             raise ValueError("cần ít nhất một phần tên cho file telemetry")
         for part in name:
-            if not part or "/" in part or "\\" in part or part in {".", ".."}:
+            if not _SAFE_NAME.fullmatch(part) or part in {".", ".."}:
                 raise ValueError(f"phần tên không hợp lệ: {part!r}")
 
         self.enabled = config.enabled
-        self.path = config.dir.joinpath(*name).with_suffix(SUFFIX)
+        # Nối chuỗi chứ không `with_suffix`: `with_suffix` cắt từ dấu chấm cuối, nên
+        # một lần chạy tên "v1.2" sẽ ghi vào "v1.jsonl" và đè lên lần chạy "v1.9".
+        self.path = config.dir.joinpath(*name[:-1], name[-1] + SUFFIX)
         self._file: IO[str] | None = None
 
         if not self.enabled:

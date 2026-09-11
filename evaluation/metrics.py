@@ -43,7 +43,7 @@ class RunScore:
     expected: str
     turn_end_ms: int | None
     take_at_ms: int | None
-    """Thời điểm quyết định TAKE đầu tiên, hoặc `None` nếu decider không bao giờ nhận lượt."""
+    """Cuối khung mà TAKE đầu tiên rơi vào, hoặc `None` nếu decider không bao giờ nhận lượt."""
 
     interrupted: bool
     """Nhận lượt *trước* khi khách nói xong — bot sẽ chen ngang (SPEC §9.1 chỉ số 1)."""
@@ -61,6 +61,17 @@ class CurvePoint:
 
     threshold_ms: int
     scenarios: int
+    turn_scenarios: int
+    """Mẫu số của `interruption_rate` và `no_response`: số kịch bản khách thật sự kết thúc lượt."""
+
+    backchannel_scenarios: int
+    """Mẫu số của `backchannel_error_rate`. Ở Giai đoạn 0 nó bằng 1 — một tỉ lệ 1.0 ở
+    đây nghĩa là một kịch bản sai một lần, không phải cả bộ sai."""
+
+    latency_source: str
+    """`file-based` hay `live`. Đi cùng mỗi hàng vì CSV rời khỏi ngữ cảnh sinh ra nó,
+    và §9.3 quy tắc 4 chỉ công nhận số đo trên hệ chạy trực tiếp."""
+
     interruption_rate: float
     median_response_latency_ms: float | None
     p90_response_latency_ms: float | None
@@ -69,14 +80,20 @@ class CurvePoint:
     """Số kịch bản mà decider không bao giờ nhận lượt — khách nói xong rồi vẫn chờ."""
 
 
-def score(decisions: Sequence[TurnDecision], scenario: Scenario) -> RunScore:
+def score(decisions: Sequence[TurnDecision], scenario: Scenario, frame_ms: int) -> RunScore:
     """Chấm một lần phát lại.
 
     Chỉ tính quyết định TAKE **đầu tiên**: đó là lúc bot mở miệng. Các khung TAKE sau
     đó là cùng một sự kiện kéo dài, không phải nhiều lần nhận lượt.
+
+    Mốc nhận lượt là **cuối** khung, không phải đầu khung. `at_s` là mốc bắt đầu khung
+    (`types.py`), nhưng thông tin biện minh cho quyết định phủ cả khung
+    `[at_s, at_s + frame_ms)`, nên thời điểm sớm nhất quyết định có thể tồn tại là cuối
+    khoảng đó. Lấy đầu khung làm mốc khiến mọi số độ trễ thấp đi đúng một khung — một
+    sai số hệ thống trên chính trục mà giai đoạn này đo.
     """
     first_take = next((d for d in decisions if d.outcome is TurnOutcome.TAKE), None)
-    take_at_ms = round(first_take.at_s * 1000) if first_take is not None else None
+    take_at_ms = round(first_take.at_s * 1000) + frame_ms if first_take is not None else None
     turn_end_ms = scenario.truth.turn_end_ms
 
     interrupted = False
@@ -98,7 +115,9 @@ def score(decisions: Sequence[TurnDecision], scenario: Scenario) -> RunScore:
     )
 
 
-def summarise(threshold_ms: int, scores: Sequence[RunScore]) -> CurvePoint:
+def summarise(
+    threshold_ms: int, scores: Sequence[RunScore], latency_source: str = "file-based"
+) -> CurvePoint:
     """Gộp các kịch bản thành một điểm trên đường cong.
 
     Tỉ lệ cắt lời tính trên các kịch bản mà khách **thật sự có** kết thúc lượt; kịch
@@ -112,6 +131,9 @@ def summarise(threshold_ms: int, scores: Sequence[RunScore]) -> CurvePoint:
     return CurvePoint(
         threshold_ms=threshold_ms,
         scenarios=len(scores),
+        turn_scenarios=len(turn_scores),
+        backchannel_scenarios=len(backchannel_scores),
+        latency_source=latency_source,
         interruption_rate=_rate(sum(s.interrupted for s in turn_scores), len(turn_scores)) or 0.0,
         median_response_latency_ms=float(np.median(latencies)) if latencies else None,
         p90_response_latency_ms=float(np.percentile(latencies, 90)) if latencies else None,

@@ -9,6 +9,8 @@ from evaluation.metrics import CurvePoint, RunScore, score, summarise, write_cur
 from evaluation.scenario import Scenario, Segment, Truth
 from turnwise.types import TurnDecision, TurnOutcome
 
+FRAME_MS = 20
+
 
 def scenario(turn_end_ms: int | None, expected: str) -> Scenario:
     return Scenario(
@@ -42,34 +44,53 @@ def decisions(take_at_ms: int | None, frames: int = 100) -> list[TurnDecision]:
 
 
 def test_a_take_after_the_turn_ends_is_a_latency() -> None:
-    result = score(decisions(take_at_ms=1200), scenario(turn_end_ms=1000, expected="take"))
+    """Mốc là cuối khung: khung bắt đầu ở 1200ms kết thúc ở 1220ms."""
+    result = score(
+        decisions(take_at_ms=1200), scenario(turn_end_ms=1000, expected="take"), FRAME_MS
+    )
     assert result.interrupted is False
-    assert result.response_latency_ms == 200
+    assert result.take_at_ms == 1220
+    assert result.response_latency_ms == 220
 
 
 def test_a_take_before_the_turn_ends_is_an_interruption() -> None:
     """Cắt lời không có độ trễ: bot chen ngang chứ không phải đáp chậm."""
-    result = score(decisions(take_at_ms=600), scenario(turn_end_ms=1000, expected="take"))
+    result = score(decisions(take_at_ms=600), scenario(turn_end_ms=1000, expected="take"), FRAME_MS)
     assert result.interrupted is True
     assert result.response_latency_ms is None
 
 
 def test_never_taking_leaves_both_axes_empty() -> None:
-    result = score(decisions(take_at_ms=None), scenario(turn_end_ms=1000, expected="take"))
+    result = score(
+        decisions(take_at_ms=None), scenario(turn_end_ms=1000, expected="take"), FRAME_MS
+    )
     assert result.take_at_ms is None
     assert result.interrupted is False
     assert result.response_latency_ms is None
 
 
 def test_only_the_first_take_counts() -> None:
-    """Chuỗi TAKE liền nhau là một sự kiện kéo dài, không phải nhiều lần nhận lượt."""
-    result = score(decisions(take_at_ms=1200), scenario(turn_end_ms=1000, expected="take"))
-    assert result.take_at_ms == 1200
+    """Chuỗi TAKE liền nhau là một sự kiện kéo dài, không phải nhiều lần nhận lượt.
+
+    Dựng thẳng chuỗi HOLD-TAKE-TAKE thay vì nhờ hàm tiện ích sinh, để phép khẳng định
+    không phụ thuộc vào chính con số mà test truyền vào.
+    """
+    frames = [
+        TurnDecision(TurnOutcome.HOLD, "b1", 0, 0.00),
+        TurnDecision(TurnOutcome.TAKE, "b1", 1, 0.02),
+        TurnDecision(TurnOutcome.TAKE, "b1", 2, 0.04),
+        TurnDecision(TurnOutcome.TAKE, "b1", 3, 0.06),
+    ]
+    result = score(frames, scenario(turn_end_ms=20, expected="take"), FRAME_MS)
+    assert result.take_at_ms == 40
+    assert result.response_latency_ms == 20
 
 
 def test_taking_a_backchannel_is_its_own_error() -> None:
     """Kịch bản tiếng đệm không có lượt nào để cắt, nên nó vào mẫu số riêng."""
-    result = score(decisions(take_at_ms=1200), scenario(turn_end_ms=None, expected="backchannel"))
+    result = score(
+        decisions(take_at_ms=1200), scenario(turn_end_ms=None, expected="backchannel"), FRAME_MS
+    )
     assert result.backchannel_mistaken is True
     assert result.interrupted is False
     assert result.response_latency_ms is None
@@ -89,11 +110,25 @@ def test_summary_keeps_the_two_axes_together() -> None:
     assert point.median_response_latency_ms == pytest.approx(300.0)
     assert point.backchannel_error_rate == pytest.approx(1.0)
     assert point.scenarios == 4
+    assert point.turn_scenarios == 3
+    assert point.backchannel_scenarios == 1
+    assert point.latency_source == "file-based"
 
 
 def test_a_curve_row_never_drops_an_axis(tmp_path: Path) -> None:
     """Cắt bớt cột là cách dễ nhất để vô tình báo một trục mà thiếu trục kia."""
-    point = CurvePoint(200, 5, 0.25, 180.0, 180.0, 1.0, 0)
+    point = CurvePoint(
+        threshold_ms=200,
+        scenarios=5,
+        turn_scenarios=4,
+        backchannel_scenarios=1,
+        latency_source="file-based",
+        interruption_rate=0.25,
+        median_response_latency_ms=180.0,
+        p90_response_latency_ms=180.0,
+        backchannel_error_rate=1.0,
+        no_response=0,
+    )
     path = write_curve([point], tmp_path / "curve.csv")
 
     with path.open(encoding="utf-8") as handle:
@@ -103,6 +138,9 @@ def test_a_curve_row_never_drops_an_axis(tmp_path: Path) -> None:
     assert set(rows[0]) == {
         "threshold_ms",
         "scenarios",
+        "turn_scenarios",
+        "backchannel_scenarios",
+        "latency_source",
         "interruption_rate",
         "median_response_latency_ms",
         "p90_response_latency_ms",

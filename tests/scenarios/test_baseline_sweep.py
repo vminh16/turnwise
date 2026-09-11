@@ -7,7 +7,7 @@ import pytest
 from evaluation.metrics import score, summarise
 from evaluation.scenario import load_all, replay
 from turnwise.config import load_settings
-from turnwise.turn.deciders.silence_threshold import SilenceThresholdDecider
+from turnwise.turn.deciders import build
 
 pytestmark = pytest.mark.scenario
 
@@ -23,9 +23,13 @@ def test_the_sweep_produces_one_point_per_threshold(tmp_path: Path) -> None:
     scenarios = load_all()
     points = []
     for threshold_ms in sweep:
-        decider = SilenceThresholdDecider(threshold_ms, floor_dbfs)
+        decider = build(settings.turn.model_copy(update={"silence_threshold_ms": threshold_ms}))
         scores = [
-            score(replay(scenario, decider, settings.audio, tmp_path), scenario)
+            score(
+                replay(scenario, decider, settings.audio, tmp_path),
+                scenario,
+                settings.audio.feature_frame_ms,
+            )
             for scenario in scenarios
         ]
         points.append(summarise(threshold_ms, scores))
@@ -48,9 +52,13 @@ def test_no_threshold_wins_both_axes(tmp_path: Path) -> None:
     scenarios = load_all()
     points = []
     for threshold_ms in sweep:
-        decider = SilenceThresholdDecider(threshold_ms, floor_dbfs)
+        decider = build(settings.turn.model_copy(update={"silence_threshold_ms": threshold_ms}))
         scores = [
-            score(replay(scenario, decider, settings.audio, tmp_path), scenario)
+            score(
+                replay(scenario, decider, settings.audio, tmp_path),
+                scenario,
+                settings.audio.feature_frame_ms,
+            )
             for scenario in scenarios
         ]
         points.append(summarise(threshold_ms, scores))
@@ -72,6 +80,10 @@ def test_b1_mistakes_the_backchannel_at_every_threshold(tmp_path: Path) -> None:
 
     backchannel = next(s for s in load_all() if s.truth.expected == "backchannel")
     for threshold_ms in sweep:
-        decider = SilenceThresholdDecider(threshold_ms, floor_dbfs)
-        result = score(replay(backchannel, decider, settings.audio, tmp_path), backchannel)
+        decider = build(settings.turn.model_copy(update={"silence_threshold_ms": threshold_ms}))
+        result = score(
+            replay(backchannel, decider, settings.audio, tmp_path),
+            backchannel,
+            settings.audio.feature_frame_ms,
+        )
         assert result.backchannel_mistaken is True

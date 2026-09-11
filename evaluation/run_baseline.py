@@ -34,7 +34,7 @@ from evaluation.metrics import CurvePoint, score, summarise, write_curve
 from evaluation.scenario import load_all, replay
 from turnwise.config import load_settings
 from turnwise.telemetry.collector import TelemetryCollector
-from turnwise.turn.deciders.silence_threshold import SilenceThresholdDecider
+from turnwise.turn.deciders import build
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,10 @@ def main() -> int:
         # sống trong thư mục tạm chứ không nằm lại trong reports/.
         directory = Path(workspace)
         for threshold_ms in sweep:
-            decider = SilenceThresholdDecider(threshold_ms, floor_dbfs)
+            # Mỗi điểm trên đường cong là một cấu hình trọn vẹn, và adapter dựng lên
+            # từ `turn.decider` chứ không từ một import thẳng tên lớp (ADR-0003).
+            turn = settings.turn.model_copy(update={"silence_threshold_ms": threshold_ms})
+            decider = build(turn)
             scores = []
             for scenario in scenarios:
                 with TelemetryCollector(
@@ -73,19 +76,23 @@ def main() -> int:
                     decisions = replay(
                         scenario, decider, settings.audio, directory, collector=collector
                     )
-                scores.append(score(decisions, scenario))
+                scores.append(score(decisions, scenario, settings.audio.feature_frame_ms))
 
             point = summarise(threshold_ms, scores)
             points.append(point)
             # Chuỗi hướng tới người dùng viết tiếng Anh: console Windows tiếng Việt
             # mặc định cp1258 và không in nổi chữ có dấu (AGENTS.md).
             logger.info(
-                "%4dms: interruptions %.0f%%, median reply %s ms, "
-                "backchannel taken as turn %s, no reply in %d scenarios",
+                "%4dms: interruptions %.0f%% of %d turn scenarios, "
+                "median reply %s ms (%s), backchannel taken as turn %s of %d, "
+                "no reply in %d scenarios",
                 point.threshold_ms,
                 point.interruption_rate * 100,
+                point.turn_scenarios,
                 point.median_response_latency_ms,
+                point.latency_source,
                 point.backchannel_error_rate,
+                point.backchannel_scenarios,
                 point.no_response,
             )
 

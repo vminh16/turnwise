@@ -15,6 +15,9 @@ def point(threshold_ms: int, latency: float | None, no_response: int = 0) -> Cur
     return CurvePoint(
         threshold_ms=threshold_ms,
         scenarios=5,
+        turn_scenarios=4,
+        backchannel_scenarios=1,
+        latency_source="file-based",
         interruption_rate=0.25,
         median_response_latency_ms=latency,
         p90_response_latency_ms=latency,
