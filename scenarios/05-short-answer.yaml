@@ -1,0 +1,23 @@
+# SPEC.md §10 phép thử 5 — câu trả lời ngắn.
+#
+# Khách đáp "Hai người." Hệ hoàn chỉnh phải đáp lại KHÔNG CHẬM HƠN khi khách trả
+# lời câu dài (SPEC R1). Đây là chỗ ngưỡng im lặng cố định lộ rõ nhất: câu càng
+# ngắn thì phần chờ ngưỡng càng chiếm tỉ lệ lớn trong tổng thời gian đáp.
+name: short-answer
+spec: "SPEC.md §10 phép thử 5"
+flow: N3
+behaviour: trả lời ngắn
+summary: Khách đáp một câu hai tiếng rồi dừng.
+
+synthesis:
+  speech_dbfs: -14.0
+  noise_floor_dbfs: -60.0
+
+segments:
+  - {kind: silence, ms: 300, note: "bot vừa hỏi xong"}
+  - {kind: speech, ms: 500, note: "hai người"}
+  - {kind: silence, ms: 1200, note: "khách chờ bot đáp"}
+
+truth:
+  turn_end_ms: 800
+  expected: take

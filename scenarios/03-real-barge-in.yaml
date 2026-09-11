@@ -1,0 +1,25 @@
+# SPEC.md §10 phép thử 3 — ngắt lời thật.
+#
+# Khách nói đè có nội dung: "Không, không phải địa chỉ đó." Hệ hoàn chỉnh phải
+# DỪNG NGAY và nhường lượt (SPEC R3, §4.3).
+#
+# GIỚI HẠN CỦA GIAI ĐOẠN 0: chỉ kênh khách, không có tiếng bot để nói đè lên.
+# Độ trễ dừng thật chỉ đo được trên đường chạy sống ở Giai đoạn 4.
+name: real-barge-in
+spec: "SPEC.md §10 phép thử 3"
+flow: N3
+behaviour: nói đè có nội dung
+summary: Bot đang đọc lại địa chỉ; khách cắt ngang để sửa.
+
+synthesis:
+  speech_dbfs: -14.0
+  noise_floor_dbfs: -60.0
+
+segments:
+  - {kind: silence, ms: 600, note: "bot đang đọc địa chỉ"}
+  - {kind: speech, ms: 1400, note: "không, không phải địa chỉ đó"}
+  - {kind: silence, ms: 900, note: "khách chờ bot đáp"}
+
+truth:
+  turn_end_ms: 2000
+  expected: take

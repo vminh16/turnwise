@@ -73,7 +73,7 @@ ignore = [
 "examples/**" = ["T20"]        # examples are meant to be read and run
 
 [tool.ruff.lint.isort]
-known-first-party = ["turnwise"]
+known-first-party = ["turnwise", "evaluation"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -99,6 +99,10 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Bộ kịch bản dùng lại evaluation/scenario.py, cũng chính là thứ run_baseline.py phát
+# lại. Hai bản sinh tín hiệu riêng cho test và cho đường cong nghĩa là đường cong đo
+# trên một âm thanh khác với âm thanh đã kiểm.
+pythonpath = ["."]
 addopts = "-ra --strict-markers"
 asyncio_mode = "auto"
 markers = [

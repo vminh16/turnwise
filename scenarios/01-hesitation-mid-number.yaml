@@ -1,0 +1,29 @@
+# SPEC.md §10 phép thử 1 — ngập ngừng giữa câu.
+#
+# Khách đọc số thuê bao, dừng giữa chừng để nhìn hoá đơn, rồi đọc tiếp.
+# Hệ hoàn chỉnh phải GIỮ IM trong khoảng dừng đó (SPEC R2, §4.3).
+#
+# GIỚI HẠN CỦA GIAI ĐOẠN 0: đây là kênh khách, sinh tổng hợp. Tiếng bot chưa mô
+# phỏng được vì cần hội thoại hai kênh — đó là việc của Giai đoạn 1. Kịch bản này
+# kiểm tra đường ống chạy được và tất định, không kiểm tra chất lượng nhận dạng.
+name: hesitation-mid-number
+spec: "SPEC.md §10 phép thử 1"
+flow: N2
+behaviour: ngừng giữa câu
+summary: Đọc số thuê bao, dừng nhìn hoá đơn, rồi đọc tiếp.
+
+synthesis:
+  speech_dbfs: -14.0
+  noise_floor_dbfs: -60.0
+
+segments:
+  - {kind: speech, ms: 1200, note: "không chín mười, ba hai một"}
+  - {kind: silence, ms: 800, note: "dừng lại nhìn hoá đơn"}
+  - {kind: speech, ms: 1000, note: "bốn năm sáu bảy"}
+  - {kind: silence, ms: 1500, note: "đã đọc xong"}
+
+truth:
+  # Thời điểm khách thật sự nói xong, tính từ đầu clip.
+  turn_end_ms: 3000
+  # Hành vi đúng của hệ hoàn chỉnh. Giai đoạn 0 chỉ ghi lại, chưa chấm đúng sai.
+  expected: take

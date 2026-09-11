@@ -1,0 +1,25 @@
+# SPEC.md §10 phép thử 4 — yêu cầu gặp người.
+#
+# "Cho tôi gặp nhân viên" nói giữa lúc bot đang nói. N5 ưu tiên tuyệt đối ở mọi
+# trạng thái (SPEC §4.2), nên đây vừa là phép thử ngắt lời vừa là phép thử luồng.
+#
+# GIỚI HẠN CỦA GIAI ĐOẠN 0: tầng `dialog` chưa tồn tại, nên kịch bản này mới chỉ
+# kiểm tra phần chuyển lượt. Phần chuyển máy kèm ngữ cảnh (R9) là Giai đoạn 4.
+name: ask-for-human
+spec: "SPEC.md §10 phép thử 4"
+flow: N5
+behaviour: nói đè có nội dung
+summary: Khách xin gặp điện thoại viên giữa lúc bot đang nói.
+
+synthesis:
+  speech_dbfs: -14.0
+  noise_floor_dbfs: -60.0
+
+segments:
+  - {kind: silence, ms: 500, note: "bot đang nói"}
+  - {kind: speech, ms: 1100, note: "cho tôi gặp nhân viên"}
+  - {kind: silence, ms: 1000, note: "khách chờ chuyển máy"}
+
+truth:
+  turn_end_ms: 1600
+  expected: take

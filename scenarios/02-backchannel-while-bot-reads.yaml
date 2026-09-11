@@ -1,0 +1,29 @@
+# SPEC.md §10 phép thử 2 — tiếng đệm.
+#
+# Khách chêm "dạ" trong lúc bot đọc thông tin cước. Hệ hoàn chỉnh phải ĐỌC TIẾP
+# liền mạch, không nhường lượt (SPEC R4, §4.3).
+#
+# Đây là kịch bản mà B1 hỏng theo cấu trúc: cổng năng lượng không phân biệt được
+# "dạ" tiếng đệm với một lượt trọn vẹn. Con số đó là kết quả cần đo.
+#
+# GIỚI HẠN CỦA GIAI ĐOẠN 0: chỉ có kênh khách. Việc bot đang nói ở đây là ngữ cảnh
+# viết trong chú thích, chưa phải tín hiệu — cần hai kênh, Giai đoạn 1.
+name: backchannel-while-bot-reads
+spec: "SPEC.md §10 phép thử 2"
+flow: N2
+behaviour: tiếng đệm
+summary: Bot đang đọc cước; khách chêm "dạ" rồi im.
+
+synthesis:
+  speech_dbfs: -14.0
+  noise_floor_dbfs: -60.0
+
+segments:
+  - {kind: silence, ms: 1000, note: "bot đang đọc, khách im"}
+  - {kind: speech, ms: 300, note: "dạ"}
+  - {kind: silence, ms: 1700, note: "khách im tiếp, bot vẫn đang đọc"}
+
+truth:
+  # Khách không hề giành lượt, nên không có thời điểm kết thúc lượt nào.
+  turn_end_ms: null
+  expected: backchannel
