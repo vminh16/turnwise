@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 BASELINE_CONFIG = "configs/baseline/silence-threshold.yaml"
 CURVE_PATH = Path("reports/baseline/silence-threshold.csv")
+FIGURE_PATH = Path("reports/baseline/silence-threshold.png")
 
 
 def main() -> int:
@@ -90,7 +91,24 @@ def main() -> int:
 
     write_curve(points, CURVE_PATH)
     logger.info("curve of %d points -> %s", len(points), CURVE_PATH)
+    draw(points)
     return 0
+
+
+def draw(points: list[CurvePoint]) -> None:
+    """Vẽ hình nếu có matplotlib. Thiếu thì báo rồi đi tiếp — CSV mới là kết quả.
+
+    matplotlib nằm trong extra `research`, không phải phụ thuộc bắt buộc, nên một
+    máy chỉ cài đường chạy runtime vẫn phải quét được dải này.
+    """
+    try:
+        from evaluation.figures import plot_tradeoff
+    except ImportError:
+        logger.warning("matplotlib missing; skipping the figure. uv sync --extra research")
+        return
+
+    path = plot_tradeoff(points, FIGURE_PATH, "B1 silence threshold: no value wins both axes")
+    logger.info("figure -> %s", path)
 
 
 if __name__ == "__main__":
