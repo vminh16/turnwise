@@ -54,8 +54,11 @@ def run_dev() -> int:
     # Đường ống chưa được nối. Báo rõ còn thiếu gì, để lệnh ghi trong README luôn
     # giải thích được trạng thái thật của repo thay vì văng lỗi import ở chỗ khác.
     logger.error(
-        "Not wired up yet. Still missing: src/turnwise/config.py, "
-        "src/turnwise/audio/source.py, and an adapter in src/turnwise/turn/deciders/."
+        "Not wired up yet. The offline path works: "
+        "`uv run pytest -m scenario` replays the five SPEC 10 scenarios and "
+        "`uv run python evaluation/run_baseline.py` sweeps the B1 baseline. "
+        "A live call still needs microphone capture, ASR, TTS, dialog/ and "
+        "transport/ wiring, which is phase 4 in docs/roadmap.md."
     )
     return 1
 
