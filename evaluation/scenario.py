@@ -20,7 +20,6 @@ cũng phát lại đúng những kịch bản này. Hai bản sinh tín hiệu r
 from __future__ import annotations
 
 import zlib
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
@@ -28,6 +27,7 @@ import numpy as np
 import soundfile as sf
 import yaml
 from numpy.typing import NDArray
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from turnwise.audio.source import WavFrameSource
 from turnwise.config import AudioConfig
@@ -38,56 +38,83 @@ from turnwise.types import TurnDecision
 SCENARIO_DIR = Path(__file__).resolve().parents[1] / "scenarios"
 
 
-@dataclass(frozen=True, slots=True)
-class Segment:
+class _Node(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+
+class Segment(_Node):
     kind: Literal["speech", "silence"]
     ms: int
     note: str = ""
 
 
-@dataclass(frozen=True, slots=True)
-class Truth:
+class Truth(_Node):
     """Sự thật nền của kịch bản, dùng để chấm ở pha 0.6."""
 
     turn_end_ms: int | None
     expected: Literal["take", "hold", "backchannel"]
 
 
-@dataclass(frozen=True, slots=True)
-class Scenario:
+class Synthesis(_Node):
+    speech_dbfs: float
+    noise_floor_dbfs: float
+
+
+class Scenario(_Node):
+    """Một kịch bản đã nạp và đã kiểm.
+
+    Kiểm lúc nạp chứ không lúc chấm, vì sai ở đây **không gây lỗi** mà lặng lẽ đổi
+    mẫu số: một kịch bản `expected: take` bị gõ nhầm `turn_end_ms: null` sẽ rơi khỏi
+    mẫu số của tỉ lệ cắt lời, tỉ lệ đổi từ 1/4 thành 1/3, và không có gì báo.
+    """
+
     name: str
     spec: str
     flow: str
     behaviour: str
     summary: str
-    speech_dbfs: float
-    noise_floor_dbfs: float
+    synthesis: Synthesis
     segments: tuple[Segment, ...]
     truth: Truth
     path: Path
 
     @property
+    def speech_dbfs(self) -> float:
+        return self.synthesis.speech_dbfs
+
+    @property
+    def noise_floor_dbfs(self) -> float:
+        return self.synthesis.noise_floor_dbfs
+
+    @property
     def duration_ms(self) -> int:
         return sum(segment.ms for segment in self.segments)
+
+    @model_validator(mode="after")
+    def _truth_matches_the_segments(self) -> Scenario:
+        if not self.segments:
+            raise ValueError(f"{self.name}: kịch bản không có đoạn nào")
+
+        turn_end_ms = self.truth.turn_end_ms
+        if self.truth.expected == "take" and turn_end_ms is None:
+            raise ValueError(
+                f"{self.name}: expected=take thì phải có turn_end_ms, "
+                "nếu không kịch bản rơi khỏi mẫu số của tỉ lệ cắt lời"
+            )
+        if self.truth.expected == "backchannel" and turn_end_ms is not None:
+            raise ValueError(f"{self.name}: tiếng đệm không có lượt nào kết thúc")
+        if turn_end_ms is not None and not 0 < turn_end_ms <= self.duration_ms:
+            raise ValueError(
+                f"{self.name}: turn_end_ms={turn_end_ms} nằm ngoài clip dài {self.duration_ms}ms"
+            )
+        if self.synthesis.noise_floor_dbfs >= self.synthesis.speech_dbfs:
+            raise ValueError(f"{self.name}: sàn ồn không được cao bằng mức tiếng nói")
+        return self
 
 
 def load(path: Path) -> Scenario:
     raw: dict[str, Any] = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return Scenario(
-        name=raw["name"],
-        spec=raw["spec"],
-        flow=raw["flow"],
-        behaviour=raw["behaviour"],
-        summary=raw["summary"],
-        speech_dbfs=float(raw["synthesis"]["speech_dbfs"]),
-        noise_floor_dbfs=float(raw["synthesis"]["noise_floor_dbfs"]),
-        segments=tuple(Segment(**segment) for segment in raw["segments"]),
-        truth=Truth(
-            turn_end_ms=raw["truth"]["turn_end_ms"],
-            expected=raw["truth"]["expected"],
-        ),
-        path=path,
-    )
+    return Scenario(**raw, path=path)
 
 
 def load_all(directory: Path = SCENARIO_DIR) -> list[Scenario]:

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from evaluation.metrics import CurvePoint, RunScore, score, summarise, write_curve
-from evaluation.scenario import Scenario, Segment, Truth
+from evaluation.scenario import Scenario, Segment, Synthesis, Truth
 from turnwise.types import TurnDecision, TurnOutcome
 
 FRAME_MS = 20
@@ -19,9 +19,8 @@ def scenario(turn_end_ms: int | None, expected: str) -> Scenario:
         flow="N2",
         behaviour="fixture",
         summary="fixture",
-        speech_dbfs=-14.0,
-        noise_floor_dbfs=-60.0,
-        segments=(Segment(kind="speech", ms=100),),
+        synthesis=Synthesis(speech_dbfs=-14.0, noise_floor_dbfs=-60.0),
+        segments=(Segment(kind="speech", ms=2000),),
         truth=Truth(turn_end_ms=turn_end_ms, expected=expected),  # type: ignore[arg-type]
         path=Path("fixture.yaml"),
     )
