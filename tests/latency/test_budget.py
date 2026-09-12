@@ -15,11 +15,11 @@ nới ngưỡng để test xanh — ngân sách sai thì đó là một ADR (`.c
 """
 
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
 import pytest
-import soundfile as sf
 
 from turnwise.audio.source import WavFrameSource
 from turnwise.config import AudioConfig, LatencyConfig, load_settings
@@ -31,9 +31,8 @@ WARMUP_FRAMES = 20
 """Bỏ qua vài khung đầu: lần gọi đầu tiên còn trả tiền cho import, cache và cấp phát."""
 
 
-@pytest.fixture(scope="module")
-def audio() -> AudioConfig:
-    return load_settings().audio
+WavWriter = Callable[..., Path]
+"""Fixture `write_wav` ở `tests/conftest.py`."""
 
 
 @pytest.fixture(scope="module")
@@ -53,23 +52,20 @@ def budget_per_feature_frame_ms(audio: AudioConfig, latency: LatencyConfig) -> f
     return audio.feature_frame_ms * realtime_factor
 
 
-def speech_wav(path: Path, audio: AudioConfig, seconds: float = 10.0) -> Path:
-    rng = np.random.default_rng(0)
-    samples = (rng.standard_normal(int(audio.sample_rate_hz * seconds)) * 0.2).astype(np.float32)
-    sf.write(path, samples, audio.sample_rate_hz, subtype="PCM_16")
-    return path
-
-
 def median_ms(durations: list[float]) -> float:
     return float(np.median(durations)) * 1000
 
 
 def test_b1_decides_inside_the_per_frame_budget(
-    tmp_path: Path, audio: AudioConfig, latency: LatencyConfig
+    tmp_path: Path, audio: AudioConfig, latency: LatencyConfig, write_wav: WavWriter
 ) -> None:
     """`decide()` chạy mỗi khung trên thread tiêu thụ; chi phí của nó nằm trong ngân sách."""
     decider = SilenceThresholdDecider(500, -45.0)
-    frames = list(WavFrameSource(speech_wav(tmp_path / "a.wav", audio), audio))
+    frames = list(
+        WavFrameSource(
+            write_wav(tmp_path / "a.wav", audio.sample_rate_hz * 10, amplitude=0.2), audio
+        )
+    )
 
     durations = []
     for index, frame in enumerate(frames):
@@ -85,10 +81,12 @@ def test_b1_decides_inside_the_per_frame_budget(
 
 
 def test_the_frame_source_keeps_up_with_its_own_frames(
-    tmp_path: Path, audio: AudioConfig, latency: LatencyConfig
+    tmp_path: Path, audio: AudioConfig, latency: LatencyConfig, write_wav: WavWriter
 ) -> None:
     """Bộ phát khung phải rẻ hơn nhiều so với ngân sách: nó chỉ cắt lát, không tính gì."""
-    source = WavFrameSource(speech_wav(tmp_path / "a.wav", audio), audio)
+    source = WavFrameSource(
+        write_wav(tmp_path / "a.wav", audio.sample_rate_hz * 10, amplitude=0.2), audio
+    )
 
     durations = []
     iterator = iter(source)
@@ -103,7 +101,7 @@ def test_the_frame_source_keeps_up_with_its_own_frames(
 
 
 def test_the_whole_offline_path_runs_faster_than_real_time(
-    tmp_path: Path, audio: AudioConfig
+    tmp_path: Path, audio: AudioConfig, write_wav: WavWriter
 ) -> None:
     """Phát lại 10 giây audio phải tốn ít hơn 10 giây, nếu không bộ kịch bản vô dụng.
 
@@ -113,7 +111,7 @@ def test_the_whole_offline_path_runs_faster_than_real_time(
     """
     seconds = 10.0
     decider = SilenceThresholdDecider(500, -45.0)
-    path = speech_wav(tmp_path / "a.wav", audio, seconds=seconds)
+    path = write_wav(tmp_path / "a.wav", int(audio.sample_rate_hz * seconds), amplitude=0.2)
 
     start = time.perf_counter()
     for frame in WavFrameSource(path, audio):
