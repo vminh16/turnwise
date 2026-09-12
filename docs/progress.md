@@ -25,7 +25,7 @@ vẽ được đường cong B1*. Cả hai đạt.
 | 0.4 Ghi vết | `telemetry/collector.py` | `a1c3c5e` | 16 test |
 | 0.5 Năm kịch bản | `scenarios/*.yaml`, `evaluation/scenario.py` | `fa6855f`, `2f160e7` | `-m scenario` |
 | 0.6 Đo và vẽ | `evaluation/metrics.py`, `run_baseline.py`, `figures.py` | `8b558fe`, `d4d7e32` | CSV + PNG |
-| 0.7 Ngân sách | `tests/latency/test_budget.py` | `b673a3a` | `-m latency` 3 |
+| 0.7 Ngân sách | `tests/latency/test_budget.py`, `tests/conftest.py` | `b673a3a`, `b2f6694` | `-m latency` 3 |
 | Sửa sau review | sáu chỗ, xem §4 | `fabfacf`, `2f160e7`, `b7369ab` | 111 test |
 
 Trạng thái cổng hiện tại:
@@ -40,6 +40,32 @@ uv run python evaluation/run_baseline.py                             # CSV + PNG
 
 Không thêm phụ thuộc runtime nào trong cả giai đoạn. `uv sync --extra research` chỉ phục
 vụ `evaluation/figures.py` và các giai đoạn offline về sau.
+
+### 1.1 Chốt: đạt cả bảy điều kiện ra
+
+Chấm ngày 2026-09-12, sau khi sửa xong các phát hiện của review (§4). Cột bằng chứng là
+lệnh đã chạy lại tại thời điểm chốt, không phải kết quả nhớ lại.
+
+| Pha | Điều kiện ra | Chốt | Bằng chứng |
+|---|---|---|---|
+| 0.1 | Hai file YAML nạp thành object đã kiểm kiểu; ngưỡng quyết định vẫn `None`; không module nào ngoài `config.py` đọc YAML hay `os.environ` | đạt | 10 test, trong đó một test tĩnh quét `src/` |
+| 0.2 | Wav 16 kHz cho đúng `ceil(len/320)` khung; `index` không nhảy; `start_s` cách đều; kích thước khung từ config | đạt | 15 test, có test đổi `feature_frame_ms` 20→40 |
+| 0.3 | `decide()` trả ở mọi khung với `scores == {}`; `reset()` tái lập; đổi ngưỡng chỉ bằng sửa config; `isinstance(obj, TurnDecider)` | đạt | 13 test + 5 test registry; công tắc `turn.decider` có thật từ `fabfacf` |
+| 0.4 | Mỗi `TurnDecision` thành đúng một dòng JSONL đủ sáu trường; `turn/` không import `telemetry`; không `print()` | đạt | 16 test, kiểm import bằng `ast`; `ruff` rule `T20` bật toàn repo |
+| 0.5 | Marker `scenario` thu được test; năm kịch bản chạy hết; tất định giữa hai lần chạy; không cần micro | đạt | `-m scenario` 10 passed; test tất định băm mẫu tín hiệu, đã kiểm bằng cách bỏ hạt giống |
+| 0.6 | Một lệnh sinh đường cong 11 điểm trong `reports/`, hai trục cùng lúc; `evaluation/` không chứa đường ra quyết định; không đọc `data/holdout/` | đạt | `run_baseline.py` sinh CSV + PNG; adapter dựng qua registry; cột `latency_source` trên mọi hàng |
+| 0.7 | Mọi lệnh "Before Marking Done" xanh; marker `latency` thu được ít nhất một test | đạt | `-m latency` 3 passed; `tests/conftest.py` có fixture wav dùng chung từ `b2f6694` |
+
+Hai chỗ **cố ý** chấm là đạt dù khác câu chữ ban đầu:
+
+- Điều kiện 0.3 nêu đích danh `AudioProcessor.has_voice()`. Hàm đó không dùng được (§3,
+  quyết định 1), nên phần "dò tiếng nói" đạt bằng cổng năng lượng, và lý do ghi ở đây
+  thay vì trong một ADR riêng.
+- `AGENTS.md` mục 5 đòi một ADR cho lựa chọn phương pháp mới. Quyết định của dự án là ghi
+  vào chính tài liệu này (§3) thay vì tách bảy file ADR cho một giai đoạn hạ tầng.
+
+Giai đoạn 0 **đóng**. Những gì còn thiếu ở §4 và §5 không thuộc điều kiện ra của giai
+đoạn này; chúng là đầu vào của Giai đoạn 1 và 4.
 
 ---
 
@@ -163,8 +189,10 @@ byte — và tìm ra hai lỗi chặn cùng tám lỗi nặng.
   khỏi mô tả kịch bản.
 - `WavFrameSource` từ chối file nhiều kênh. Hội thoại hai kênh cần một adapter mới **và**
   một quyết định về chính kiểu của seam — `FeatureFrame` hiện mang đúng một mảng mẫu.
-- `tests/conftest.py` còn rỗng; ba nơi tự sinh wav riêng.
-- Cổng `-m latency` có độ dư khoảng 1400 lần: một hồi quy 1000 lần vẫn xanh.
+- Cổng `-m latency` có độ dư khoảng 1400 lần: một hồi quy 1000 lần vẫn xanh. Ngưỡng ở
+  đó là **ngân sách**, không phải mốc hồi quy; đặt thêm một mốc chặt hơn bây giờ là bịa
+  ra một con số chưa ai đo. Khi có hệ chạy sống ở Giai đoạn 4 thì mốc hồi quy mới có cơ
+  sở.
 
 ---
 
