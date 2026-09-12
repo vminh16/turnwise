@@ -91,11 +91,16 @@ class WavFrameSource:
 
         Đệm chứ không cắt bỏ: phần đuôi của một phát ngôn là chỗ quyết định lượt nói
         xảy ra, và bỏ nó đi thì bài đo mất đúng đoạn đang cần đo.
+
+        Khung đệm mang theo `padded_samples` để người tiêu thụ biết phần nào là tín
+        hiệu thật. Giữ độ dài cố định mà vẫn nói thật về phần đệm: bộ đệm cố định là
+        thứ `.claude/rules/audio.md` đòi, còn năng lượng thì phải tính trên phần thật.
         """
         size = self._frame_samples
         for index, start in enumerate(range(0, len(self._samples), size)):
             chunk = self._samples[start : start + size]
-            if len(chunk) < size:
+            padded_samples = size - len(chunk)
+            if padded_samples:
                 padded = np.zeros(size, dtype=np.float32)
                 padded[: len(chunk)] = chunk
                 padded.flags.writeable = False
@@ -105,4 +110,5 @@ class WavFrameSource:
                 start_s=index * self._duration_s,
                 duration_s=self._duration_s,
                 samples=chunk,
+                padded_samples=padded_samples,
             )

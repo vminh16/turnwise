@@ -100,6 +100,18 @@ class FeatureFrame:
     samples: NDArray[np.float32]
     """Mẫu mono đã khử vọng."""
 
+    padded_samples: int = 0
+    """Số mẫu cuối khung là phần đệm, không phải tín hiệu thu được.
+
+    Chỉ khung cuối của một nguồn hữu hạn mới khác 0: file kết thúc giữa chừng một
+    khung, và khung vẫn giữ đủ độ dài để mọi bộ đệm là cố định
+    (`.claude/rules/audio.md`).
+
+    Ai tính năng lượng **phải** bỏ phần này ra. Không bỏ thì phần đệm kéo RMS xuống —
+    đo được 15 dB trên một khung chỉ có 10 mẫu thật — và một đuôi phát ngôn nhỏ tiếng
+    bị đẩy xuống dưới ngưỡng im lặng, sinh ra một lượt "đã xong" không có thật.
+    """
+
     f0_hz: float | None = None
     """Tần số cơ bản, hoặc `None` khi khung vô thanh hay không ước lượng được.
 

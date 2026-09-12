@@ -85,3 +85,11 @@ def test_multi_channel_file_is_refused(tmp_path: Path, audio: AudioConfig) -> No
     path = write_wav(tmp_path / "a.wav", 1600, channels=2)
     with pytest.raises(ValueError, match="2 kênh"):
         WavFrameSource(path, audio)
+
+
+def test_the_padded_tail_is_reported(tmp_path: Path, audio: AudioConfig) -> None:
+    """Khung cuối nói thật nó có bao nhiêu mẫu đệm; các khung đầy thì không có mẫu nào."""
+    per_frame = audio.sample_rate_hz * audio.feature_frame_ms // 1000
+    frames = list(WavFrameSource(write_wav(tmp_path / "a.wav", per_frame + 10), audio))
+
+    assert [frame.padded_samples for frame in frames] == [0, per_frame - 10]

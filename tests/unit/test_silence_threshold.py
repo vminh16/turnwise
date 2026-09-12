@@ -131,3 +131,27 @@ def test_every_swept_threshold_is_usable(baseline: tuple[int, float]) -> None:
 def test_a_non_positive_threshold_is_refused() -> None:
     with pytest.raises(ValueError, match="phải dương"):
         SilenceThresholdDecider(0, -45.0)
+
+
+def test_a_padded_tail_does_not_look_like_silence() -> None:
+    """Đệm kéo RMS xuống 15 dB; nếu tính cả đệm thì đuôi phát ngôn thành im lặng giả.
+
+    Khung ở đây chỉ có 10 mẫu thật ở -19 dBFS. Tính cả 310 mẫu đệm cho -34 dBFS, vẫn
+    trên ngưỡng -45 nên chưa đủ để lộ lỗi; hạ ngưỡng xuống -25 dBFS làm phép thử sắc
+    hơn: tính đúng thì đây là tiếng nói, tính cả đệm thì nó bị coi là im lặng.
+    """
+    decider = SilenceThresholdDecider(200, -25.0)
+    tail = FeatureFrame(
+        index=0,
+        start_s=0.0,
+        duration_s=FRAME_S,
+        samples=np.concatenate([np.full(10, 0.11, np.float32), np.zeros(310, np.float32)]),
+        padded_samples=310,
+    )
+
+    decider.decide(tail)
+    silence = frames("." * 20)
+    outcomes = [decider.decide(frame).outcome for frame in silence]
+
+    # Khung đuôi phải được tính là tiếng nói, nên bộ đếm im lặng khởi động từ sau nó.
+    assert outcomes.index(TurnOutcome.TAKE) == 9

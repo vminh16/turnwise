@@ -70,7 +70,10 @@ class SilenceThresholdDecider:
         bằng chứng của một lượt đã xong (`.claude/rules/turn.md`).
         """
         if not self._taken:
-            if rms_dbfs(frame.samples) > self._floor_dbfs:
+            # Bỏ phần đệm của khung cuối: đệm không kéo RMS xuống 15 dB và biến một
+            # đuôi phát ngôn nhỏ tiếng thành im lặng (`types.py`, `padded_samples`).
+            samples = frame.samples[: len(frame.samples) - frame.padded_samples]
+            if len(samples) and rms_dbfs(samples) > self._floor_dbfs:
                 self._heard_speech = True
                 self._silence_ms = 0
             else:
