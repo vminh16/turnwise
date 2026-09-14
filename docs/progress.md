@@ -238,7 +238,7 @@ phần **holdout** khoá lại cho báo cáo cuối. Cả hai đều chỉ dùng
 | Pha | Sinh ra | Trạng thái |
 |---|---|---|
 | 1.1 Kịch bản đóng vai | `roleplay/*.yaml`, `evaluation/roleplay.py`, test độ phủ | **xong** |
-| 1.2 Hướng dẫn gán nhãn + đồng ý | `docs/annotation-guide.md` | chưa |
+| 1.2 Hướng dẫn gán nhãn + đồng ý | `docs/annotation-guide.md` | **xong**, ba giả định chờ chốt ở 1.6 |
 | 1.3 Đọc được hai kênh | `FeatureFrame`/`WavFrameSource` nhận micro + tiếng bot | chưa |
 | 1.4 Công cụ thu + buổi thử | `scripts/collect_session.py`, độ lệch phát–thu đo được | chưa |
 | 1.5 Manifest, chia tập, khoá holdout | `scripts/validate_manifests.py`, chia theo người nói | chưa |
@@ -252,17 +252,33 @@ Không giải bằng cách nới script chặn.
 ### 6.3 Pha 1.1 — kịch bản đóng vai
 
 Chín kịch bản cho năm luồng, 46 lượt bot, cộng `roleplay/common.yaml` với các câu dùng
-chung khi buổi thu lệch kịch bản. `uv run pytest tests/unit/test_roleplay_scripts.py`: 26
-test.
+chung khi buổi thu lệch kịch bản. `uv run pytest tests/unit/test_roleplay_scripts.py`: 28
+test. Commit `111577e`, sửa theo rà soát độ tự nhiên ở `17dace2`.
 
 | Kiểm tra | Kết quả |
 |---|---|
 | Mỗi luồng N1–N5 có kịch bản | đủ năm |
 | Mỗi hành vi có ở ít nhất hai luồng | ngập ngừng, tiếng đệm, câu dài: 4 luồng; ngắt lời: 3; gặp nhân viên: 3; câu ngắn: 5 |
 | Gặp nhân viên giữa lúc bot đang đọc, ngoài N5 | có ở N2 và N4 |
-| Gợi ý câu trả lời ngắn phủ sáu thanh ở âm tiết cuối | ngang 17, sắc 16, nặng 11, huyền 7, hỏi 6, ngã 3 |
+| "Dạ." là một câu trả lời trọn, không chỉ là tiếng đệm | có ở bốn luồng |
+| Gợi ý câu trả lời ngắn phủ sáu thanh ở âm tiết cuối | nặng 15, sắc 15, ngang 12, huyền 9, hỏi 6, ngã 3 |
+| Mọi đoạn bot đọc có dấu `/` đánh chỗ ngắt hơi | kiểm lúc nạp |
 
 Đã thử phá: bỏ ba câu gợi ý kết thúc bằng thanh ngã thì kiểm tra độ phủ thanh báo thiếu.
+
+**Rà soát độ tự nhiên (`17dace2`).** Bản đầu dặn người tham gia *diễn* hành vi ("dừng hẳn
+lại vài giây", "chêm dạ hai ba lần"). Ngập ngừng và tiếng đệm diễn ra không có nhịp của thứ
+thật, mà nhịp chính là thứ bộ dữ liệu đo. Bản sửa để **nhiệm vụ** sinh ra hành vi: số thuê bao
+lẫn giữa mã khách hàng và số hợp đồng trên hoá đơn giả (cách nhà mạng thật hỏi thông tin: họ tên
+chủ hợp đồng, số điện thoại, địa chỉ lắp đặt, tình trạng đèn modem — trang báo hỏng của VNPT);
+mã lịch hẹn nằm trong tin nhắn không dấu; người tham gia ghi giờ hẹn và từng khoản cước ra giấy
+trong lúc bot đọc. Thêm "Dạ." trọn lượt, vì bản đầu chỉ có "dạ" kiểu tiếng đệm nên ca khó nhất
+của R4 không đo được. Câu bot mở đầu bằng "Dạ" giảm từ 41/46 xuống 3/46.
+
+Giới hạn của rà soát: các diễn đàn công khai (tinhte, voz) chặn truy cập tự động nên không đọc
+được lời kể cuộc gọi thật từ người dùng. Bằng chứng về cách nói thật chỉ gồm trang hướng dẫn
+của nhà mạng và báo chí về trải nghiệm tổng đài tự động. Nội dung vẫn cần người bản ngữ ngoài
+nhóm đọc thử và một buổi thu thử (1.4).
 
 Quyết định và lý do:
 
@@ -292,3 +308,35 @@ Giới hạn: nội dung kịch bản chưa được người bản ngữ ngoài
 ở đây là của **gợi ý**; thanh thật của lời khách chỉ biết sau khi gán nhãn ở 1.6.
 Tiếng ồn nền (`SPEC.md` §4.3) và bot tự nghe tiếng mình (R5) là điều kiện của buổi thu,
 không phải nội dung kịch bản, nên thuộc 1.4.
+
+### 6.4 Pha 1.2 — hướng dẫn gán nhãn và mẫu đồng ý
+
+`docs/annotation-guide.md`, phiên bản 1.0.
+
+Quyết định và lý do:
+
+- **Nhãn trung tâm `caller_act` hỏi "bot lẽ ra phải làm gì" ở cuối mỗi đoạn khách nói**:
+  `hold`, `take`, `backchannel` (đúng ba giá trị của `TurnDecision`), cộng `barge_in` và
+  `aside`. Nhãn khớp thẳng với chỗ chấm điểm, không cần bảng đổi.
+- **Nhãn gán sau khi nghe đoạn phía sau**, không gán theo từ. "Dạ." và "dạ" cùng chuỗi âm,
+  khác nhãn.
+- **Thuộc tính `cut_in`** giữ lại những lần người điều khiển nói chen khi khách chưa xong. Đó là
+  những lần cắt lời thật, không được sửa thành `take`.
+- **Pause, gap, overlap và bốn trạng thái `self/other/none/both` lấy nguyên từ Heldner &
+  Edlund (2010)**, không tự đặt. Ngưỡng 180 ms và 90 ms của bài báo là mặc định tham khảo; giá
+  trị thật đặt trong `configs/` ở pha 1.6.
+- **Thanh điệu không gán tay**, đọc từ lời chép bằng `final_syllable_tone`. Vì vậy số phải
+  chép bằng chữ. `dialect` là trường bắt buộc, vì giọng Nam nhập thanh hỏi và ngã.
+- **Chỉ thu metadata phép đo cần**: mã người nói, vùng giọng, xác nhận đủ 18 tuổi. Không thu
+  giới tính, vì F0 chuẩn hoá theo từng người chứ không theo giới.
+- **Mẫu đồng ý bám Luật 91/2025/QH15** (Điều 9, 10, 11, 14; đọc từ bản có chữ ký số), có ô
+  đồng ý riêng cho từng mục đích. Mẫu nói rõ "tổng đài" do người bấm phát, và ghi rằng dữ liệu
+  **không** dùng để huấn luyện; muốn dùng khác thì phải xin đồng ý lại. Điều đó khoá quy tắc ở
+  §6.1 bằng một văn bản người tham gia đã ký, không chỉ bằng một dòng trong tài liệu này.
+
+Ba giả định chờ chốt ở pha 1.6: gán kép **20%** số buổi; ngưỡng chấp nhận **κ ≥ 0,7** trên
+`caller_act`, báo riêng cho các đoạn chỉ gồm một tiếng đệm; công cụ gán nhãn là Praat hay ELAN.
+
+Giới hạn: mẫu đồng ý không phải tư vấn pháp lý. Luật để Chính phủ ban hành danh mục dữ liệu
+nhạy cảm; danh mục đó chưa kiểm chứng, nên mẫu xử lý giọng nói như dữ liệu nhạy cảm. Nguồn về
+việc nhập thanh hỏi–ngã ở giọng Nam mới đọc qua trích đoạn, chưa đọc toàn văn.
