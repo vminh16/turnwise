@@ -1,0 +1,39 @@
+# Mọi số trên thẻ là giả. NetCo là công ty giả định (SPEC §3).
+name: n2-a-bill-backchannel
+flow: N2
+title: Tra cước, chêm tiếng đệm khi bot đọc chi tiết số tiền
+summary: >
+  Bot đọc chi tiết cước dài; khách chêm "dạ, vâng" mà bot phải đọc tiếp (SPEC §10.2, R4).
+  Khách ngập ngừng khi chọn kỳ cước.
+persona: Khách thấy cước tháng này cao bất thường, bình tĩnh, muốn nghe cho rõ.
+props:
+  subscriber_id: "519 083 274"
+steps:
+  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    customer: Nói muốn kiểm tra cước.
+  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
+    customer: Đọc số trên thẻ.
+  - bot: "Dạ, quý khách muốn tra cước kỳ nào ạ?"
+    customer: >
+      Nói kỳ cước, nhưng đổi ý giữa câu: bắt đầu nói một tháng, dừng lại nghĩ vài giây, rồi nói
+      tháng khác.
+    behaviours: [hesitation]
+  - bot: >
+      Dạ, cước tháng tám của thuê bao năm một chín, không tám ba, hai bảy bốn gồm: cước gói Internet
+      cơ bản hai trăm bốn mươi chín nghìn đồng; phí thuê thiết bị phát sóng ba mươi nghìn đồng; phí
+      dịch vụ truyền hình bổ sung sáu mươi lăm nghìn đồng; tổng cộng ba trăm bốn mươi bốn nghìn
+      đồng, đã bao gồm thuế giá trị gia tăng.
+    reading: amount
+    customer: >
+      Nghe bot đọc, chêm "dạ", "vâng" hoặc "ừ" hai ba lần ở các chỗ ngắt tự nhiên. Không ngắt lời
+      bot.
+    behaviours: [backchannel]
+  - bot: "Dạ, quý khách có thắc mắc về khoản nào không ạ?"
+    customer: >
+      Hỏi về khoản truyền hình bổ sung bằng một câu dài: nói là mình không nhớ đã đăng ký, và hỏi
+      đăng ký từ bao giờ.
+    behaviours: [long_answer]
+  - bot: "Dạ, quý khách có muốn em gửi chi tiết cước qua tin nhắn không ạ?"
+    customer: Trả lời ngắn.
+    behaviours: [short_answer]
+    replies: ["Có ạ.", "Phải.", "Không cần.", "Gửi đi."]

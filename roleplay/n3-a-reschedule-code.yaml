@@ -1,0 +1,37 @@
+# Mọi mã trên thẻ là giả. NetCo là công ty giả định (SPEC §3).
+name: n3-a-reschedule-code
+flow: N3
+title: Đổi lịch hẹn, đọc mã lịch hẹn và chọn lại giờ
+summary: >
+  Khách đọc mã lịch hẹn có ngập ngừng, chọn ngày và buổi bằng câu ngắn, xác nhận trước khi bot
+  ghi nhận thay đổi (SPEC §4.2). Chêm tiếng đệm khi bot đọc lại lịch mới.
+persona: Khách bận việc đột xuất, cần dời lịch kỹ thuật viên, thái độ bình thường.
+props:
+  appointment_code: "L 47 20 93"
+steps:
+  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    customer: Nói muốn đổi lịch hẹn kỹ thuật viên.
+  - bot: "Dạ, quý khách vui lòng đọc giúp em mã lịch hẹn trong tin nhắn ạ."
+    customer: >
+      Đọc mã trên thẻ. Đọc chữ cái đầu và hai số, dừng lại vài giây như đang tìm lại tin nhắn, rồi
+      đọc tiếp.
+    behaviours: [hesitation]
+  - bot: "Dạ, quý khách muốn dời sang ngày nào ạ?"
+    customer: Nói ngày mới bằng một hai chữ.
+    behaviours: [short_answer]
+    replies: ["Thứ năm.", "Chủ nhật.", "Ngày mai.", "Tuần sau."]
+  - bot: "Dạ, quý khách chọn buổi sáng hay buổi chiều ạ?"
+    customer: Chọn một buổi.
+    behaviours: [short_answer]
+    replies: ["Sáng.", "Chiều.", "Buổi chiều.", "Sáng sớm."]
+  - bot: >
+      Em xin đọc lại lịch hẹn mới: mã lịch hẹn L bốn bảy, hai không, chín ba; kỹ thuật viên đến vào
+      thứ năm tuần này, buổi chiều, từ một giờ ba mươi đến bốn giờ ba mươi; địa chỉ không thay đổi so
+      với lịch hẹn cũ.
+    reading: address
+    customer: Chêm "dạ" hoặc "vâng" trong lúc bot đọc. Không ngắt lời.
+    behaviours: [backchannel]
+  - bot: "Dạ, quý khách xác nhận đổi sang lịch hẹn mới này chứ ạ?"
+    customer: Đồng ý bằng một câu ngắn.
+    behaviours: [short_answer]
+    replies: ["Vâng.", "Đồng ý.", "Được ạ.", "Chốt."]

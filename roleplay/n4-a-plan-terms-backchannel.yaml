@@ -1,0 +1,35 @@
+# Mọi số, tên gói và điều khoản là giả. NetCo là công ty giả định (SPEC §3).
+name: n4-a-plan-terms-backchannel
+flow: N4
+title: Đăng ký gói, nghe bot đọc điều khoản
+summary: >
+  Bot bắt buộc đọc điều khoản trước khi đăng ký; khách chêm tiếng đệm suốt đoạn đọc (R4), rồi xác
+  nhận rõ ràng (SPEC §4.2, im lặng không phải đồng ý).
+persona: Khách muốn nâng gói tốc độ cao hơn cho con học trực tuyến, kiên nhẫn.
+props:
+  subscriber_id: "248 630 915"
+  plan: "Gói Tốc Độ 300"
+steps:
+  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    customer: Nói muốn nâng gói Internet, kèm lý do, thành một câu dài.
+    behaviours: [long_answer]
+  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
+    customer: Đọc số trên thẻ, dừng giữa chừng một lần như đang dò số.
+    behaviours: [hesitation]
+  - bot: "Dạ, hiện có gói Tốc Độ ba trăm và gói Tốc Độ năm trăm. Quý khách chọn gói nào ạ?"
+    customer: Chọn gói trên thẻ bằng vài chữ.
+    behaviours: [short_answer]
+    replies: ["Ba trăm.", "Gói ba trăm.", "Cái rẻ hơn.", "Gói nhỏ."]
+  - bot: >
+      Dạ, em xin đọc điều khoản của gói Tốc Độ ba trăm: cước hằng tháng ba trăm hai mươi nghìn đồng;
+      cam kết sử dụng tối thiểu mười hai tháng; nếu huỷ trước thời hạn cam kết, quý khách thanh toán
+      phí huỷ bằng hai tháng cước; gói có hiệu lực từ ngày đầu tiên của kỳ cước tiếp theo, và gói cũ
+      giữ nguyên đến hết kỳ hiện tại.
+    reading: terms
+    customer: >
+      Nghe hết điều khoản. Chêm "dạ", "vâng" hoặc "ừ" hai ba lần ở các chỗ ngắt. Không ngắt lời bot.
+    behaviours: [backchannel]
+  - bot: "Dạ, quý khách xác nhận đăng ký gói Tốc Độ ba trăm với các điều khoản trên chứ ạ?"
+    customer: Xác nhận rõ ràng bằng một câu ngắn.
+    behaviours: [short_answer]
+    replies: ["Tôi đồng ý.", "Xác nhận.", "Đăng ký.", "Có ạ."]

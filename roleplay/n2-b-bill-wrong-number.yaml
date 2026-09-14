@@ -1,0 +1,34 @@
+# Mọi số trên thẻ là giả. NetCo là công ty giả định (SPEC §3).
+name: n2-b-bill-wrong-number
+flow: N2
+title: Tra cước, bot đọc lại sai số thuê bao
+summary: >
+  Bot cố ý đọc lại một số thuê bao khác với số trên thẻ; khách nói đè để sửa (R3). Sau đó khách
+  đòi gặp nhân viên giữa lúc bot đọc số tiền (N5 ở giữa luồng, SPEC §4.2).
+persona: Khách đang vội, đã gọi tổng đài một lần trước đó mà không xong.
+props:
+  subscriber_id: "662 190 537"
+steps:
+  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    customer: Nói muốn tra cước tháng này.
+  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
+    customer: Đọc số trên thẻ.
+  - bot: >
+      Em xin đọc lại số thuê bao: sáu sáu hai, một chín không, năm bảy ba. Em tra cước cho số này
+      nhé ạ.
+    reading: number
+    customer: >
+      Số bot đọc sai so với thẻ. Ngay khi nghe ra chỗ sai, nói đè lên để sửa, ví dụ theo kiểu
+      "không, không phải số đó", rồi đọc lại số đúng.
+    behaviours: [barge_in]
+  - bot: "Dạ, em xin lỗi. Quý khách xác nhận giúp em số cuối là năm ba bảy đúng không ạ?"
+    customer: Xác nhận ngắn.
+    behaviours: [short_answer]
+    replies: ["Đúng rồi.", "Phải.", "Chuẩn.", "Số cũ."]
+  - bot: >
+      Dạ, cước tháng này của quý khách là bốn trăm mười hai nghìn đồng, trong đó có một khoản phí
+      đóng muộn kỳ trước năm mươi nghìn đồng, hạn thanh toán là ngày hai mươi lăm, quý khách có thể
+      thanh toán qua ứng dụng NetCo hoặc tại các điểm giao dịch.
+    reading: amount
+    customer: Nghe tới khoản phí đóng muộn thì nói đè lên, đòi gặp nhân viên, bằng lời của mình.
+    behaviours: [agent_request]

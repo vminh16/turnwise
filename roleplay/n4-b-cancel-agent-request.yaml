@@ -1,0 +1,29 @@
+# Mọi số, tên gói và điều khoản là giả. NetCo là công ty giả định (SPEC §3).
+name: n4-b-cancel-agent-request
+flow: N4
+title: Huỷ gói, đòi gặp nhân viên giữa lúc bot đọc điều khoản
+summary: >
+  Khách muốn huỷ gói, bot đọc điều khoản phí huỷ; khách nói đè đòi gặp nhân viên (SPEC §10.4, N5
+  ưu tiên tuyệt đối).
+persona: Khách chuyển sang nhà mạng khác, bực vì nghe nói phải trả phí huỷ.
+props:
+  subscriber_id: "731 458 062"
+  plan: "Gói Gia Đình"
+steps:
+  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    customer: Nói ngắn là muốn huỷ gói.
+    behaviours: [short_answer]
+    replies: ["Tôi muốn hủy.", "Hủy gói.", "Cắt mạng.", "Huỷ gói cũ."]
+  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
+    customer: Đọc số trên thẻ.
+  - bot: "Dạ, quý khách cho em hỏi lý do huỷ gói để em ghi nhận ạ."
+    customer: Giải thích lý do thành một câu dài, có dừng lại giữa câu một lần để tìm từ.
+    behaviours: [long_answer, hesitation]
+  - bot: >
+      Dạ, em xin đọc điều khoản huỷ Gói Gia Đình: thuê bao đang trong thời gian cam kết mười hai
+      tháng, đã sử dụng bảy tháng; nếu huỷ trước hạn, quý khách thanh toán phí huỷ tương đương năm
+      tháng cước còn lại, tổng cộng một triệu hai trăm năm mươi nghìn đồng; thiết bị modem cần hoàn
+      trả trong vòng mười lăm ngày.
+    reading: terms
+    customer: Nghe tới phí huỷ thì nói đè lên, đòi gặp nhân viên, bằng lời của mình.
+    behaviours: [agent_request]

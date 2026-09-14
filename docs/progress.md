@@ -8,7 +8,7 @@ Quyết định kỹ thuật ghi thẳng ở đây thay vì tách thành ADR ri�
 một file là nắm được trạng thái. ADR dành cho quyết định kiến trúc lớn của các giai đoạn
 sau.
 
-Cập nhật lần cuối: 2026-09-12. Nhánh `feat/repo-setup`.
+Cập nhật lần cuối: 2026-09-14. Nhánh `feat/repo-setup`.
 
 ---
 
@@ -213,11 +213,82 @@ Hai quyết định còn treo, cả hai cỡ một ADR:
 
 ---
 
-## 6. Tiếp theo
+## 6. Giai đoạn 1 — Bộ dữ liệu vàng: **đang làm**
 
-**Giai đoạn 1 — Dữ liệu đóng vai.** Đường găng của cả dự án, tốn thời gian thật chứ không
-tốn code: kịch bản đóng vai cho năm luồng, thu hai kênh có đồng ý, gán nhãn, manifest kèm
-sha256, chia tập **theo người nói**, khoá holdout.
+Bằng chứng nền: `docs/research/reuse-audit.md` và `docs/research/data-and-method.md`.
 
-Bằng chứng nền cho các giai đoạn sau — mô hình nào kế thừa được, giấy phép ra sao, chỗ
-nào tài liệu repo đang sai — nằm ở `docs/research/reuse-audit.md`.
+### 6.1 Dữ liệu này dùng để làm gì
+
+**Giai đoạn 1 thu bộ dữ liệu vàng để kiểm thử**: người thật nói chuyện với bot, gán nhãn
+cẩn thận, dùng để đo. Nó **không** phải dữ liệu huấn luyện.
+
+**Fine-tune không bị loại trừ, nhưng phải có lý do chính đáng.** Sau khi có bộ dữ liệu và
+Giai đoạn 2 đã đo B1, B2, B3 trên đó, chỉ tinh chỉnh khi số đo chỉ ra một chỗ hỏng cụ thể
+mà cách rẻ hơn (chỉnh ngưỡng, kết hợp tín hiệu có sẵn) không vá được. Lý do đó ghi vào
+tài liệu này kèm con số. Không có lý do thì không tinh chỉnh. Nếu tinh chỉnh, dữ liệu
+huấn luyện phải lấy từ nguồn khác; bộ dữ liệu vàng không bao giờ được dùng để huấn luyện.
+
+**Giả định cần bạn xác nhận ở pha 1.5.** Holdout mở đúng một lần (`SPEC.md` §9.3), nên
+Giai đoạn 2 không thể chọn hướng trên chính holdout. Giả định: bộ dữ liệu vàng chia hai
+phần rời nhau về người nói — phần **dev** để Giai đoạn 2 quét B1, so sánh và chọn hướng;
+phần **holdout** khoá lại cho báo cáo cuối. Cả hai đều chỉ dùng để đo.
+
+### 6.2 Các pha
+
+| Pha | Sinh ra | Trạng thái |
+|---|---|---|
+| 1.1 Kịch bản đóng vai | `roleplay/*.yaml`, `evaluation/roleplay.py`, test độ phủ | **xong** |
+| 1.2 Hướng dẫn gán nhãn + đồng ý | `docs/annotation-guide.md` | chưa |
+| 1.3 Đọc được hai kênh | `FeatureFrame`/`WavFrameSource` nhận micro + tiếng bot | chưa |
+| 1.4 Công cụ thu + buổi thử | `scripts/collect_session.py`, độ lệch phát–thu đo được | chưa |
+| 1.5 Manifest, chia tập, khoá holdout | `scripts/validate_manifests.py`, chia theo người nói | chưa |
+| 1.6 Quy trình gán nhãn | nhãn tự động + nhãn người, đo độ đồng thuận | chưa |
+| 1.7 Thu thật, đóng giai đoạn | điều kiện xong của `roadmap.md` §6 | chưa |
+
+Việc đã biết trước cho 1.5: `scripts/check_holdout_isolation.py` chặn mọi file trong
+`scripts/` có chữ `holdout`, nên bước khoá holdout không thể là một script trong `scripts/`.
+Không giải bằng cách nới script chặn.
+
+### 6.3 Pha 1.1 — kịch bản đóng vai
+
+Chín kịch bản cho năm luồng, 46 lượt bot, cộng `roleplay/common.yaml` với các câu dùng
+chung khi buổi thu lệch kịch bản. `uv run pytest tests/unit/test_roleplay_scripts.py`: 26
+test.
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Mỗi luồng N1–N5 có kịch bản | đủ năm |
+| Mỗi hành vi có ở ít nhất hai luồng | ngập ngừng, tiếng đệm, câu dài: 4 luồng; ngắt lời: 3; gặp nhân viên: 3; câu ngắn: 5 |
+| Gặp nhân viên giữa lúc bot đang đọc, ngoài N5 | có ở N2 và N4 |
+| Gợi ý câu trả lời ngắn phủ sáu thanh ở âm tiết cuối | ngang 17, sắc 16, nặng 11, huyền 7, hỏi 6, ngã 3 |
+
+Đã thử phá: bỏ ba câu gợi ý kết thúc bằng thanh ngã thì kiểm tra độ phủ thanh báo thiếu.
+
+Quyết định và lý do:
+
+- **Lời bot viết đủ từng chữ, lời khách chỉ là chỉ dẫn.** Bot được đóng bằng câu thu sẵn,
+  người điều khiển bấm phát (Wizard-of-Oz), vì `dialog/` còn rỗng và giọng TTS tiếng Việt
+  chưa chốt. Khách mà đọc thuộc lòng thì mất đúng thứ cần đo: ngập ngừng, tiếng đệm, nói đè
+  tự nhiên. Ngoại lệ là câu trả lời ngắn, có danh sách gợi ý để phủ đủ thanh điệu.
+- **Số thuê bao, mã lịch hẹn, địa chỉ in trên thẻ giả.** Câu bot đọc lại thu sẵn nên phải
+  khớp với thứ khách đọc. Phải dò số trên thẻ cũng tự sinh ra ngập ngừng thật như phép thử
+  `SPEC.md` §10.1. Hai kịch bản cố ý cho bot đọc sai (số thuê bao, địa chỉ) để có ca ngắt
+  lời có nội dung.
+- **Bot xưng "em", gọi khách là "quý khách".** Câu thu sẵn không đổi được "anh/chị" theo
+  giọng người gọi.
+- **Tiếng đệm và ngắt lời bắt buộc rơi vào bước bot đang đọc đoạn dài** (`reading`: số,
+  số tiền, địa chỉ, điều khoản), kiểm lúc nạp. Không có đoạn đọc thì không có chỗ để chêm.
+- **Có `long_answer`**, vì phép thử §10.5 là so sánh câu ngắn với câu dài; thiếu câu dài
+  thì không có mốc so.
+- **Kịch bản ở `roleplay/`, schema ở `evaluation/roleplay.py`**, đặt song song với
+  `scenarios/` và `evaluation/scenario.py`. Không để trong `scenarios/` vì `-m scenario`
+  nạp mọi file ở đó. Schema ở `evaluation/` vì mục đích của dữ liệu là đo, và để công cụ thu
+  ở 1.4 chỉ là lớp CLI mỏng như `PROJECT-STRUCTURE.md` quy định cho `scripts/`.
+- **`final_syllable_tone()` đọc thanh từ chữ viết** bằng `unicodedata` của thư viện chuẩn.
+  Hiện nằm trong `evaluation/roleplay.py`; pha 1.6 cần đúng hàm này để gán thanh cho lời
+  khách, lúc đó mới quyết định chỗ đặt chung.
+
+Giới hạn: nội dung kịch bản chưa được người bản ngữ ngoài nhóm đọc thử. Độ phủ thanh điệu
+ở đây là của **gợi ý**; thanh thật của lời khách chỉ biết sau khi gán nhãn ở 1.6.
+Tiếng ồn nền (`SPEC.md` §4.3) và bot tự nghe tiếng mình (R5) là điều kiện của buổi thu,
+không phải nội dung kịch bản, nên thuộc 1.4.
