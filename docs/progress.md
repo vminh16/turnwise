@@ -240,7 +240,7 @@ phần **holdout** khoá lại cho báo cáo cuối. Cả hai đều chỉ dùng
 | 1.1 Kịch bản đóng vai | `roleplay/*.yaml`, `evaluation/roleplay.py`, test độ phủ | **xong** |
 | 1.2 Hướng dẫn gán nhãn + đồng ý | `docs/annotation-guide.md` | **xong**, ba giả định chờ chốt ở 1.6 |
 | 1.3 Đọc được hai kênh | `FeatureFrame`/`WavFrameSource` nhận micro + tiếng bot | chưa |
-| 1.4 Công cụ thu + buổi thử | `scripts/collect_session.py`, độ lệch phát–thu đo được | chưa |
+| 1.4 Công cụ thu + buổi thử | `scripts/collect_session.py`, độ lệch phát–thu đo được, ghi mốc bấm nút của người điều khiển | chưa |
 | 1.5 Manifest, chia tập, khoá holdout | `scripts/validate_manifests.py`, chia theo người nói | chưa |
 | 1.6 Quy trình gán nhãn | nhãn tự động + nhãn người, đo độ đồng thuận | chưa |
 | 1.7 Thu thật, đóng giai đoạn | điều kiện xong của `roadmap.md` §6 | chưa |
@@ -336,6 +336,21 @@ Quyết định và lý do:
 
 Ba giả định chờ chốt ở pha 1.6: gán kép **20%** số buổi; ngưỡng chấp nhận **κ ≥ 0,7** trên
 `caller_act`, báo riêng cho các đoạn chỉ gồm một tiếng đệm; công cụ gán nhãn là Praat hay ELAN.
+
+**Cách thu: Wizard-of-Oz, không cần bot thật.** Người thật đóng khách; lời bot là câu một
+người đọc sẵn một lần; người điều khiển bấm phát, không nói. Không dùng bot thật vì dữ liệu sẽ
+lệch về decider đã thu nó. Không dùng hai người đóng vai vì người gọi nói với người khác với nói
+với máy (`SPEC.md` §3), và "tổng đài viên" thật sẽ chêm tiếng đệm như bot không bao giờ làm.
+Ba giới hạn đã chấp nhận:
+
+- Người điều khiển đáp chậm hơn một hệ tốt. Nhãn ghi ý định của khách nên không sai; công cụ
+  thu ghi mốc bấm nút để biết độ trễ đó lớn cỡ nào.
+- Bản ghi chỉ có một diễn biến: đo được từng quyết định đúng hay sai, không đo được khách phản
+  ứng thế nào sau một quyết định sai. Phần đó đo trực tiếp ở Giai đoạn 4.
+- Giọng bot thu sẵn khác giọng TTS của Giai đoạn 4; khi chốt TTS, thu lại một phần nhỏ để đo
+  độ lệch.
+
+Người đọc giọng bot cũng ký đồng ý (phụ lục B của hướng dẫn).
 
 Giới hạn: mẫu đồng ý không phải tư vấn pháp lý. Luật để Chính phủ ban hành danh mục dữ liệu
 nhạy cảm; danh mục đó chưa kiểm chứng, nên mẫu xử lý giọng nói như dữ liệu nhạy cảm. Nguồn về

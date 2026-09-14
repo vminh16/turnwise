@@ -6,7 +6,7 @@ người tham gia phải ký trước khi thu.
 
 `SPEC.md` đúng hơn tài liệu này. Chỗ nào tài liệu này và `SPEC.md` mâu thuẫn, sửa tài liệu này.
 
-Phiên bản hướng dẫn: **1.0** (2026-09-14). Mỗi file nhãn ghi phiên bản hướng dẫn đã dùng để
+Phiên bản hướng dẫn: **1.1** (2026-09-14). Mỗi file nhãn ghi phiên bản hướng dẫn đã dùng để
 gán; đổi quy tắc là tăng phiên bản (§6.4).
 
 ---
@@ -30,7 +30,7 @@ không nói với bot.
 |---|---|---|
 | Track **micro** | micro người tham gia | tiếng khách; ở buổi thu bằng loa có lẫn tiếng bot vọng lại |
 | Track **bot** | chính tín hiệu đã phát | biết chính xác từng mẫu, không phải đoán |
-| Log phát | công cụ thu (pha 1.4) | mỗi câu bot: mã câu, mốc bắt đầu, mốc dừng, dừng vì hết câu hay vì người điều khiển cắt |
+| Log phát | công cụ thu (pha 1.4) | mỗi câu bot: mã câu, mốc người điều khiển bấm nút, mốc bắt đầu phát, mốc dừng, dừng vì hết câu hay vì người điều khiển cắt |
 | Metadata buổi | người điều khiển điền | §3 |
 | File nhãn | người gán | §4, §5 |
 
@@ -320,6 +320,37 @@ khác với hai mục đích trên, dự án phải xin đồng ý lại.
 Tôi xác nhận đã đủ 18 tuổi, đã đọc và hiểu phiếu này.
 
 Mã người nói (nhóm dự án điền): ________ Ngày: ________ Chữ ký: ________
+
+---
+
+## Phụ lục B — Đồng ý của người thu giọng bot
+
+Giọng bot cũng là giọng một người thật, phát lại trong mọi buổi thu và nằm trong mọi bản ghi.
+Cùng căn cứ và cùng lưu ý pháp lý như phụ lục A.
+
+---
+
+**PHIẾU ĐỒNG Ý THU GIỌNG TỔNG ĐÀI — DỰ ÁN TURNWISE**
+
+**Bạn sẽ làm gì.** Đọc toàn bộ lời tổng đài trong các kịch bản của dự án, một lần, theo đúng
+chữ viết. Bản thu được phát lại cho người tham gia trong các buổi đóng vai.
+
+**Dữ liệu được thu.** Bản ghi giọng đọc của bạn. Không gắn với tên bạn trong bộ dữ liệu.
+
+**Bên kiểm soát dữ liệu, lưu trữ, quyền của bạn.** Như phụ lục A. Nếu bạn rút lại đồng ý, các
+buổi thu **đã** diễn ra không bị ảnh hưởng (Luật 91/2025/QH15 Điều 10 khoản 4); các buổi sau
+dùng giọng khác.
+
+- [ ] **Mục đích 1 (bắt buộc):** Phát lại giọng tôi trong các buổi đóng vai, và giọng tôi có mặt
+  trong bản ghi của các buổi đó, dùng để **đo và đánh giá** hệ thống.
+- [ ] **Mục đích 2 (không bắt buộc):** Dùng trích đoạn giọng tôi trong báo cáo, bài trình bày
+  hoặc demo.
+
+Giọng tôi **không** được dùng để huấn luyện mô hình tổng hợp giọng nói.
+
+Tôi xác nhận đã đủ 18 tuổi, đã đọc và hiểu phiếu này.
+
+Ngày: ________ Chữ ký: ________
 
 ---
 
