@@ -1,43 +1,48 @@
-# Mọi số trên thẻ là giả. NetCo là công ty giả định (SPEC §3).
+# Mọi số trên hoá đơn là giả. NetCo là công ty giả định (SPEC §3).
 name: n1-a-outage-reading-number
 flow: N1
-title: Báo mất mạng, đọc số thuê bao từ thẻ
+title: Báo mất mạng, tìm số thuê bao trên hoá đơn
 summary: >
-  Khách báo mất mạng, phải dò số thuê bao trên thẻ nên ngập ngừng giữa dãy số (SPEC §10.1),
-  kể lỗi bằng câu dài, chọn khung giờ bằng câu ngắn, chêm tiếng đệm khi bot đọc lại lịch hẹn.
-persona: Khách mất mạng từ sáng, hơi bực, đang cầm thẻ thuê bao.
+  Khách báo mất mạng, phải tìm số thuê bao lẫn giữa các mã khác trên hoá đơn nên ngập ngừng
+  thật (SPEC §10.1), kể lỗi bằng câu dài, chọn buổi hẹn bằng câu ngắn, ghi giờ hẹn ra giấy trong
+  lúc bot đọc lại nên có tiếng đệm tự nhiên.
+persona: Mạng nhà mất từ sáng, con đang cần học trực tuyến. Hoá đơn tháng trước để trên bàn.
 props:
+  customer_code: "KH 5530 2178"
+  contract_no: "HĐ 0917 44"
   subscriber_id: "824 615 390"
 steps:
-  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+  - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     customer: Nói là mạng ở nhà bị mất, bằng lời của mình.
-  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
+  - bot: "Quý khách cho em xin số thuê bao in trên hoá đơn ạ."
     customer: >
-      Đọc số trên thẻ. Đọc được ba bốn số thì dừng hẳn lại vài giây như đang dò tiếp trên thẻ,
-      rồi đọc nốt. Không báo trước là mình sẽ dừng.
+      Số thuê bao nằm trên hoá đơn, lẫn với mã khách hàng và số hợp đồng. Cần tìm thì cứ nói với
+      bot như khi gọi tổng đài thật, rồi tìm và đọc theo cách quen của mình.
     behaviours: [hesitation]
-  - bot: "Em xin đọc lại số thuê bao: tám hai bốn, sáu một năm, ba chín không. Đúng không ạ?"
+  - bot: "Em xin đọc lại: tám hai bốn / sáu một năm / ba chín không. Đúng không ạ?"
     reading: number
-    customer: Xác nhận bằng một câu ngắn.
+    customer: Nếu khớp với hoá đơn thì xác nhận ngắn; nếu khác thì sửa lại.
     behaviours: [short_answer]
-    replies: ["Đúng rồi.", "Vâng.", "Được.", "Đúng đấy."]
-  - bot: "Dạ, quý khách mô tả giúp em tình trạng mạng hiện tại ạ."
+    replies: ["Dạ.", "Đúng rồi.", "Dạ đúng.", "Ừ, đúng đấy."]
+  - bot: "Quý khách mô tả giúp em tình trạng mạng, ví dụ đèn trên modem đang thế nào ạ?"
     customer: >
-      Kể lỗi thành một câu dài, ít nhất hai ý: mất từ lúc nào, đèn modem ra sao, đã thử khởi động
-      lại chưa.
+      Kể như kể với nhân viên thật: mất từ lúc nào, đèn modem ra sao, đã thử khởi động lại chưa.
+      Nói bao nhiêu tuỳ ý.
     behaviours: [long_answer]
-  - bot: "Dạ, kỹ thuật viên có thể qua vào sáng mai hoặc chiều mai. Quý khách chọn khung giờ nào ạ?"
-    customer: Chọn một khung giờ bằng một hai chữ.
+  - bot: "Kỹ thuật viên có thể qua vào sáng mai hoặc chiều mai. Quý khách chọn buổi nào ạ?"
+    customer: Chọn một buổi.
     behaviours: [short_answer]
-    replies: ["Sáng.", "Chiều.", "Sáng mai.", "Chiều nay không được, chiều mai."]
+    replies: ["Sáng mai.", "Chiều.", "Sáng.", "Buổi nào cũng được."]
   - bot: >
-      Em xin xác nhận lịch hẹn: kỹ thuật viên sẽ đến vào sáng mai, từ tám giờ đến mười một giờ,
-      tại địa chỉ đăng ký của thuê bao tám hai bốn, sáu một năm, ba chín không. Kỹ thuật viên sẽ
-      gọi điện cho quý khách trước khi đến khoảng ba mươi phút.
-    reading: address
-    customer: Trong lúc bot đọc, chêm "dạ" hoặc "vâng" một hai lần. Không ngắt lời.
+      Em xác nhận lịch hẹn: / kỹ thuật viên đến vào sáng mai, / từ tám giờ đến mười một giờ, / tại
+      địa chỉ đăng ký của thuê bao. / Trước khi đến khoảng ba mươi phút, / kỹ thuật viên sẽ gọi
+      điện cho quý khách.
+    reading: schedule
+    customer: >
+      Ghi giờ hẹn ra giấy trong lúc bot đọc. Nghe và đáp lời như khi nghe điện thoại bình thường;
+      không ngắt lời.
     behaviours: [backchannel]
   - bot: "Quý khách còn cần hỗ trợ gì thêm không ạ?"
     customer: Trả lời là không cần gì nữa.
     behaviours: [short_answer]
-    replies: ["Không.", "Thôi.", "Không cần nữa.", "Hết rồi."]
+    replies: ["Không.", "Không cần nữa.", "Hết rồi.", "Thôi, cảm ơn."]

@@ -1,32 +1,31 @@
 # Mọi địa chỉ và mã là giả. NetCo là công ty giả định (SPEC §3).
 name: n3-b-reschedule-wrong-address
 flow: N3
-title: Đổi lịch hẹn, bot đọc sai địa chỉ
+title: Đổi lịch hẹn, bot đọc địa chỉ cũ
 summary: >
-  Phép thử SPEC §10.3: khách nói đè "không, không phải địa chỉ đó" khi bot đọc địa chỉ. Khách giải
-  thích địa chỉ đúng bằng câu dài.
-persona: Khách vừa chuyển nhà, lịch hẹn cũ còn ghi địa chỉ cũ.
+  Phép thử SPEC §10.3: khách nói đè để sửa khi bot đọc địa chỉ cũ. Khách đọc địa chỉ mới và giải
+  thích bằng câu dài.
+persona: Vừa chuyển nhà tuần trước; lịch hẹn cũ vẫn ghi địa chỉ cũ.
 props:
   appointment_code: "L 81 36 05"
   old_address: "số 12 ngõ 45 đường Hoa Sữa"
   new_address: "số 8 ngõ 17 đường Hoa Mai"
 steps:
-  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+  - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     customer: Nói muốn kiểm tra lại lịch hẹn kỹ thuật viên.
-  - bot: "Dạ, quý khách vui lòng đọc giúp em mã lịch hẹn ạ."
-    customer: Đọc mã trên thẻ, liền một mạch.
+  - bot: "Quý khách cho em xin mã lịch hẹn ạ."
+    customer: Đọc mã trên thẻ.
   - bot: >
-      Dạ, lịch hẹn của quý khách: kỹ thuật viên đến vào sáng thứ sáu, từ tám giờ đến mười giờ, tại số
-      mười hai, ngõ bốn mươi lăm, đường Hoa Sữa. Kỹ thuật viên sẽ mang theo modem mới để thay thế.
+      Lịch hẹn của quý khách: / kỹ thuật viên đến vào sáng thứ sáu, / từ tám giờ đến mười giờ, / tại
+      số mười hai, ngõ bốn mươi lăm, đường Hoa Sữa. / Kỹ thuật viên sẽ mang theo modem mới để thay.
     reading: address
     customer: >
-      Địa chỉ bot đọc là địa chỉ cũ. Ngay khi nghe ra, nói đè lên để sửa, ví dụ theo kiểu "không,
-      không phải địa chỉ đó".
+      Địa chỉ bot đọc là nhà cũ. Sửa lại ngay khi nhận ra, không cần chờ bot đọc xong.
     behaviours: [barge_in]
-  - bot: "Dạ, em xin lỗi. Quý khách vui lòng cho em địa chỉ mới ạ."
-    customer: Đọc địa chỉ mới trên thẻ và giải thích thêm là vừa chuyển nhà, thành một câu dài.
+  - bot: "Dạ, em xin lỗi. Quý khách cho em xin địa chỉ mới ạ."
+    customer: Đọc địa chỉ mới trên thẻ và nói thêm là vừa chuyển nhà, bằng lời của mình.
     behaviours: [long_answer]
-  - bot: "Dạ, quý khách vẫn giữ khung giờ sáng thứ sáu chứ ạ?"
+  - bot: "Quý khách vẫn giữ khung giờ sáng thứ sáu chứ ạ?"
     customer: Trả lời ngắn.
     behaviours: [short_answer]
-    replies: ["Giữ nguyên.", "Vẫn thế.", "Có.", "Đổi hết."]
+    replies: ["Dạ.", "Giữ lịch cũ.", "Vẫn giữ.", "Đổi sang chiều."]

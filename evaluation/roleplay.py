@@ -10,6 +10,10 @@ sẵn, chỉ có chỉ dẫn hành vi — người đọc thuộc lòng thì m�
 tiếng đệm, nói đè tự nhiên. Ngoại lệ duy nhất là câu trả lời ngắn, có danh sách gợi ý để
 phủ đủ sáu thanh ở âm tiết cuối.
 
+Trong lời bot, `/` đánh một chỗ ngắt hơi ngắn cho người thu giọng bot. Tiếng đệm tự nhiên
+rơi vào những chỗ ngắt như vậy; một đoạn đọc liền một hơi buộc khách hoặc im, hoặc chêm
+vào giữa từ, và cả hai đều không giống cuộc gọi thật.
+
 Module ở `evaluation/` vì mục đích của dữ liệu là đánh giá, và để công cụ thu ở pha 1.4
 chỉ còn là một lớp CLI mỏng trong `scripts/`.
 """
@@ -46,11 +50,11 @@ OVERLAP: frozenset[str] = frozenset({"backchannel", "barge_in"})
 # Dấu thanh sau khi tách NFD. Dấu mũ, dấu trăng và dấu móc là dấu nguyên âm, không phải
 # dấu thanh, nên cố ý không có ở đây.
 _TONE_MARKS = {
-    "̀": Tone.FALLING,
-    "́": Tone.RISING,
-    "̉": Tone.DIPPING,
-    "̃": Tone.BROKEN,
-    "̣": Tone.DROP,
+    "\u0300": Tone.FALLING,
+    "\u0301": Tone.RISING,
+    "\u0309": Tone.DIPPING,
+    "\u0303": Tone.BROKEN,
+    "\u0323": Tone.DROP,
 }
 
 
@@ -78,7 +82,7 @@ class Step(_Node):
     """Một lượt bot nói, và điều người đóng vai khách được dặn làm quanh lượt đó."""
 
     bot: str
-    reading: Literal["number", "amount", "address", "terms"] | None = None
+    reading: Literal["number", "amount", "address", "schedule", "terms"] | None = None
     customer: str
     behaviours: tuple[Behaviour, ...] = ()
     replies: tuple[str, ...] = ()
@@ -87,6 +91,11 @@ class Step(_Node):
     def _behaviours_fit_the_step(self) -> Step:
         if len(set(self.behaviours)) != len(self.behaviours):
             raise ValueError(f"hành vi lặp lại trong một bước: {self.behaviours}")
+        if self.reading is not None and "/" not in self.bot:
+            raise ValueError(
+                "đoạn bot đọc cần dấu `/` đánh chỗ ngắt hơi cho người thu giọng bot; "
+                "không có chỗ ngắt thì khách không có chỗ tự nhiên để chêm tiếng đệm"
+            )
         overlap = OVERLAP.intersection(self.behaviours)
         if overlap and self.reading is None:
             raise ValueError(

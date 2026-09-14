@@ -1,39 +1,35 @@
-# Mọi số trên thẻ là giả. NetCo là công ty giả định (SPEC §3).
+# Mọi số trên hoá đơn là giả. NetCo là công ty giả định (SPEC §3).
 name: n2-a-bill-backchannel
 flow: N2
-title: Tra cước, chêm tiếng đệm khi bot đọc chi tiết số tiền
+title: Tra cước, ghi lại từng khoản trong lúc bot đọc
 summary: >
-  Bot đọc chi tiết cước dài; khách chêm "dạ, vâng" mà bot phải đọc tiếp (SPEC §10.2, R4).
-  Khách ngập ngừng khi chọn kỳ cước.
-persona: Khách thấy cước tháng này cao bất thường, bình tĩnh, muốn nghe cho rõ.
+  Bot đọc chi tiết cước theo từng khoản có chỗ ngắt; khách ghi ra giấy nên đáp lời tự nhiên mà bot
+  phải đọc tiếp (SPEC §10.2, R4). Khách ngập ngừng khi chọn tháng cần tra.
+persona: Cước tháng này cao hơn mọi tháng. Muốn nghe rõ từng khoản để so với hoá đơn.
 props:
   subscriber_id: "519 083 274"
 steps:
-  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+  - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     customer: Nói muốn kiểm tra cước.
-  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
-    customer: Đọc số trên thẻ.
-  - bot: "Dạ, quý khách muốn tra cước kỳ nào ạ?"
-    customer: >
-      Nói kỳ cước, nhưng đổi ý giữa câu: bắt đầu nói một tháng, dừng lại nghĩ vài giây, rồi nói
-      tháng khác.
+  - bot: "Quý khách cho em xin số thuê bao ạ."
+    customer: Đọc số trên hoá đơn.
+  - bot: "Quý khách muốn tra cước tháng nào ạ?"
+    customer: Trả lời tháng muốn tra. Chưa chắc thì cứ vừa nghĩ vừa nói; đổi ý cũng được.
     behaviours: [hesitation]
   - bot: >
-      Dạ, cước tháng tám của thuê bao năm một chín, không tám ba, hai bảy bốn gồm: cước gói Internet
-      cơ bản hai trăm bốn mươi chín nghìn đồng; phí thuê thiết bị phát sóng ba mươi nghìn đồng; phí
-      dịch vụ truyền hình bổ sung sáu mươi lăm nghìn đồng; tổng cộng ba trăm bốn mươi bốn nghìn
-      đồng, đã bao gồm thuế giá trị gia tăng.
+      Cước tháng tám của quý khách gồm: / cước gói Internet cơ bản hai trăm bốn mươi chín nghìn
+      đồng; / phí thuê thiết bị phát sóng ba mươi nghìn đồng; / phí truyền hình bổ sung sáu mươi lăm
+      nghìn đồng. / Tổng cộng ba trăm bốn mươi bốn nghìn đồng, / đã bao gồm VAT.
     reading: amount
     customer: >
-      Nghe bot đọc, chêm "dạ", "vâng" hoặc "ừ" hai ba lần ở các chỗ ngắt tự nhiên. Không ngắt lời
-      bot.
+      Ghi từng khoản ra giấy trong lúc bot đọc. Nghe và đáp lời như khi nghe điện thoại bình
+      thường; không ngắt lời.
     behaviours: [backchannel]
-  - bot: "Dạ, quý khách có thắc mắc về khoản nào không ạ?"
+  - bot: "Quý khách có thắc mắc về khoản nào không ạ?"
     customer: >
-      Hỏi về khoản truyền hình bổ sung bằng một câu dài: nói là mình không nhớ đã đăng ký, và hỏi
-      đăng ký từ bao giờ.
+      Bạn không nhớ đã đăng ký truyền hình bổ sung. Hỏi bot về khoản đó bằng lời của mình.
     behaviours: [long_answer]
-  - bot: "Dạ, quý khách có muốn em gửi chi tiết cước qua tin nhắn không ạ?"
+  - bot: "Quý khách có muốn em gửi chi tiết cước qua tin nhắn không ạ?"
     customer: Trả lời ngắn.
     behaviours: [short_answer]
-    replies: ["Có ạ.", "Phải.", "Không cần.", "Gửi đi."]
+    replies: ["Dạ có.", "Có ạ.", "Phải.", "Khỏi."]

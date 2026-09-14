@@ -1,11 +1,12 @@
 # Câu bot dùng chung, người điều khiển bấm phát khi buổi thu lệch khỏi kịch bản.
 # Không gắn với luồng nào. Thu sẵn cùng giọng với lời bot trong các file nX-*.yaml.
 prompts:
-  greeting: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+  greeting: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
   acknowledge: "Dạ vâng."
-  listening: "Dạ, em đang nghe ạ."
-  repeat: "Dạ, quý khách vui lòng nhắc lại giúp em ạ."
+  listening: "Em đang nghe ạ."
+  take_your_time: "Dạ, quý khách cứ từ từ, em chờ ạ."
+  repeat: "Xin lỗi, quý khách nhắc lại giúp em được không ạ?"
   wait: "Quý khách vui lòng chờ em một chút ạ."
   sorry_stop: "Dạ, em xin lỗi."
-  transfer: "Dạ, em chuyển máy cho nhân viên hỗ trợ ngay. Quý khách không cần nhắc lại thông tin đã cung cấp ạ."
+  transfer: "Em chuyển máy cho nhân viên hỗ trợ ngay. Quý khách không cần nhắc lại thông tin đã cung cấp ạ."
   goodbye: "Cảm ơn quý khách đã gọi tổng đài NetCo. Chúc quý khách một ngày tốt lành."

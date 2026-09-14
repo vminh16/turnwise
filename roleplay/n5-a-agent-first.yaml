@@ -3,17 +3,17 @@ name: n5-a-agent-first
 flow: N5
 title: Gặp nhân viên, nói đè ngay từ lời chào
 summary: >
-  Khách đòi gặp người thật khi bot còn đang chào (N5 ở điểm sớm nhất). Lời chào dài để có chỗ nói
-  đè; nếu bot hỏi lại, khách trả lời ngắn.
-persona: Khách đã quen gọi tổng đài, không muốn nói chuyện với máy.
+  Khách đòi gặp người thật khi bot còn đang đọc danh sách dịch vụ (N5 ở điểm sớm nhất). Nếu bot hỏi
+  lại để chuyển đúng bộ phận, khách trả lời ngắn.
+persona: Chỉ muốn nói chuyện với người thật, không muốn nghe máy đọc danh sách.
 steps:
   - bot: >
-      Dạ, tổng đài NetCo xin nghe. Để được hỗ trợ nhanh hơn, quý khách vui lòng cho biết nhu cầu:
-      báo sự cố mạng, tra cứu cước, đổi lịch hẹn kỹ thuật viên, hoặc đăng ký và huỷ gói cước.
+      Tổng đài NetCo xin nghe. / Để được hỗ trợ nhanh hơn, quý khách vui lòng cho biết nhu cầu: /
+      báo sự cố mạng, / tra cứu cước, / đổi lịch hẹn kỹ thuật viên, / hoặc đăng ký và huỷ gói cước.
     reading: terms
-    customer: Không đợi bot đọc hết, nói đè đòi gặp nhân viên, bằng lời của mình.
+    customer: Bạn chỉ muốn gặp người thật. Nói ra lúc nào tuỳ ý, không cần chờ bot đọc hết.
     behaviours: [agent_request]
-  - bot: "Dạ, quý khách cho em hỏi quý khách cần hỗ trợ về vấn đề gì để em chuyển đúng bộ phận ạ?"
+  - bot: "Quý khách cần hỗ trợ về vấn đề gì để em chuyển đúng bộ phận ạ?"
     customer: Trả lời ngắn một chủ đề bất kỳ.
     behaviours: [short_answer]
-    replies: ["Cước.", "Mạng.", "Lịch hẹn.", "Chuyện gói cước."]
+    replies: ["Cước.", "Mạng.", "Lịch hẹn.", "Khiếu nại."]

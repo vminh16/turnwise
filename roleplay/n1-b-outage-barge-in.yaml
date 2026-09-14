@@ -1,37 +1,37 @@
-# Mọi số trên thẻ là giả. NetCo là công ty giả định (SPEC §3).
+# Mọi số trên hoá đơn là giả. NetCo là công ty giả định (SPEC §3).
 name: n1-b-outage-barge-in
 flow: N1
-title: Báo mất mạng, ngắt lời khi bot đọc hướng dẫn đã làm rồi
+title: Báo mất mạng, ngắt lời khi bot hướng dẫn lại việc đã làm
 summary: >
-  Bot đọc hướng dẫn khởi động lại modem mà khách đã làm; khách nói đè có nội dung để bot dừng
-  (SPEC §4.3, R3). Có ngập ngừng khi nhớ giờ mất mạng.
-persona: Khách đã tự khởi động lại modem hai lần, mất kiên nhẫn với hướng dẫn chung chung.
+  Bot đọc hướng dẫn khởi động lại modem mà khách đã tự làm hai lần; khách nói đè có nội dung để
+  bot dừng (SPEC §4.3, R3). Có ngập ngừng khi nhớ giờ mất mạng.
+persona: >
+  Đã tự rút điện modem hai lần từ tối qua mà không được. Đây là lần thứ hai gọi tổng đài về
+  chuyện này.
 props:
   subscriber_id: "307 942 186"
 steps:
-  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+  - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     customer: Báo mạng chập chờn rồi mất hẳn.
-  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
-    customer: Đọc số trên thẻ, liền một mạch.
-  - bot: "Dạ, quý khách cho em hỏi mạng bắt đầu mất từ khoảng mấy giờ ạ?"
-    customer: >
-      Nhớ lại giờ mất mạng. Mở đầu câu, rồi dừng lại nghĩ vài giây ("từ khoảng... "), rồi nói
-      tiếp.
+  - bot: "Quý khách cho em xin số thuê bao ạ."
+    customer: Đọc số trên hoá đơn.
+  - bot: "Mạng bắt đầu mất từ khoảng mấy giờ ạ?"
+    customer: Nhớ lại rồi trả lời. Không chắc thì cứ vừa nghĩ vừa nói.
     behaviours: [hesitation]
   - bot: >
-      Dạ, trước tiên quý khách vui lòng thử các bước sau: rút dây nguồn của modem ra, chờ khoảng
-      ba mươi giây, cắm lại dây nguồn, sau đó chờ thêm hai phút cho đến khi đèn Internet trên
-      modem sáng xanh ổn định, rồi kiểm tra lại kết nối trên điện thoại hoặc máy tính.
+      Trước tiên, quý khách vui lòng thử các bước sau: / rút dây nguồn của modem ra, / chờ khoảng
+      ba mươi giây, / cắm lại dây nguồn, / sau đó chờ thêm hai phút đến khi đèn Internet sáng xanh
+      ổn định, / rồi kiểm tra lại kết nối.
     reading: terms
     customer: >
-      Khi bot vừa đọc được một đoạn, nói đè lên để báo là đã làm rồi mà không được. Nói bằng lời
-      của mình, có nội dung rõ ràng, không phải chỉ "dạ".
+      Bạn đã làm đúng các bước này hai lần rồi. Khi nhận ra bot đang hướng dẫn lại, nói cho bot
+      biết. Muốn nói lúc nào thì nói, không cần chờ bot đọc xong.
     behaviours: [barge_in]
-  - bot: "Dạ, em xin lỗi. Vậy em đặt lịch kỹ thuật viên qua kiểm tra. Quý khách muốn hẹn ngày nào ạ?"
-    customer: Chọn ngày bằng một hai chữ.
+  - bot: "Dạ, em xin lỗi. Em đặt lịch kỹ thuật viên qua kiểm tra. Quý khách muốn hẹn ngày nào ạ?"
+    customer: Chọn ngày.
     behaviours: [short_answer]
-    replies: ["Thứ hai.", "Mai.", "Hôm nay.", "Thứ bảy."]
-  - bot: "Dạ, quý khách xác nhận đặt lịch hẹn này chứ ạ?"
+    replies: ["Hôm nay.", "Mai.", "Thứ bảy.", "Càng sớm càng tốt."]
+  - bot: "Quý khách xác nhận đặt lịch hẹn này chứ ạ?"
     customer: Đồng ý bằng một câu ngắn.
     behaviours: [short_answer]
-    replies: ["Vâng ạ.", "Có.", "Đồng ý.", "Được."]
+    replies: ["Dạ.", "Có.", "Đồng ý.", "Được."]

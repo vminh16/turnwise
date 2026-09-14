@@ -5,25 +5,27 @@ title: Huỷ gói, đòi gặp nhân viên giữa lúc bot đọc điều khoả
 summary: >
   Khách muốn huỷ gói, bot đọc điều khoản phí huỷ; khách nói đè đòi gặp nhân viên (SPEC §10.4, N5
   ưu tiên tuyệt đối).
-persona: Khách chuyển sang nhà mạng khác, bực vì nghe nói phải trả phí huỷ.
+persona: Chuyển sang nhà mạng khác vì chuyển nhà. Không nghĩ là phải trả phí huỷ.
 props:
   subscriber_id: "731 458 062"
   plan: "Gói Gia Đình"
 steps:
-  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+  - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     customer: Nói ngắn là muốn huỷ gói.
     behaviours: [short_answer]
-    replies: ["Tôi muốn hủy.", "Hủy gói.", "Cắt mạng.", "Huỷ gói cũ."]
-  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
-    customer: Đọc số trên thẻ.
-  - bot: "Dạ, quý khách cho em hỏi lý do huỷ gói để em ghi nhận ạ."
-    customer: Giải thích lý do thành một câu dài, có dừng lại giữa câu một lần để tìm từ.
+    replies: ["Tôi muốn huỷ.", "Huỷ gói.", "Huỷ mạng.", "Cắt hợp đồng."]
+  - bot: "Quý khách cho em xin số thuê bao ạ."
+    customer: Đọc số trên hoá đơn.
+  - bot: "Quý khách cho em hỏi lý do huỷ gói để em ghi nhận ạ."
+    customer: Giải thích lý do bằng lời của mình; cứ vừa nghĩ vừa nói.
     behaviours: [long_answer, hesitation]
   - bot: >
-      Dạ, em xin đọc điều khoản huỷ Gói Gia Đình: thuê bao đang trong thời gian cam kết mười hai
-      tháng, đã sử dụng bảy tháng; nếu huỷ trước hạn, quý khách thanh toán phí huỷ tương đương năm
-      tháng cước còn lại, tổng cộng một triệu hai trăm năm mươi nghìn đồng; thiết bị modem cần hoàn
-      trả trong vòng mười lăm ngày.
+      Em xin đọc điều khoản huỷ Gói Gia Đình. / Thuê bao đang trong thời gian cam kết mười hai tháng,
+      / đã sử dụng bảy tháng. / Nếu huỷ trước hạn, / quý khách thanh toán phí huỷ bằng năm tháng cước
+      còn lại, / tổng cộng một triệu hai trăm năm mươi nghìn đồng. / Modem cần hoàn trả trong vòng
+      mười lăm ngày.
     reading: terms
-    customer: Nghe tới phí huỷ thì nói đè lên, đòi gặp nhân viên, bằng lời của mình.
+    customer: >
+      Bạn không đồng ý trả phí huỷ. Nghe tới phí huỷ thì bảo bot cho gặp nhân viên. Muốn nói lúc
+      nào thì nói.
     behaviours: [agent_request]

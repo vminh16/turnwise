@@ -3,33 +3,35 @@ name: n4-a-plan-terms-backchannel
 flow: N4
 title: Đăng ký gói, nghe bot đọc điều khoản
 summary: >
-  Bot bắt buộc đọc điều khoản trước khi đăng ký; khách chêm tiếng đệm suốt đoạn đọc (R4), rồi xác
-  nhận rõ ràng (SPEC §4.2, im lặng không phải đồng ý).
-persona: Khách muốn nâng gói tốc độ cao hơn cho con học trực tuyến, kiên nhẫn.
+  Bot bắt buộc đọc điều khoản trước khi đăng ký, có chỗ ngắt sau từng điều; khách đáp lời trong lúc
+  nghe (R4), rồi xác nhận rõ ràng (SPEC §4.2, im lặng không phải đồng ý).
+persona: Muốn nâng gói nhanh hơn vì con học trực tuyến và cả nhà dùng chung mạng.
 props:
+  customer_code: "KH 7702 9314"
   subscriber_id: "248 630 915"
   plan: "Gói Tốc Độ 300"
 steps:
-  - bot: "Dạ, tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
-    customer: Nói muốn nâng gói Internet, kèm lý do, thành một câu dài.
+  - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    customer: Nói muốn nâng gói Internet và lý do, bằng lời của mình.
     behaviours: [long_answer]
-  - bot: "Dạ, quý khách vui lòng đọc giúp em số thuê bao ạ."
-    customer: Đọc số trên thẻ, dừng giữa chừng một lần như đang dò số.
+  - bot: "Quý khách cho em xin số thuê bao in trên hoá đơn ạ."
+    customer: >
+      Số thuê bao nằm trên hoá đơn cùng mã khách hàng. Tìm và đọc; cần thì bảo bot chờ.
     behaviours: [hesitation]
-  - bot: "Dạ, hiện có gói Tốc Độ ba trăm và gói Tốc Độ năm trăm. Quý khách chọn gói nào ạ?"
-    customer: Chọn gói trên thẻ bằng vài chữ.
+  - bot: "Hiện có gói Tốc Độ ba trăm và gói Tốc Độ năm trăm. Quý khách chọn gói nào ạ?"
+    customer: Chọn gói ghi trên thẻ.
     behaviours: [short_answer]
-    replies: ["Ba trăm.", "Gói ba trăm.", "Cái rẻ hơn.", "Gói nhỏ."]
+    replies: ["Ba trăm.", "Gói ba trăm.", "Gói nhỏ.", "Cái rẻ hơn."]
   - bot: >
-      Dạ, em xin đọc điều khoản của gói Tốc Độ ba trăm: cước hằng tháng ba trăm hai mươi nghìn đồng;
-      cam kết sử dụng tối thiểu mười hai tháng; nếu huỷ trước thời hạn cam kết, quý khách thanh toán
-      phí huỷ bằng hai tháng cước; gói có hiệu lực từ ngày đầu tiên của kỳ cước tiếp theo, và gói cũ
-      giữ nguyên đến hết kỳ hiện tại.
+      Em xin đọc điều khoản gói Tốc Độ ba trăm. / Cước hằng tháng ba trăm hai mươi nghìn đồng. / Cam
+      kết sử dụng tối thiểu mười hai tháng. / Nếu huỷ trước thời hạn cam kết, / quý khách thanh toán
+      phí huỷ bằng hai tháng cước. / Gói có hiệu lực từ kỳ cước tiếp theo, / gói hiện tại giữ nguyên
+      đến hết kỳ này.
     reading: terms
     customer: >
-      Nghe hết điều khoản. Chêm "dạ", "vâng" hoặc "ừ" hai ba lần ở các chỗ ngắt. Không ngắt lời bot.
+      Nghe điều khoản như khi nghe tổng đài thật và đáp lời theo thói quen của mình; không ngắt lời.
     behaviours: [backchannel]
-  - bot: "Dạ, quý khách xác nhận đăng ký gói Tốc Độ ba trăm với các điều khoản trên chứ ạ?"
+  - bot: "Quý khách xác nhận đăng ký gói Tốc Độ ba trăm với các điều khoản trên chứ ạ?"
     customer: Xác nhận rõ ràng bằng một câu ngắn.
     behaviours: [short_answer]
-    replies: ["Tôi đồng ý.", "Xác nhận.", "Đăng ký.", "Có ạ."]
+    replies: ["Dạ đồng ý.", "Xác nhận.", "Đăng ký.", "Ừ, được."]

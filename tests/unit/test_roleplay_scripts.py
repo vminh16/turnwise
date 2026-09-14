@@ -29,7 +29,7 @@ title: fixture
 summary: fixture
 persona: fixture
 steps:
-  - bot: "Dạ, cước tháng này là ba trăm nghìn đồng."
+  - bot: "Cước tháng này gồm: / cước gói ba trăm nghìn đồng."
     reading: amount
     customer: Chêm "dạ".
     behaviours: [backchannel]
@@ -121,6 +121,21 @@ def test_short_answer_suggestions_cover_all_six_tones() -> None:
     assert not missing, f"thiếu thanh: {missing}; đang có {dict(tones)}"
 
 
+def test_da_is_elicited_as_a_complete_answer_not_only_as_a_backchannel() -> None:
+    """SPEC §2: "dạ" chêm vào là tiếng đệm, "Dạ." đứng một mình sau câu hỏi là một lượt trọn.
+
+    Cùng chuỗi âm, hai chức năng ngược nhau — đó là ca khó nhất của R4. Bộ dữ liệu chỉ có
+    "dạ" kiểu tiếng đệm thì không đo được bộ phân biệt nào cả.
+    """
+    flows = {
+        script.flow
+        for script in load_all(ROLEPLAY_DIR)
+        for step in script.steps
+        if "Dạ." in step.replies
+    }
+    assert len(flows) >= 2, f'"Dạ." trọn lượt chỉ có ở {flows}'
+
+
 def test_common_prompts_cover_what_the_operator_needs_off_script() -> None:
     prompts = load_common(ROLEPLAY_DIR).prompts
     assert {"repeat", "sorry_stop", "transfer", "goodbye"} <= set(prompts)
@@ -135,8 +150,16 @@ def test_the_fixture_itself_is_valid(tmp_path: Path) -> None:
 
 def test_overlap_without_a_bot_reading_is_refused(tmp_path: Path) -> None:
     """Tiếng đệm cần bot đang nói một đoạn dài; không có đoạn đọc thì không có chỗ chêm."""
+    body = VALID.replace("    reading: amount\n", "")
     with pytest.raises(ValidationError, match="reading"):
-        load(write(tmp_path, VALID.replace("    reading: amount\n", "")))
+        load(write(tmp_path, body))
+
+
+def test_a_bot_reading_without_pause_marks_is_refused(tmp_path: Path) -> None:
+    """Đoạn đọc liền một hơi không để chỗ tự nhiên nào cho tiếng đệm."""
+    body = VALID.replace("gồm: / cước", "gồm cước")
+    with pytest.raises(ValidationError, match="ngắt"):
+        load(write(tmp_path, body))
 
 
 def test_a_short_answer_without_suggested_replies_is_refused(tmp_path: Path) -> None:
