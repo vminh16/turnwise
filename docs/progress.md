@@ -401,9 +401,16 @@ phát khớp từng mẫu mà không cần đo độ lệch bằng tiếng tách
 - Bot **không** dừng khi khách nói chen, và **không** tự cắt lời. Nhãn vẫn đúng vì ghi ý định của
   khách; mất các ca "bot cắt lời thật".
 
-Bằng chứng: 24 test API (phần lớn là test từ chối); chạy server thật và gọi qua HTTP; file WAV do bộ
-mã hoá JS tạo ra được server nhận và `WavFrameSource` đọc đúng kênh, đúng cờ `bot_speaking`.
+Bằng chứng (2026-09-15): 28 test API; bài e2e lái Chrome thật với micro giả 1500 Hz và giọng bot
+giả 440/660 Hz, chạy cả tại chỗ lẫn trong container Docker. Kênh bot trùng file đã upload tới từng
+mẫu (sai số tối đa 1), im tuyệt đối ngoài nhật ký, kênh khách không lẫn tiếng bot. Bốn buổi thu
+trong container, một lần rút lại đồng ý, khởi động lại container: `tools/audit_export.py` báo 0 lỗi
+(integrity, khoá ngoại, sha256 file = DB = sidecar, không file mồ côi). Đọc lại bằng `WavFrameSource`:
+số khung có cờ `bot_speaking` đúng bằng số tính từ nhật ký (102/102), B1 chạy qua mọi khung.
 
-Chưa kiểm: build Docker (Docker Desktop không chạy trên máy lúc làm); ghi âm thật trong Chrome với
-micro thật — đó là buổi thử. Luật 91/2025/QH15 có quy định riêng về chuyển dữ liệu cá nhân ra nước
+Lỗi tìm ra khi kiểm, đã sửa kèm test: nút gọi tổng đài bấm được trong lúc đang tải giọng bot, cú
+bấm bị nuốt mất; chưa có đường thực hiện quyền rút lại đồng ý và xoá (Luật 91 Điều 10, 14); header
+admin có ký tự ngoài ASCII làm server trả 500 thay vì 401.
+
+Chưa kiểm: ghi âm với micro thật và tai nghe thật — đó là buổi thử. Luật 91/2025/QH15 có quy định riêng về chuyển dữ liệu cá nhân ra nước
 ngoài, chưa đọc; phải kiểm trước khi thu người khác trên server đặt ở nước ngoài.

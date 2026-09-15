@@ -9,8 +9,13 @@ link mời, thu giọng bot và tải dữ liệu về. Vì sao thu theo cách n
 cd collector
 uv sync
 COLLECTOR_ADMIN_TOKEN=<chuỗi ngẫu nhiên ≥ 16 ký tự> uv run uvicorn app.main:app_factory --factory --port 8000
-uv run pytest                                  # 24 test API
+uv run pytest                                  # 28 test API
+COLLECTOR_E2E=1 uv run pytest tests/e2e        # Chrome thật, micro giả, giọng bot giả
+uv run python tools/audit_export.py <export.zip>   # kiểm chất lượng file tải về
 ```
+
+Bài e2e chạy vào container: đặt thêm `COLLECTOR_E2E_URL=http://127.0.0.1:<cổng>` và
+`COLLECTOR_E2E_ADMIN_TOKEN`.
 
 Mở `http://localhost:8000/admin`. Trình duyệt chỉ cho dùng micro trên `localhost` hoặc HTTPS.
 Dữ liệu mặc định ghi vào `data/collector/` ở gốc repo (đã gitignore).
@@ -51,7 +56,9 @@ Các biến khác có giá trị mặc định trong `collector/app/settings.py`
 3. **Người thu** mở link bằng Chrome trên máy tính, đeo tai nghe có dây: đồng ý, thử micro, chọn
    tình huống, bấm nghe câu bot, nói, bấm khi đã nói xong. Xong tình huống nào, web gửi lên tình
    huống đó.
-4. **Tải về** ở `/admin` bằng nút tải toàn bộ dữ liệu (.zip).
+4. **Tải về** ở `/admin` bằng nút tải toàn bộ dữ liệu (.zip), rồi chạy `tools/audit_export.py`.
+5. **Rút lại đồng ý**: người thu liên hệ, quản trị bấm "Rút lại & xoá" ở `/admin`. Bản ghi và bản
+   đồng ý bị xoá, link hết hiệu lực, mã người nói không bao giờ được cấp lại.
 
 ## Mỗi bản ghi gồm
 
