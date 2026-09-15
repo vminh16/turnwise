@@ -93,6 +93,9 @@ function listScripts() {
 // --- chạy một tình huống -------------------------------------------------------------------
 
 async function runScript(script) {
+  // Khoá nút trước mọi await: đang tải giọng bot mà bấm thì chưa có gì xử lý cú bấm, và nó mất.
+  $("run-next").disabled = true;
+  $("run-next").onclick = null;
   show("run");
   status("Đang tải giọng tổng đài...");
   const { ctx } = audio;

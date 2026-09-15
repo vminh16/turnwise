@@ -26,13 +26,24 @@ async function loadInvites() {
   for (const invite of invites) {
     const row = document.createElement("tr");
     cell(row, invite.speaker_id);
-    cell(row, invite.consented ? "có" : "chưa");
+    cell(row, invite.withdrawn ? "đã rút lại" : invite.consented ? "có" : "chưa");
     cell(row, String(invite.recordings));
     const link = document.createElement("input");
     link.readOnly = true;
-    link.value = `${location.origin}/?t=${invite.token}`;
+    link.value = invite.withdrawn ? "" : `${location.origin}/?t=${invite.token}`;
     link.addEventListener("focus", () => link.select());
-    cell(row, link);
+    const withdraw = document.createElement("button");
+    withdraw.textContent = "Rút lại & xoá";
+    withdraw.disabled = Boolean(invite.withdrawn);
+    withdraw.addEventListener("click", async () => {
+      if (!confirm(`Xoá vĩnh viễn mọi bản ghi và bản đồng ý của ${invite.speaker_id}?`)) return;
+      const result = await (await api(`/api/admin/speakers/${invite.speaker_id}`, { method: "DELETE" })).json();
+      status(`${result.speaker_id}: đã xoá ${result.recordings_deleted} bản ghi`);
+      await loadInvites();
+    });
+    const actions = document.createElement("div");
+    actions.append(link, withdraw);
+    cell(row, actions);
     body.append(row);
   }
 }

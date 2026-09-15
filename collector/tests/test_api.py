@@ -247,3 +247,43 @@ def test_export_contains_the_database_and_every_recording(client: TestClient) ->
     assert "collector.sqlite3" in names
     assert any(name.startswith("sessions/S001/") and name.endswith(".wav") for name in names)
     assert any(name.endswith(".json") for name in names)
+
+
+# --- rút lại đồng ý ---------------------------------------------------------------------
+
+
+def test_withdrawal_deletes_recordings_and_consent_and_kills_the_link(
+    client: TestClient, settings: Settings
+) -> None:
+    """Phiếu đồng ý hứa quyền rút lại và xoá (Luật 91/2025/QH15 Điều 10, 14)."""
+    token = consented(client)
+    saved = upload(client, token).json()  # type: ignore[attr-defined]
+    audio = settings.data_dir / saved["file"]
+    assert audio.exists()
+
+    response = client.delete("/api/admin/speakers/S001", headers=ADMIN)
+    assert response.status_code == 200, response.text
+    assert response.json() == {"speaker_id": "S001", "recordings_deleted": 1}
+
+    assert not audio.exists()
+    assert not audio.with_suffix(".json").exists()
+    assert client.get("/api/config", params={"t": token}).status_code == 401
+    listed = {
+        row["speaker_id"]: row for row in client.get("/api/admin/invites", headers=ADMIN).json()
+    }
+    assert listed["S001"]["withdrawn"] and listed["S001"]["recordings"] == 0
+
+
+def test_speaker_ids_are_never_reused_after_a_withdrawal(client: TestClient) -> None:
+    consented(client)
+    client.delete("/api/admin/speakers/S001", headers=ADMIN)
+    assert client.post("/api/admin/invites", headers=ADMIN).json()["speaker_id"] == "S002"
+
+
+def test_withdrawing_an_unknown_speaker_is_404(client: TestClient) -> None:
+    assert client.delete("/api/admin/speakers/S999", headers=ADMIN).status_code == 404
+
+
+def test_a_non_ascii_admin_header_is_refused_not_a_server_error(client: TestClient) -> None:
+    response = client.post("/api/admin/invites", headers={"X-Admin-Token": "tổng-đài".encode()})
+    assert response.status_code == 401

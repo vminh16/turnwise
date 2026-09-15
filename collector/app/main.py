@@ -64,7 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return speaker_id
 
     def admin(x_admin_token: Annotated[str, Header()] = "") -> None:
-        if not secrets.compare_digest(x_admin_token, settings.admin_token):
+        if not secrets.compare_digest(x_admin_token.encode(), settings.admin_token.encode()):
             raise HTTPException(401, "admin token required")
 
     async def read_limited(upload: UploadFile) -> bytes:
@@ -178,6 +178,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/admin/invites", dependencies=[Depends(admin)])
     def invites() -> list[dict[str, Any]]:
         return store.list_invites()
+
+    @app.delete("/api/admin/speakers/{speaker_id}", dependencies=[Depends(admin)])
+    def withdraw(speaker_id: str) -> dict[str, Any]:
+        """Thực hiện quyền rút lại đồng ý và xoá dữ liệu (Luật 91/2025/QH15 Điều 10, 14)."""
+        deleted = store.withdraw(speaker_id)
+        if deleted is None:
+            raise HTTPException(404, f"unknown speaker {speaker_id!r}")
+        logger.info("speaker %s withdrew; %d recordings deleted", speaker_id, deleted)
+        return {"speaker_id": speaker_id, "recordings_deleted": deleted}
 
     @app.get("/api/admin/lines", dependencies=[Depends(admin)])
     def lines() -> list[dict[str, Any]]:
