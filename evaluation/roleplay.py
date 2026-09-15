@@ -4,8 +4,8 @@ Khác `scenarios/`: bộ kia là tín hiệu tổng hợp để CI phát lại; 
 người thật** nói chuyện với bot trong buổi thu ở Giai đoạn 1. Dữ liệu thu được là dữ
 liệu **đánh giá**, không phải dữ liệu huấn luyện (`docs/progress.md`, Giai đoạn 1).
 
-Lời bot viết đủ từng chữ, vì bot được đóng bằng các câu thu sẵn và người điều khiển bấm
-phát (Wizard-of-Oz): chưa có `dialog/` và chưa chốt giọng TTS. Lời khách **không** viết
+Lời bot viết đủ từng chữ, vì bot được đóng bằng các câu thu sẵn và web thu (`collector/`)
+phát từng câu khi người thu bấm: chưa có `dialog/` và chưa chốt giọng TTS. Lời khách **không** viết
 sẵn, chỉ có chỉ dẫn hành vi — người đọc thuộc lòng thì mất đúng thứ cần đo: ngập ngừng,
 tiếng đệm, nói đè tự nhiên. Ngoại lệ duy nhất là câu trả lời ngắn, có danh sách gợi ý để
 phủ đủ sáu thanh ở âm tiết cuối.
@@ -141,7 +141,7 @@ class Script(_Node):
 
 
 class CommonPrompts(_Node):
-    """Các câu bot dùng chung cho mọi kịch bản, để người điều khiển xử lý chỗ lệch kịch bản."""
+    """Câu bot dùng chung cho buổi thu có người điều khiển; web thu tự phục vụ không dùng."""
 
     prompts: dict[str, str]
     path: Path

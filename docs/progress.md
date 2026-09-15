@@ -245,7 +245,7 @@ phần **holdout** khoá lại cho báo cáo cuối. Cả hai đều chỉ dùng
 | 1.1 Kịch bản đóng vai | `roleplay/*.yaml`, `evaluation/roleplay.py`, test độ phủ | **xong** |
 | 1.2 Hướng dẫn gán nhãn + đồng ý | `docs/annotation-guide.md` | **xong**, ba giả định chờ chốt ở 1.6 |
 | 1.3 Đọc được hai kênh | `FeatureFrame.bot_speaking`, `WavFrameSource` đọc file khách + bot kèm log phát | **xong** |
-| 1.4 Công cụ thu + buổi thử | `scripts/collect_session.py`, độ lệch phát–thu đo được, ghi mốc bấm nút của người điều khiển | chưa |
+| 1.4 Web thu tự phục vụ + buổi thử | `collector/` (FastAPI + SQLite + Docker), `docs/runbook/collect-data.md` | code **xong**; chờ deploy và buổi thử |
 | 1.5 Manifest, chia tập, khoá holdout | `scripts/validate_manifests.py`, chia theo người nói | chưa |
 | 1.6 Quy trình gán nhãn | nhãn tự động + nhãn người, đo độ đồng thuận | chưa |
 | 1.7 Thu thật, đóng giai đoạn | điều kiện xong của `roadmap.md` §6 | chưa |
@@ -342,14 +342,15 @@ Quyết định và lý do:
 Ba giả định chờ chốt ở pha 1.6: gán kép **20%** số buổi; ngưỡng chấp nhận **κ ≥ 0,7** trên
 `caller_act`, báo riêng cho các đoạn chỉ gồm một tiếng đệm; công cụ gán nhãn là Praat hay ELAN.
 
-**Cách thu: Wizard-of-Oz, không cần bot thật.** Người thật đóng khách; lời bot là câu một
-người đọc sẵn một lần; người điều khiển bấm phát, không nói. Không dùng bot thật vì dữ liệu sẽ
+**Cách thu: bot là câu thu sẵn, không cần bot thật.** Người thật đóng khách; lời bot là câu một
+người đọc sẵn một lần. (Ban đầu định có người điều khiển bấm phát; pha 1.4 đổi sang web tự phục vụ,
+xem §6.6.) Không dùng bot thật vì dữ liệu sẽ
 lệch về decider đã thu nó. Không dùng hai người đóng vai vì người gọi nói với người khác với nói
 với máy (`SPEC.md` §3), và "tổng đài viên" thật sẽ chêm tiếng đệm như bot không bao giờ làm.
 Ba giới hạn đã chấp nhận:
 
-- Người điều khiển đáp chậm hơn một hệ tốt. Nhãn ghi ý định của khách nên không sai; công cụ
-  thu ghi mốc bấm nút để biết độ trễ đó lớn cỡ nào.
+- Bot chỉ đáp khi người thu bấm, nên khoảng lặng trước câu bot là độ trễ bấm nút, không phải
+  độ trễ của một hệ. Nhãn ghi ý định của khách nên không sai; log ghi mốc bấm nút.
 - Bản ghi chỉ có một diễn biến: đo được từng quyết định đúng hay sai, không đo được khách phản
   ứng thế nào sau một quyết định sai. Phần đó đo trực tiếp ở Giai đoạn 4.
 - Giọng bot thu sẵn khác giọng TTS của Giai đoạn 4; khi chốt TTS, thu lại một phần nhỏ để đo
@@ -382,3 +383,27 @@ chỗ đều có test đỏ. Cổng: ruff, mypy (61 file), pytest 151, `-m laten
 
 Chưa làm: khử vọng cho file (`audio/aec.py` còn rỗng; buổi thu bằng tai nghe chưa cần, buổi
 thu bằng loa thì cần trước khi dùng cho R5).
+
+### 6.6 Pha 1.4 — web thu tự phục vụ
+
+`collector/`: thư mục riêng, môi trường `uv` riêng, `Dockerfile` riêng, không import `turnwise`.
+FastAPI + SQLite + thư mục file trên một volume. Cách chạy và deploy: `docs/runbook/collect-data.md`.
+
+Người thu mở link riêng, ký đồng ý điện tử, thử micro, chọn tình huống. Web hiện thẻ giả và chỉ dẫn,
+**không** hiện lời bot. Người thu bấm để nghe câu bot, nói, bấm khi đã nói xong. Chrome ghi file
+**2 kênh**: kênh 0 micro, kênh 1 chính tín hiệu bot đã phát, cùng đồng hồ AudioContext, nên nhật ký
+phát khớp từng mẫu mà không cần đo độ lệch bằng tiếng tách.
+
+- Tắt khử vọng, lọc ồn, tự chỉnh âm lượng của Chrome; bắt buộc tai nghe có dây.
+- Server từ chối file sai định dạng, nhật ký chồng nhau hoặc vượt độ dài file, ghi âm khi chưa đồng
+  ý. Quy tắc nhật ký trùng `WavFrameSource`.
+- Mỗi bản ghi có file `.json` đi kèm (nhật ký, thông tin trình duyệt, bản đồng ý, sha256).
+- Bot **không** dừng khi khách nói chen, và **không** tự cắt lời. Nhãn vẫn đúng vì ghi ý định của
+  khách; mất các ca "bot cắt lời thật".
+
+Bằng chứng: 24 test API (phần lớn là test từ chối); chạy server thật và gọi qua HTTP; file WAV do bộ
+mã hoá JS tạo ra được server nhận và `WavFrameSource` đọc đúng kênh, đúng cờ `bot_speaking`.
+
+Chưa kiểm: build Docker (Docker Desktop không chạy trên máy lúc làm); ghi âm thật trong Chrome với
+micro thật — đó là buổi thử. Luật 91/2025/QH15 có quy định riêng về chuyển dữ liệu cá nhân ra nước
+ngoài, chưa đọc; phải kiểm trước khi thu người khác trên server đặt ở nước ngoài.

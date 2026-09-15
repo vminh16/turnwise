@@ -1,12 +1,12 @@
 # Hướng dẫn gán nhãn và thu dữ liệu có đồng ý
 
-Tài liệu cho người gán nhãn và người điều khiển buổi thu của Giai đoạn 1. Nó định nghĩa
+Tài liệu cho người gán nhãn và người quản trị buổi thu của Giai đoạn 1. Nó định nghĩa
 **nhãn nào, gán ở đâu, quyết định ca khó ra sao, đo độ đồng thuận thế nào**, và mẫu đồng ý
 người tham gia phải ký trước khi thu.
 
 `SPEC.md` đúng hơn tài liệu này. Chỗ nào tài liệu này và `SPEC.md` mâu thuẫn, sửa tài liệu này.
 
-Phiên bản hướng dẫn: **1.1** (2026-09-14). Mỗi file nhãn ghi phiên bản hướng dẫn đã dùng để
+Phiên bản hướng dẫn: **1.2** (2026-09-15). Mỗi file nhãn ghi phiên bản hướng dẫn đã dùng để
 gán; đổi quy tắc là tăng phiên bản (§6.4).
 
 ---
@@ -30,12 +30,13 @@ không nói với bot.
 |---|---|---|
 | Track **micro** | micro người tham gia | tiếng khách; ở buổi thu bằng loa có lẫn tiếng bot vọng lại |
 | Track **bot** | chính tín hiệu đã phát | biết chính xác từng mẫu, không phải đoán |
-| Log phát | công cụ thu (pha 1.4) | mỗi câu bot: mã câu, mốc người điều khiển bấm nút, mốc bắt đầu phát, mốc dừng, dừng vì hết câu hay vì người điều khiển cắt |
-| Metadata buổi | người điều khiển điền | §3 |
+| Log phát | web thu (`collector/`) | mỗi câu bot: bước, mốc người thu bấm nút, mốc bắt đầu phát, mốc hết câu; tính bằng chỉ số mẫu trong file |
+| Metadata buổi | người thu điền trên web, trình duyệt tự ghi phần kỹ thuật | §3 |
 | File nhãn | người gán | §4, §5 |
 
-Hai track cùng một đồng hồ. Độ lệch giữa lúc phát và lúc micro thu được đo ở pha 1.4 và ghi
-vào metadata; mọi mốc thời gian trong nhãn là mốc **đã bù độ lệch**.
+Hai track ghi trên cùng đồng hồ của trình duyệt. Kênh micro vẫn trễ hơn kênh bot một khoảng
+bằng độ trễ thiết bị; trình duyệt báo ước lượng trong file `.json` đi kèm (`base_latency_s`,
+`output_latency_s`). Buổi thử đo lại khoảng này để quyết định có cần bù trước khi gán nhãn.
 
 ---
 
@@ -63,7 +64,7 @@ gộp (`AGENTS.md` Gotchas), không theo giới.
 
 `session_id`, ngày, `speaker_id`, danh sách kịch bản theo thứ tự đã chạy, `playback`
 (`headset` hoặc `loudspeaker`), `noise` (`none`, `tv`, `street`, `children`, `other`), thiết bị
-micro, độ lệch phát–thu đo được, người điều khiển, phiên bản hướng dẫn.
+micro và độ trễ trình duyệt báo, phiên bản hướng dẫn.
 
 Buổi `loudspeaker` là nguồn dữ liệu duy nhất cho R5 (bot không nhận nhầm tiếng mình). Buổi có
 `noise` khác `none` là nguồn duy nhất cho hành vi §4.3 "tiếng ồn nền". Không có hai loại buổi
@@ -130,8 +131,9 @@ Thuộc tính đi kèm, chỉ điền khi đúng:
 - `explicit` — trên `hold`: khách **nói rõ** là cần chờ ("chờ chút", "để tôi tìm"). Khoảng lặng
   sau các IPU này thường dài hơn hẳn, nên phân tích phải tách chúng khỏi ngập ngừng im lặng.
 - `filled` — trên `hold`: IPU kết thúc bằng tiếng ngập ngừng ("ờ", "ừm", "à").
-- `cut_in` — trên `hold`: bot (người điều khiển) đã nói trong lúc khách còn chưa xong. Đây là một
-  lần **cắt lời thật**, dữ liệu quý nhất cho tỉ lệ cắt lời; không được sửa thành `take`.
+- `cut_in` — trên `hold`: bot đã nói trong lúc khách còn chưa xong. Đây là một lần **cắt lời
+  thật**, dữ liệu quý nhất cho tỉ lệ cắt lời; không được sửa thành `take`. Web thu hiện chỉ phát
+  câu bot khi người thu bấm, nên ca này chỉ xuất hiện khi người thu bấm sớm.
 
 ---
 
@@ -165,7 +167,7 @@ và bằng chứng tốt nhất của ý định là việc khách làm tiếp t
 | "dạ, nhưng mà..." đè lên bot rồi nói tiếp nội dung | `barge_in` |
 | "hả?" hoặc "gì cơ?" đè lên bot | `barge_in` — khách đòi bot nhắc lại, tức giành lượt |
 | "ừ ừ ừ" liền nhau trong lúc bot nói | một IPU `backchannel` |
-| Khách nói đè có nội dung, bot (người điều khiển) chưa dừng kịp, khách im | vẫn `barge_in` |
+| Khách nói đè có nội dung, bot không dừng (web thu không dừng bot), khách im hoặc nói tiếp | vẫn `barge_in` |
 | "alo? alo?" khi bot im quá lâu | `take` — khách đang giục bot; đồng thời là dấu hiệu bot chậm |
 | "để xem nào, ờ..." rồi đọc tiếp | `hold` + `filled` |
 | Khách quay sang nói với người khác trong phòng | `aside` |
@@ -245,18 +247,16 @@ một cách chọn tham số trên holdout.
 
 ---
 
-## 7. Ghi chú cho người điều khiển buổi thu
+## 7. Ghi chú cho người quản trị buổi thu
 
-- Thu thử một buổi với chính mình trước mỗi đợt, nghe lại cả hai track.
-- Đọc cho người tham gia phần "Bạn sẽ làm gì" của mẫu đồng ý, không đọc kịch bản cho họ nghe.
-- Đưa hoá đơn hoặc thẻ tin nhắn giả **úp mặt**, lật khi bot hỏi tới. Ngập ngừng khi tìm số là
-  thứ cần thu; đừng để người tham gia chuẩn bị sẵn.
-- Khi khách nói đè có nội dung, **dừng phát ngay**. Mỗi lần dừng chậm là một lần R3 bị đo sai.
-- Khi khách chêm tiếng đệm, **không** dừng.
-- Không nhắc người tham gia "nhớ chêm dạ". Chỉ dẫn trong kịch bản là đủ; ép thêm thì tiếng đệm
-  mất nhịp tự nhiên.
-- Người tham gia **không** được đọc số điện thoại, địa chỉ hay tên thật của mình. Mọi thông tin
-  cần đọc đều in trên thẻ giả. Nếu họ lỡ nói thông tin thật, ghi mốc thời gian để xoá đoạn đó
+Người thu tự làm trên web (`docs/runbook/collect-data.md`). Người quản trị:
+
+- Thu thử một buổi với chính mình trước mỗi đợt, nghe lại cả hai kênh.
+- Gửi mỗi người một link riêng. Không gửi kèm kịch bản; web chỉ cho người thu thấy tình huống,
+  thẻ giả và chỉ dẫn, không cho thấy trước lời bot.
+- Không nhắc người thu "nhớ chêm dạ". Chỉ dẫn trong kịch bản là đủ; ép thêm thì tiếng đệm mất
+  nhịp tự nhiên.
+- Khi nghe lại, nếu người thu lỡ nói thông tin thật của mình, ghi mốc thời gian để xoá đoạn đó
   trước khi gán nhãn.
 
 ---
@@ -287,8 +287,9 @@ xong, và dừng lại khi người gọi nói chen vào. Công ty NetCo trong b
 tình huống có sẵn. Mọi số thuê bao, mã và địa chỉ bạn cần đọc đều in trên thẻ giả. **Không đọc
 số điện thoại, địa chỉ hay tên thật của bạn.**
 
-**Về "tổng đài".** Giọng tổng đài là các câu đã thu sẵn, **do một người trong nhóm dự án bấm
-phát** theo diễn biến cuộc gọi. Bạn không nói chuyện với một hệ thống tự động thật.
+**Về "tổng đài".** Giọng tổng đài là các câu một người đã đọc và thu sẵn. Trang web phát từng
+câu khi bạn bấm nút. Bạn không nói chuyện với một hệ thống tự động thật, và tổng đài không dừng
+lại khi bạn nói chen vào.
 
 **Dữ liệu được thu.** Bản ghi âm giọng nói của bạn; bản chép lời; một mã người nói không chứa
 tên bạn; vùng giọng nói của bạn (Bắc, Bắc Trung Bộ, Trung, Nam). Không thu họ tên, tuổi, giới
