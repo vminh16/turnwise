@@ -20,7 +20,7 @@ Kích thước khung suy ra từ `configs/`, không có literal nào trong file 
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
@@ -53,11 +53,22 @@ class WavFrameSource:
     một lần rồi thôi giúp vòng lặp phát khung không chạm đĩa lần nào.
     """
 
-    def __init__(self, path: Path | str, audio: AudioConfig) -> None:
+    def __init__(
+        self,
+        path: Path | str,
+        audio: AudioConfig,
+        bot_intervals: Sequence[tuple[float, float]] | None = None,
+    ) -> None:
+        """Nạp file.
+
+        File một kênh là tiếng khách, như bộ kịch bản của Giai đoạn 0. File hai kênh là
+        bản thu Giai đoạn 1: kênh `audio.recording_caller_channel` là tiếng khách, kênh
+        còn lại là tiếng bot, và **bắt buộc** kèm `bot_intervals` — các khoảng
+        `(start_s, end_s)` bot phát một câu, lấy từ log phát. Kênh bot không vào khung.
+        """
         if audio.channels != 1:
             raise ValueError(
-                f"WavFrameSource chỉ đọc mono, còn audio.channels={audio.channels}. "
-                "Hội thoại hai kênh của Giai đoạn 1 cần một adapter riêng."
+                f"WavFrameSource chỉ phát khung mono, còn audio.channels={audio.channels}."
             )
 
         self._path = Path(path)
@@ -68,15 +79,31 @@ class WavFrameSource:
                 f"{self._path} lấy mẫu ở {sample_rate_hz} Hz, còn cấu hình đòi "
                 f"{audio.sample_rate_hz} Hz. Nguồn này không lấy mẫu lại."
             )
-        if data.shape[1] != audio.channels:
+
+        file_channels = data.shape[1]
+        if file_channels == 1:
+            caller = data[:, 0]
+        elif file_channels == 2:
+            if bot_intervals is None:
+                raise ValueError(
+                    f"{self._path} có 2 kênh (khách + bot) nhưng thiếu `bot_intervals`. "
+                    "Không có log phát thì cờ bot_speaking luôn tắt, và mọi tiếng đệm "
+                    "trông như một câu trả lời."
+                )
+            caller = data[:, audio.recording_caller_channel]
+        else:
             raise ValueError(
-                f"{self._path} có {data.shape[1]} kênh, còn cấu hình đòi {audio.channels}."
+                f"{self._path} có {file_channels} kênh; nguồn này đọc 1 kênh (khách) "
+                "hoặc 2 kênh (khách + bot)."
             )
 
-        self._samples: np.ndarray = np.ascontiguousarray(data[:, 0], dtype=np.float32)
+        self._samples: np.ndarray = np.ascontiguousarray(caller, dtype=np.float32)
         self._samples.flags.writeable = False
         self._frame_samples = audio.sample_rate_hz * audio.feature_frame_ms // 1000
         self._duration_s = audio.feature_frame_ms / 1000
+        self._bot_frames = self._frames_with_bot(
+            bot_intervals or (), audio.sample_rate_hz, len(self._samples)
+        )
 
         logger.debug(
             "%s: %d samples at %d Hz, %d samples per frame",
@@ -85,6 +112,37 @@ class WavFrameSource:
             sample_rate_hz,
             self._frame_samples,
         )
+
+    def _frames_with_bot(
+        self,
+        intervals: Sequence[tuple[float, float]],
+        sample_rate_hz: int,
+        total_samples: int,
+    ) -> frozenset[int]:
+        """Chỉ số các khung có tiếng bot ở bất kỳ phần nào.
+
+        Tính trên chỉ số mẫu nguyên chứ không trên giây, cùng lý do như B1: cộng số thực
+        theo khung thì ranh giới trôi dần (`0.02 * 10 != 0.2`). Khoảng là nửa mở
+        `[start, end)`, nên một câu kết thúc đúng mép khung không bật cờ khung sau.
+        """
+        size = self._frame_samples
+        frame_count = -(-total_samples // size)
+        marked: set[int] = set()
+        previous_end = 0
+        for start_s, end_s in sorted(intervals):
+            start = round(start_s * sample_rate_hz)
+            end = round(end_s * sample_rate_hz)
+            if start < 0 or end <= start:
+                raise ValueError(f"bot_intervals: khoảng ({start_s}, {end_s}) rỗng, ngược hoặc âm")
+            if start < previous_end:
+                raise ValueError(
+                    f"bot_intervals: khoảng bắt đầu ở {start_s}s chồng lên khoảng trước; "
+                    "bot không phát hai câu cùng lúc, log phát đang sai"
+                )
+            previous_end = end
+            last = min((end - 1) // size, frame_count - 1)
+            marked.update(range(start // size, last + 1))
+        return frozenset(marked)
 
     def __iter__(self) -> Iterator[FeatureFrame]:
         """Phát lần lượt từng khung, khung cuối được đệm không cho đủ độ dài.
@@ -111,4 +169,5 @@ class WavFrameSource:
                 duration_s=self._duration_s,
                 samples=chunk,
                 padded_samples=padded_samples,
+                bot_speaking=index in self._bot_frames,
             )

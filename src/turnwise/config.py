@@ -59,6 +59,7 @@ class AudioConfig(_Section):
 
     sample_rate_hz: int = Field(gt=0)
     channels: int = Field(gt=0)
+    recording_caller_channel: int = Field(ge=0, le=1)
     capture_frame_ms: int = Field(gt=0)
     feature_frame_ms: int = Field(gt=0)
     ring_buffer_ms: int = Field(gt=0)

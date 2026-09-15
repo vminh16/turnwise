@@ -112,6 +112,18 @@ class FeatureFrame:
     bị đẩy xuống dưới ngưỡng im lặng, sinh ra một lượt "đã xong" không có thật.
     """
 
+    bot_speaking: bool = False
+    """Bot có đang phát một câu ở bất kỳ phần nào của khung này hay không.
+
+    Cùng một tiếng "dạ": bot đang nói thì đó là tiếng đệm, bot đang im thì đó là một câu
+    trả lời (SPEC §2, R4). Decider cần biết điều đó, nhưng không được nghe tiếng bot — nên
+    khung chỉ mang một cờ, không mang mẫu nào của bot.
+
+    Cờ đi theo **log phát**, không theo năng lượng kênh bot: trong một chỗ ngắt hơi giữa
+    câu, kênh bot im nhưng bot vẫn đang giữ lượt. Nguồn không có tiếng bot (file mono của
+    Giai đoạn 0) để `False`.
+    """
+
     f0_hz: float | None = None
     """Tần số cơ bản, hoặc `None` khi khung vô thanh hay không ước lượng được.
 

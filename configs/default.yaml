@@ -15,6 +15,12 @@ audio:
   sample_rate_hz: 16000
   channels: 1
 
+  # Bố cục file thu Giai đoạn 1 (docs/annotation-guide.md §2): hai kênh, một là micro của
+  # khách, kênh còn lại là chính tín hiệu bot đã phát. Chỉ tiếng khách vào khung đặc trưng;
+  # tiếng bot chỉ thành cờ bot_speaking, lấy từ log phát. Thu sai thứ tự kênh thì sửa ở
+  # đây, không sửa file thu.
+  recording_caller_channel: 0
+
   # RÀNG BUỘC CỨNG, không phải lựa chọn. WebRTC audio processing (aec_audio_processing)
   # xử lý đúng 160 mẫu mỗi lần ở 16 kHz. Đổi số này là AEC ngừng hoạt động.
   # Kiểm chứng: AudioProcessor().get_frame_size() -> 160.

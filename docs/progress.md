@@ -244,7 +244,7 @@ phần **holdout** khoá lại cho báo cáo cuối. Cả hai đều chỉ dùng
 |---|---|---|
 | 1.1 Kịch bản đóng vai | `roleplay/*.yaml`, `evaluation/roleplay.py`, test độ phủ | **xong** |
 | 1.2 Hướng dẫn gán nhãn + đồng ý | `docs/annotation-guide.md` | **xong**, ba giả định chờ chốt ở 1.6 |
-| 1.3 Đọc được hai kênh | `FeatureFrame`/`WavFrameSource` nhận micro + tiếng bot | chưa |
+| 1.3 Đọc được hai kênh | `FeatureFrame.bot_speaking`, `WavFrameSource` đọc file khách + bot kèm log phát | **xong** |
 | 1.4 Công cụ thu + buổi thử | `scripts/collect_session.py`, độ lệch phát–thu đo được, ghi mốc bấm nút của người điều khiển | chưa |
 | 1.5 Manifest, chia tập, khoá holdout | `scripts/validate_manifests.py`, chia theo người nói | chưa |
 | 1.6 Quy trình gán nhãn | nhãn tự động + nhãn người, đo độ đồng thuận | chưa |
@@ -360,3 +360,25 @@ Người đọc giọng bot cũng ký đồng ý (phụ lục B của hướng d
 Giới hạn: mẫu đồng ý không phải tư vấn pháp lý. Luật để Chính phủ ban hành danh mục dữ liệu
 nhạy cảm; danh mục đó chưa kiểm chứng, nên mẫu xử lý giọng nói như dữ liệu nhạy cảm. Nguồn về
 việc nhập thanh hỏi–ngã ở giọng Nam mới đọc qua trích đoạn, chưa đọc toàn văn.
+
+### 6.5 Pha 1.3 — đọc file hai kênh
+
+`FeatureFrame` thêm cờ `bot_speaking`; `WavFrameSource` đọc file hai kênh (khách + bot) kèm
+`bot_intervals` lấy từ log phát. File một kênh chạy như cũ. 12 test mới.
+
+- **Khung mang cờ, không mang tiếng bot.** Decider cần biết bot có đang nói ("dạ" khi bot nói
+  là tiếng đệm, khi bot im là câu trả lời), nhưng scorer không được nghe tiếng bot (R5).
+- **Cờ theo log phát, không theo năng lượng**: trong chỗ ngắt hơi `/` kênh bot im mà bot vẫn
+  giữ lượt. Cờ bật nếu bot phát ở bất kỳ phần nào của khung; khoảng nửa mở, tính trên chỉ số
+  mẫu nguyên.
+- **File hai kênh thiếu log thì từ chối**, vì chạy tiếp thì cờ luôn tắt mà không có gì báo.
+  Log chồng nhau, rỗng, ngược hay âm cũng từ chối.
+- Thứ tự kênh ở `audio.recording_caller_channel` trong `configs/default.yaml`.
+- B1 **không** dùng cờ: tổng đài cũ không biết bot có đang nói.
+
+Bằng chứng: đường cong B1 `reports/baseline/silence-threshold.csv` trùng từng byte trước và
+sau (sha256 `0eaf9258…`). Thử phá hai chỗ (bỏ qua kênh trong config, nhận log chồng nhau), mỗi
+chỗ đều có test đỏ. Cổng: ruff, mypy (61 file), pytest 151, `-m latency` 3, `-m scenario` 10.
+
+Chưa làm: khử vọng cho file (`audio/aec.py` còn rỗng; buổi thu bằng tai nghe chưa cần, buổi
+thu bằng loa thì cần trước khi dùng cho R5).
