@@ -111,6 +111,7 @@ Phát biểu theo điều **phải đúng**, không theo cách cài đặt.
   - **B3 — endpointer ngữ nghĩa trên văn bản ASR.** Mô hình mã nguồn mở có bản tiếng Việt riêng, chạy CPU, dùng nguyên trọng số, không tinh chỉnh.
 
   B1 chứng minh luận điểm ở §1: không ngưỡng nào thắng được. B2 và B3 trả lời câu hỏi “tại sao không dùng mô hình có sẵn” — câu hỏi này đã hợp lệ từ 2025, khi các endpointer đa ngôn ngữ bắt đầu liệt kê tiếng Việt. Tên và phiên bản mô hình cụ thể ghi ở `docs/adr/`, không chốt trong tài liệu này.
+- **R12** — **Bot nói chuyện giống người, không vô cảm.** Giọng tự nhiên, lời thoại có đồng cảm và không lặp lại máy móc, nhịp đáp tự nhiên. Không ai muốn nói chuyện với một cái máy đọc; một bot chuyển lượt đúng từng mili giây mà nghe vô cảm vẫn là sản phẩm hỏng. Đạt được bằng: chọn giọng TTS có sẵn theo độ tự nhiên, viết lời thoại, và chính tầng `turn`. **Không** bằng huấn luyện TTS mới, sinh câu trả lời tự do bằng LLM, hay nhận dạng cảm xúc (§11).
 
 ### Nên có
 
@@ -172,6 +173,7 @@ Ngưỡng cụ thể đặt ở `configs/`. Baseline đo ở Giai đoạn 0, kh�
 - Thời gian trung bình hoàn tất một luồng nghiệp vụ
 - Tỉ lệ phiên bot thu đủ thông tin mà không phải chuyển người
 - Số lần trung bình khách phải lặp lại một thông tin
+- Điểm tự nhiên của bot do người nghe chấm (R12), đặt cạnh cùng lời thoại do người thật đọc ở Giai đoạn 1 làm mốc trần
 
 ### 9.3 Quy tắc báo cáo
 
@@ -191,7 +193,7 @@ Dự án được coi là hoàn thành khi **một người chưa từng dùng h
 4. **Yêu cầu gặp người.** Nói "Cho tôi gặp nhân viên" giữa lúc bot đang nói. Bot dừng và chuyển máy kèm thông tin đã thu.
 5. **Câu trả lời ngắn.** Trả lời "Hai người." Bot đáp không chậm hơn khi trả lời câu dài.
 
-Trong suốt năm phép thử, bảng theo dõi hiển thị chỉ số theo thời gian thực, và bot **không lần nào tự nhận nhầm tiếng của chính mình là ngắt lời**.
+Trong suốt năm phép thử, bảng theo dõi hiển thị chỉ số theo thời gian thực, và bot **không lần nào tự nhận nhầm tiếng của chính mình là ngắt lời**. Sau cuộc gọi, người thử chấm bot nghe có giống người không (R12).
 
 Ngoài ra: bộ chỉ số ở §9 chạy được bằng một lệnh, sinh ra báo cáo đầy đủ gồm cả bảng ablation và đường cong đánh đổi.
 

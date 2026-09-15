@@ -220,7 +220,7 @@ Nghiệp vụ thứ sáu vẫn là scope creep ở giai đoạn này, y như ở
 
 ---
 
-## 7. Ba chỗ dễ chết
+## 7. Bốn chỗ dễ chết
 
 **GĐ 1 chặn GĐ 2, 3 và 4.** Không có dữ liệu hai kênh thì cả ba đứng im. Bắt đầu viết
 kịch bản đóng vai sớm, song song với GĐ 0.
@@ -233,3 +233,9 @@ nằm ở `audio/`.
 **Làm GĐ 3 mà chưa có GĐ 2.** Tự dựng một hệ mà không biết cái có sẵn giải quyết được bao
 nhiêu là cách chắc nhất để tiêu hết thời gian vào việc phát minh lại thứ đã có — và với
 dự án ứng dụng thì đó là lỗi tốn kém hơn hẳn so với dự án nghiên cứu thuần.
+
+**Tối ưu chỉ số lượt nói mà bot vẫn vô cảm.** Mọi chỉ số ở GĐ 0–3 đo *khi nào* bot nói, không
+đo bot nói *nghe thế nào*. Dễ trượt thành một bot chuyển lượt hoàn hảo bằng giọng máy đọc.
+`SPEC.md` R12 chặn chỗ đó: chọn giọng TTS ở GĐ 4 theo điểm tự nhiên người nghe chấm, so với
+giọng người thật đã thu ở GĐ 1; lời thoại có đồng cảm, có biến thể, không lặp một câu cho mọi
+lần.

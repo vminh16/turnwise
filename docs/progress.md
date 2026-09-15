@@ -209,7 +209,12 @@ Hai quyết định còn treo, cả hai cỡ một ADR:
 - **`praat-parselmouth` là GPLv3 và nằm trong `[project] dependencies`**, tức đường chạy
   chính, trong khi `LICENSE` của repo đang rỗng 0 byte. Chốt trước Giai đoạn 3.
 - **Giọng TTS tiếng Việt** chưa có nguồn chính thức: `rhasspy/piper-voices` không có mục
-  `vi`, và `piper-tts` trên PyPI đã chuyển sang GPL-3.0-or-later. Chốt trước Giai đoạn 4.
+  `vi`, và `piper-tts` trên PyPI đã chuyển sang GPL-3.0-or-later. Chốt trước Giai đoạn 4,
+  **theo độ tự nhiên trước** (`SPEC.md` R12), rồi mới tới giấy phép và độ trễ.
+
+**Chưa có bot.** Tính tới 2026-09-15: `dialog/`, `transport/` và toàn bộ `audio/` trừ
+`source.py` đều rỗng; chưa cài gói ASR hay TTS nào. Bot giống người là yêu cầu R12, không phải
+phần trang trí làm sau cùng.
 
 ---
 
