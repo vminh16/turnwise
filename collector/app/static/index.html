@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Turnwise — thu âm đóng vai</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main>
+  <h1>Thu âm đóng vai tổng đài</h1>
+  <p id="status" class="status"></p>
+
+  <section id="consent" hidden>
+    <h2>Phiếu đồng ý</h2>
+    <p><b>Dự án là gì.</b> Turnwise nghiên cứu cách một tổng đài tự động biết khi nào người gọi đã
+      nói xong, và dừng lại khi người gọi nói chen vào. Công ty NetCo trong buổi thu là công ty giả định.</p>
+    <p><b>Bạn sẽ làm gì.</b> Đóng vai khách hàng gọi tổng đài theo một số tình huống có sẵn. Mọi số
+      thuê bao, mã và địa chỉ đều in trên thẻ giả. <b>Không đọc số điện thoại, địa chỉ hay tên thật
+      của bạn.</b></p>
+    <p><b>Về "tổng đài".</b> Giọng tổng đài là các câu một người đã đọc và thu sẵn. Trang web phát
+      từng câu khi bạn bấm nút. Bạn không nói chuyện với một hệ thống tự động thật, và tổng đài sẽ
+      không dừng lại khi bạn nói chen vào.</p>
+    <p><b>Dữ liệu được thu.</b> Giọng nói của bạn trong buổi thu, một mã người nói không chứa tên
+      bạn, vùng giọng nói. Không thu họ tên, tuổi, giới tính, số điện thoại.</p>
+    <p><b>Bên kiểm soát dữ liệu.</b> <span id="controller"></span></p>
+    <p><b>Quyền của bạn.</b> Tham gia là tự nguyện; bạn dừng lúc nào cũng được. Bạn có quyền rút lại
+      đồng ý và yêu cầu xoá bản ghi bằng cách liên hệ bên kiểm soát dữ liệu. Việc rút lại không ảnh
+      hưởng tới những xử lý đã thực hiện trước đó (Luật 91/2025/QH15, Điều 10 khoản 4).</p>
+    <p>Dữ liệu này <b>không</b> được dùng để huấn luyện mô hình. Ô không tích nghĩa là không đồng ý.</p>
+    <form id="consent-form">
+      <label><input type="checkbox" name="purpose_evaluation"> <b>Mục đích 1 (bắt buộc):</b> ghi âm,
+        chép lời, gán nhãn và dùng để đo, đánh giá hệ thống. Kết quả chỉ công bố dạng số liệu tổng hợp.</label>
+      <label><input type="checkbox" name="purpose_excerpts"> <b>Mục đích 2 (không bắt buộc):</b> dùng
+        trích đoạn giọng tôi trong báo cáo, bài trình bày hoặc demo.</label>
+      <label><input type="checkbox" name="adult"> Tôi đã đủ 18 tuổi.</label>
+      <label><input type="checkbox" name="wired_headphones"> Tôi đang dùng <b>tai nghe có dây</b>
+        (không dùng loa ngoài, không dùng tai nghe Bluetooth).</label>
+      <label>Vùng giọng nói của tôi:
+        <select name="dialect">
+          <option value="">— chọn —</option>
+          <option value="north">Bắc</option>
+          <option value="north_central">Bắc Trung Bộ</option>
+          <option value="central">Trung</option>
+          <option value="south">Nam</option>
+        </select>
+      </label>
+      <button type="submit">Tôi đồng ý</button>
+    </form>
+  </section>
+
+  <section id="miccheck" hidden>
+    <h2>Thử micro</h2>
+    <p>Đeo tai nghe có dây, nói vài câu bình thường. Vạch dưới đây phải nhảy khi bạn nói.</p>
+    <meter id="level" min="0" max="1" value="0"></meter>
+    <p id="mic-warning" class="warning" hidden></p>
+    <button id="mic-ok">Micro ổn, tiếp tục</button>
+  </section>
+
+  <section id="scripts" hidden>
+    <h2>Chọn một tình huống</h2>
+    <p>Mỗi tình huống khoảng 2 phút. Làm lần lượt, nghỉ giữa các tình huống nếu cần.</p>
+    <ul id="script-list"></ul>
+  </section>
+
+  <section id="run" hidden>
+    <h2 id="run-title"></h2>
+    <p id="run-persona" class="persona"></p>
+    <div id="run-props" class="card"></div>
+    <div class="instruction">
+      <p class="label">Việc của bạn lúc này</p>
+      <p id="run-instruction">Bấm nút bên dưới để gọi tổng đài.</p>
+      <p id="run-replies" class="replies"></p>
+    </div>
+    <button id="run-next" class="big">Gọi tổng đài</button>
+    <p class="hint">Nói tự nhiên như gọi tổng đài thật. Khi <b>bạn đã nói xong</b>, bấm nút để nghe
+      câu tiếp theo. Muốn nói chen khi tổng đài đang nói thì cứ nói, không cần bấm gì.</p>
+  </section>
+</main>
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>

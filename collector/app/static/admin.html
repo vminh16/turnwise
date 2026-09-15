@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Turnwise — quản trị thu âm</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main>
+  <h1>Quản trị thu âm</h1>
+  <p id="status" class="status"></p>
+
+  <section>
+    <label>Admin token <input id="token" type="password" autocomplete="off"></label>
+    <button id="load">Mở</button>
+  </section>
+
+  <section id="panel" hidden>
+    <h2>Người thu</h2>
+    <button id="invite">Tạo link mời mới</button>
+    <table>
+      <thead><tr><th>Mã</th><th>Đồng ý</th><th>Số tình huống đã thu</th><th>Link</th></tr></thead>
+      <tbody id="invites"></tbody>
+    </table>
+    <button id="export">Tải toàn bộ dữ liệu (.zip)</button>
+
+    <h2>Giọng tổng đài</h2>
+    <p>Đeo tai nghe có dây. Đọc đúng từng chữ; dấu <b>/</b> là chỗ ngắt hơi ngắn. Bấm Thu, đọc, bấm
+      Dừng, nghe lại, rồi Lưu. Thu lại bao nhiêu lần cũng được.</p>
+    <table>
+      <thead><tr><th>Tình huống / bước</th><th>Lời tổng đài</th><th></th></tr></thead>
+      <tbody id="lines"></tbody>
+    </table>
+  </section>
+</main>
+<script type="module" src="/static/admin.js"></script>
+</body>
+</html>
