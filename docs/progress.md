@@ -395,6 +395,9 @@ Người thu mở link riêng, ký đồng ý điện tử, thử micro, chọn 
 phát khớp từng mẫu mà không cần đo độ lệch bằng tiếng tách.
 
 - Tắt khử vọng, lọc ồn, tự chỉnh âm lượng của Chrome; bắt buộc tai nghe có dây.
+- **Thu raw, không tiền xử lý** (quyết định 2026-09-16): không cắt khoảng im, không chuẩn hoá âm
+  lượng, kể cả giọng bot. Khoảng im trước khi nói là tự nhiên. Chỗ bot thật sự bắt đầu nói trong
+  một câu được xác định lúc phân tích từ kênh bot, không bằng cách sửa file.
 - Server từ chối file sai định dạng, nhật ký chồng nhau hoặc vượt độ dài file, ghi âm khi chưa đồng
   ý. Quy tắc nhật ký trùng `WavFrameSource`.
 - Mỗi bản ghi có file `.json` đi kèm (nhật ký, thông tin trình duyệt, bản đồng ý, sha256).
