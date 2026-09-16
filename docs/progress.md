@@ -417,3 +417,18 @@ admin có ký tự ngoài ASCII làm server trả 500 thay vì 401.
 
 Chưa kiểm: ghi âm với micro thật và tai nghe thật — đó là buổi thử. Luật 91/2025/QH15 có quy định riêng về chuyển dữ liệu cá nhân ra nước
 ngoài, chưa đọc; phải kiểm trước khi thu người khác trên server đặt ở nước ngoài.
+
+### 6.7 ASR kiểm thử — chỉ để nghe ngược dữ liệu thu
+
+`asr-check/`: thư mục riêng, môi trường `uv` riêng, `faster-whisper` với mô hình
+`Systran/faster-whisper-small` (MIT) khoá ở revision `536b0662`, tải vào `asr-check/models/`
+(gitignore). `uv run python transcribe.py <export.zip>` chép lời câu bot và kênh khách, in kèm
+`avg_logprob`/`no_speech_prob`, không sửa file nào.
+
+**Chỉ phục vụ kiểm thử dữ liệu thu.** Không phải ASR của sản phẩm, không phải B3 (`SPEC.md` R8),
+không thay người gán nhãn. Chọn ASR cho các vai đó là quyết định riêng ở pha 1.6 và Giai đoạn 2.
+
+Đã thấy trên bản ghi thật đầu tiên: tắt bộ lọc tiếng nói thì Whisper small bịa ra một câu quảng
+cáo YouTube trên đoạn im lặng; bật bộ lọc (chỉ trong bộ nhớ, mốc thời gian vẫn theo file gốc) thì
+hết. Với câu ngắn, nhỏ tiếng, kết quả dao động giữa các cách chạy ("ồ ồ", "à lâu quá", "alô alô")
+— đó là giới hạn của mô hình nhỏ, nên kết quả chỉ dùng để gợi ý, phải nghe lại bằng tai.

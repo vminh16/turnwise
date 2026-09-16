@@ -57,6 +57,8 @@ Các biến khác có giá trị mặc định trong `collector/app/settings.py`
    tình huống, bấm nghe câu bot, nói, bấm khi đã nói xong. Xong tình huống nào, web gửi lên tình
    huống đó.
 4. **Tải về** ở `/admin` bằng nút tải toàn bộ dữ liệu (.zip), rồi chạy `tools/audit_export.py`.
+   Muốn biết một bản ghi chứa lời gì: `cd asr-check && uv run python transcribe.py <export.zip>`
+   (chỉ để kiểm thử, xem `docs/progress.md` §6.7).
 5. **Rút lại đồng ý**: người thu liên hệ, quản trị bấm "Rút lại & xoá" ở `/admin`. Bản ghi và bản
    đồng ý bị xoá, link hết hiệu lực, mã người nói không bao giờ được cấp lại.
 
