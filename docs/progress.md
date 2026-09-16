@@ -401,6 +401,9 @@ phát khớp từng mẫu mà không cần đo độ lệch bằng tiếng tách
 - Server từ chối file sai định dạng, nhật ký chồng nhau hoặc vượt độ dài file, ghi âm khi chưa đồng
   ý. Quy tắc nhật ký trùng `WavFrameSource`.
 - Mỗi bản ghi có file `.json` đi kèm (nhật ký, thông tin trình duyệt, bản đồng ý, sha256).
+- Giao diện (2026-09-16): một trang, ba bước; thanh sóng nhảy theo giọng khi ghi; người thu nghe lại
+  rồi mới gửi (chưa gửi thì chưa lên server); tình huống đã gửi ẩn với người đó, gửi trùng bị từ
+  chối (409), quản trị nghe và xoá được bản ghi, xoá xong tình huống hiện lại.
 - Bot **không** dừng khi khách nói chen, và **không** tự cắt lời. Nhãn vẫn đúng vì ghi ý định của
   khách; mất các ca "bot cắt lời thật".
 

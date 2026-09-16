@@ -9,7 +9,7 @@ link mời, thu giọng bot và tải dữ liệu về. Vì sao thu theo cách n
 cd collector
 uv sync
 COLLECTOR_ADMIN_TOKEN=<chuỗi ngẫu nhiên ≥ 16 ký tự> uv run uvicorn app.main:app_factory --factory --port 8000
-uv run pytest                                  # 28 test API
+uv run pytest                                  # 34 test API
 COLLECTOR_E2E=1 uv run pytest tests/e2e        # Chrome thật, micro giả, giọng bot giả
 uv run python tools/audit_export.py <export.zip>   # kiểm chất lượng file tải về
 ```
@@ -53,13 +53,15 @@ Các biến khác có giá trị mặc định trong `collector/app/settings.py`
 1. **Thu giọng bot** ở `/admin`: đeo tai nghe có dây, đọc đúng từng chữ, `/` là chỗ ngắt hơi.
    Một tình huống chỉ hiện cho người thu khi mọi câu bot của nó đã thu.
 2. **Tạo link mời** ở `/admin`, gửi mỗi người một link. Mã trong link là mã người nói (`S001`...).
-3. **Người thu** mở link bằng Chrome trên máy tính, đeo tai nghe có dây: đồng ý, thử micro, chọn
-   tình huống, bấm nghe câu bot, nói, bấm khi đã nói xong. Xong tình huống nào, web gửi lên tình
-   huống đó.
-4. **Tải về** ở `/admin` bằng nút tải toàn bộ dữ liệu (.zip), rồi chạy `tools/audit_export.py`.
+3. **Người thu** mở link bằng Chrome trên máy tính, đeo tai nghe có dây: đồng ý, bật micro (nút
+   tiếp tục chỉ mở khi micro nghe thấy giọng), chọn tình huống, bấm Bắt đầu, nói xong mới bấm nút.
+   Hết tình huống thì **nghe lại** rồi **gửi** hoặc thu lại; chưa bấm gửi thì chưa có gì lên server.
+   Tình huống đã gửi không hiện lại cho người đó, trừ khi quản trị xoá bản ghi.
+4. **Nghe và xoá bản ghi** ở `/admin`, mục Bản ghi. Xoá thì tình huống hiện lại cho người thu đó.
+5. **Tải về** ở `/admin` bằng nút tải toàn bộ dữ liệu (.zip), rồi chạy `tools/audit_export.py`.
    Muốn biết một bản ghi chứa lời gì: `cd asr-check && uv run python transcribe.py <export.zip>`
    (chỉ để kiểm thử, xem `docs/progress.md` §6.7).
-5. **Rút lại đồng ý**: người thu liên hệ, quản trị bấm "Rút lại & xoá" ở `/admin`. Bản ghi và bản
+6. **Rút lại đồng ý**: người thu liên hệ, quản trị bấm "Rút lại & xoá" ở `/admin`. Bản ghi và bản
    đồng ý bị xoá, link hết hiệu lực, mã người nói không bao giờ được cấp lại.
 
 ## Mỗi bản ghi gồm
