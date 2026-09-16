@@ -92,6 +92,16 @@ export function encodeWav(channels, sampleRate) {
   return new Blob([buffer], { type: "audio/wav" });
 }
 
+// Bản trộn một kênh chỉ để người thu nghe lại (giọng mình + giọng tổng đài). File gửi lên vẫn là
+// bản hai kênh gốc, không trộn, không xử lý.
+export function mixForListening(channels) {
+  const out = new Float32Array(channels[0].length);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = Math.max(-1, Math.min(1, channels[0][i] + channels[1][i]));
+  }
+  return out;
+}
+
 export function flatten(chunks) {
   const total = chunks.reduce((n, ch) => n + ch.length, 0);
   const out = new Float32Array(total);

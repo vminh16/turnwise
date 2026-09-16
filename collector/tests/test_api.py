@@ -170,7 +170,7 @@ def test_a_valid_recording_is_stored_with_its_checksum_and_sidecar(
     assert [entry["step"] for entry in sidecar["playback"]] == [0, 1]
 
     config = client.get("/api/config", params={"t": token}).json()
-    assert {s["name"]: s["recorded"] for s in config["scripts"]}[SCRIPT] is True
+    assert SCRIPT not in {s["name"] for s in config["scripts"]}
 
 
 @pytest.mark.parametrize(
@@ -287,3 +287,60 @@ def test_withdrawing_an_unknown_speaker_is_404(client: TestClient) -> None:
 def test_a_non_ascii_admin_header_is_refused_not_a_server_error(client: TestClient) -> None:
     response = client.post("/api/admin/invites", headers={"X-Admin-Token": "tổng-đài".encode()})
     assert response.status_code == 401
+
+
+# --- tình huống đã thu --------------------------------------------------------------------
+
+
+def names_offered(client: TestClient, token: str) -> set[str]:
+    return {s["name"] for s in client.get("/api/config", params={"t": token}).json()["scripts"]}
+
+
+def test_a_recorded_scenario_is_no_longer_offered_to_that_speaker(client: TestClient) -> None:
+    token = consented(client)
+    assert SCRIPT in names_offered(client, token)
+    assert upload(client, token).status_code == 201  # type: ignore[attr-defined]
+    assert SCRIPT not in names_offered(client, token)
+    config = client.get("/api/config", params={"t": token}).json()
+    assert (config["done"], config["total"]) == (1, 9)
+
+
+def test_a_second_upload_of_the_same_scenario_is_refused(client: TestClient) -> None:
+    """Bấm gửi hai lần, hoặc hai tab cùng lúc, không được sinh ra hai bản ghi."""
+    token = consented(client)
+    assert upload(client, token).status_code == 201  # type: ignore[attr-defined]
+    assert upload(client, token).status_code == 409  # type: ignore[attr-defined]
+
+
+def test_other_speakers_still_see_a_scenario_someone_else_recorded(client: TestClient) -> None:
+    upload(client, consented(client))
+    assert SCRIPT in names_offered(client, consented(client))
+
+
+def test_admin_lists_plays_and_deletes_recordings(client: TestClient, settings: Settings) -> None:
+    token = consented(client)
+    saved = upload(client, token).json()  # type: ignore[attr-defined]
+
+    listed = client.get("/api/admin/recordings", headers=ADMIN).json()
+    assert len(listed) == 1
+    row = listed[0]
+    assert (row["speaker_id"], row["script"], row["seconds"]) == ("S001", SCRIPT, 3.0)
+    assert row["title"]
+
+    audio = client.get(f"/api/admin/recordings/{row['id']}.wav", headers=ADMIN)
+    assert audio.status_code == 200
+    assert audio.content == wav_bytes()
+
+    assert client.delete(f"/api/admin/recordings/{row['id']}", headers=ADMIN).status_code == 200
+    assert not (settings.data_dir / saved["file"]).exists()
+    assert client.get("/api/admin/recordings", headers=ADMIN).json() == []
+    assert SCRIPT in names_offered(client, token)  # xoá xong thì tình huống hiện lại
+
+
+def test_recording_routes_need_the_admin_token(client: TestClient) -> None:
+    assert client.get("/api/admin/recordings").status_code == 401
+    assert client.delete("/api/admin/recordings/1").status_code == 401
+
+
+def test_deleting_an_unknown_recording_is_404(client: TestClient) -> None:
+    assert client.delete("/api/admin/recordings/42", headers=ADMIN).status_code == 404

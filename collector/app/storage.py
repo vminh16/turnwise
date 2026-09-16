@@ -178,6 +178,31 @@ class Store:
             )
         return {"file": relative.as_posix(), "sha256": digest, "frames": frames}
 
+    def list_recordings(self) -> list[dict[str, Any]]:
+        with self._db() as db:
+            rows = db.execute(
+                "SELECT id, speaker_id, script, frames, bytes, created_at FROM recordings "
+                "ORDER BY id DESC"
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def recording_path(self, recording_id: int) -> Path | None:
+        with self._db() as db:
+            row = db.execute("SELECT file FROM recordings WHERE id = ?", (recording_id,)).fetchone()
+        return None if row is None else self.data_dir / row["file"]
+
+    def delete_recording(self, recording_id: int) -> bool:
+        """Xoá một bản ghi và file đi kèm. Tình huống đó sẽ hiện lại cho người thu."""
+        with self._db() as db:
+            row = db.execute("SELECT file FROM recordings WHERE id = ?", (recording_id,)).fetchone()
+            if row is None:
+                return False
+            target = self.data_dir / row["file"]
+            target.unlink(missing_ok=True)
+            target.with_suffix(".json").unlink(missing_ok=True)
+            db.execute("DELETE FROM recordings WHERE id = ?", (recording_id,))
+        return True
+
     def recorded_scripts(self, speaker_id: str) -> set[str]:
         with self._db() as db:
             rows = db.execute(

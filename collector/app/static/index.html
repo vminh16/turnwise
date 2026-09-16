@@ -3,79 +3,146 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Turnwise — thu âm đóng vai</title>
+  <title>Thu âm đóng vai tổng đài</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <main>
-  <h1>Thu âm đóng vai tổng đài</h1>
-  <p id="status" class="status"></p>
+  <header class="top">
+    <h1>Thu âm đóng vai tổng đài</h1>
+    <span id="speaker" class="sub"></span>
+  </header>
+  <ol class="steps" id="steps">
+    <li data-step="consent">1 · Đồng ý</li>
+    <li data-step="mic">2 · Kiểm tra micro</li>
+    <li data-step="record">3 · Thu âm</li>
+  </ol>
+  <div id="banner" class="banner" hidden></div>
 
-  <section id="consent" hidden>
-    <h2>Phiếu đồng ý</h2>
-    <p><b>Dự án là gì.</b> Turnwise nghiên cứu cách một tổng đài tự động biết khi nào người gọi đã
-      nói xong, và dừng lại khi người gọi nói chen vào. Công ty NetCo trong buổi thu là công ty giả định.</p>
-    <p><b>Bạn sẽ làm gì.</b> Đóng vai khách hàng gọi tổng đài theo một số tình huống có sẵn. Mọi số
-      thuê bao, mã và địa chỉ đều in trên thẻ giả. <b>Không đọc số điện thoại, địa chỉ hay tên thật
-      của bạn.</b></p>
-    <p><b>Về "tổng đài".</b> Giọng tổng đài là các câu một người đã đọc và thu sẵn. Trang web phát
-      từng câu khi bạn bấm nút. Bạn không nói chuyện với một hệ thống tự động thật, và tổng đài sẽ
-      không dừng lại khi bạn nói chen vào.</p>
-    <p><b>Dữ liệu được thu.</b> Giọng nói của bạn trong buổi thu, một mã người nói không chứa tên
-      bạn, vùng giọng nói. Không thu họ tên, tuổi, giới tính, số điện thoại.</p>
-    <p><b>Bên kiểm soát dữ liệu.</b> <span id="controller"></span></p>
-    <p><b>Quyền của bạn.</b> Tham gia là tự nguyện; bạn dừng lúc nào cũng được. Bạn có quyền rút lại
-      đồng ý và yêu cầu xoá bản ghi bằng cách liên hệ bên kiểm soát dữ liệu. Việc rút lại không ảnh
-      hưởng tới những xử lý đã thực hiện trước đó (Luật 91/2025/QH15, Điều 10 khoản 4).</p>
-    <p>Dữ liệu này <b>không</b> được dùng để huấn luyện mô hình. Ô không tích nghĩa là không đồng ý.</p>
+  <!-- 1. Đồng ý -->
+  <section id="consent" class="card" hidden>
+    <h2>Trước khi bắt đầu</h2>
+    <p>Bạn sẽ đóng vai <b>khách hàng gọi tổng đài</b> của một công ty giả định. Giọng tổng đài là
+      các câu đã thu sẵn; bạn nghe qua tai nghe và trả lời tự nhiên.</p>
+    <ul class="small muted">
+      <li>Mọi số thuê bao, mã, địa chỉ đều in sẵn trên màn hình. <b>Không nói thông tin thật của bạn.</b></li>
+      <li>Chỉ thu giọng nói, mã người nói và vùng giọng. Không thu họ tên, tuổi, số điện thoại.</li>
+      <li>Dữ liệu dùng để đo và đánh giá hệ thống, <b>không</b> dùng để huấn luyện mô hình.</li>
+    </ul>
+    <details>
+      <summary>Đọc đầy đủ về dữ liệu và quyền của bạn</summary>
+      <div class="fine">
+        <p><b>Bên kiểm soát dữ liệu:</b> <span id="controller"></span>.</p>
+        <p>Tham gia là tự nguyện, bạn dừng lúc nào cũng được. Bạn có quyền rút lại đồng ý và yêu
+          cầu xoá bản ghi bằng cách liên hệ bên kiểm soát dữ liệu. Việc rút lại không ảnh hưởng tới
+          những xử lý đã thực hiện trước đó (Luật 91/2025/QH15, Điều 10 khoản 4). Bản ghi không
+          công bố công khai; kết quả chỉ công bố dạng số liệu tổng hợp.</p>
+        <p>Giọng tổng đài do người thu sẵn và trang web phát khi bạn bấm nút; tổng đài không dừng
+          lại khi bạn nói chen vào. Ô không tích nghĩa là không đồng ý.</p>
+      </div>
+    </details>
     <form id="consent-form">
-      <label><input type="checkbox" name="purpose_evaluation"> <b>Mục đích 1 (bắt buộc):</b> ghi âm,
-        chép lời, gán nhãn và dùng để đo, đánh giá hệ thống. Kết quả chỉ công bố dạng số liệu tổng hợp.</label>
-      <label><input type="checkbox" name="purpose_excerpts"> <b>Mục đích 2 (không bắt buộc):</b> dùng
-        trích đoạn giọng tôi trong báo cáo, bài trình bày hoặc demo.</label>
-      <label><input type="checkbox" name="adult"> Tôi đã đủ 18 tuổi.</label>
-      <label><input type="checkbox" name="wired_headphones"> Tôi đang dùng <b>tai nghe có dây</b>
-        (không dùng loa ngoài, không dùng tai nghe Bluetooth).</label>
-      <label>Vùng giọng nói của tôi:
-        <select name="dialect">
-          <option value="">— chọn —</option>
-          <option value="north">Bắc</option>
-          <option value="north_central">Bắc Trung Bộ</option>
-          <option value="central">Trung</option>
-          <option value="south">Nam</option>
-        </select>
-      </label>
-      <button type="submit">Tôi đồng ý</button>
+      <label class="check"><input type="checkbox" name="purpose_evaluation">
+        <span><b>Tôi đồng ý</b> ghi âm và dùng bản ghi để đo, đánh giá hệ thống. <span class="muted">(bắt buộc)</span></span></label>
+      <label class="check"><input type="checkbox" name="purpose_excerpts">
+        <span>Cho phép dùng trích đoạn giọng tôi trong báo cáo hoặc demo. <span class="muted">(không bắt buộc)</span></span></label>
+      <label class="check"><input type="checkbox" name="adult"><span>Tôi đủ 18 tuổi.</span></label>
+      <label class="check"><input type="checkbox" name="wired_headphones">
+        <span>Tôi đang đeo <b>tai nghe có dây</b> (không dùng loa ngoài, không dùng Bluetooth).</span></label>
+      <p class="small" style="margin: 12px 0 0">Giọng nói của bạn thuộc vùng nào?</p>
+      <div class="choices">
+        <label><input type="radio" name="dialect" value="north">Bắc</label>
+        <label><input type="radio" name="dialect" value="north_central">Bắc Trung Bộ</label>
+        <label><input type="radio" name="dialect" value="central">Trung</label>
+        <label><input type="radio" name="dialect" value="south">Nam</label>
+      </div>
+      <div class="actions"><button type="submit" class="primary block" id="consent-submit" disabled>Tiếp tục</button></div>
     </form>
   </section>
 
-  <section id="miccheck" hidden>
-    <h2>Thử micro</h2>
-    <p>Đeo tai nghe có dây, nói vài câu bình thường. Vạch dưới đây phải nhảy khi bạn nói.</p>
-    <meter id="level" min="0" max="1" value="0"></meter>
-    <p id="mic-warning" class="warning" hidden></p>
-    <button id="mic-ok">Micro ổn, tiếp tục</button>
-  </section>
-
-  <section id="scripts" hidden>
-    <h2>Chọn một tình huống</h2>
-    <p>Mỗi tình huống khoảng 2 phút. Làm lần lượt, nghỉ giữa các tình huống nếu cần.</p>
-    <ul id="script-list"></ul>
-  </section>
-
-  <section id="run" hidden>
-    <h2 id="run-title"></h2>
-    <p id="run-persona" class="persona"></p>
-    <div id="run-props" class="card"></div>
-    <div class="instruction">
-      <p class="label">Việc của bạn lúc này</p>
-      <p id="run-instruction">Bấm nút bên dưới để gọi tổng đài.</p>
-      <p id="run-replies" class="replies"></p>
+  <!-- 2. Kiểm tra micro -->
+  <section id="mic" class="card" hidden>
+    <h2>Kiểm tra micro</h2>
+    <p>Đeo tai nghe có dây, bấm <b>Bật micro</b>, rồi nói một câu bình thường. Các vạch sẽ chuyển
+      màu xanh khi micro nghe thấy bạn.</p>
+    <div class="recorder" id="mic-recorder">
+      <span class="rec-dot"></span>
+      <canvas id="mic-meter"></canvas>
     </div>
-    <button id="run-next" class="big">Gọi tổng đài</button>
-    <p class="hint">Nói tự nhiên như gọi tổng đài thật. Khi <b>bạn đã nói xong</b>, bấm nút để nghe
-      câu tiếp theo. Muốn nói chen khi tổng đài đang nói thì cứ nói, không cần bấm gì.</p>
+    <p id="mic-hint" class="small muted" style="margin-top: 10px">Chưa bật micro.</p>
+    <div class="actions">
+      <button id="mic-start" class="primary">Bật micro</button>
+      <button id="mic-ok" class="primary" hidden disabled>Micro hoạt động, tiếp tục</button>
+    </div>
+  </section>
+
+  <!-- 3a. Danh sách tình huống -->
+  <section id="list" hidden>
+    <div class="card">
+      <div class="scenario" style="align-items: baseline">
+        <h2 id="remaining">Tình huống</h2>
+        <span id="progress-text" class="small muted"></span>
+      </div>
+      <div class="progress"><span id="progress-bar" style="width: 0"></span></div>
+    </div>
+    <div class="card flat">
+      <h3>Cách làm</h3>
+      <ol class="howto small">
+        <li>Chọn một tình huống, đọc thẻ thông tin.</li>
+        <li>Bấm <b>Bắt đầu</b>. Nghe tổng đài và trả lời tự nhiên. Muốn chen ngang thì cứ nói, không cần bấm gì.</li>
+        <li>Nói xong mới bấm nút. Cuối cùng <b>nghe lại</b> rồi <b>gửi</b>.</li>
+      </ol>
+    </div>
+    <div class="card" id="scenario-list"></div>
+  </section>
+
+  <!-- 3b. Đang thu -->
+  <section id="run" hidden>
+    <div class="card">
+      <div class="recorder" id="run-recorder">
+        <span class="rec-dot"></span>
+        <span class="rec-label" id="run-label">Chưa ghi</span>
+        <canvas id="run-meter"></canvas>
+        <span class="rec-time" id="run-time">00:00</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="scenario" style="align-items: baseline">
+        <h2 id="run-title"></h2>
+        <span id="run-step" class="small muted"></span>
+      </div>
+      <p id="run-persona" class="muted"></p>
+      <dl class="props" id="run-props"></dl>
+    </div>
+    <div class="card">
+      <p><span id="run-status" class="pill">Sẵn sàng</span></p>
+      <p class="instruction" id="run-instruction">Đọc thẻ bên trên. Khi sẵn sàng, bấm Bắt đầu.</p>
+      <div class="replies" id="run-replies"></div>
+      <div class="actions">
+        <button id="run-next" class="primary block" disabled>Đang tải…</button>
+      </div>
+      <div class="actions"><button id="run-cancel" class="link">Huỷ tình huống này</button></div>
+    </div>
+  </section>
+
+  <!-- 3c. Nghe lại -->
+  <section id="review" class="card" hidden>
+    <h2>Nghe lại bản thu</h2>
+    <p class="muted" id="review-title"></p>
+    <audio id="review-audio" controls preload="auto"></audio>
+    <p class="small muted">Bạn nghe cả giọng mình và giọng tổng đài. Nếu có tiếng mình rõ ràng là ổn.
+      Bản gửi đi là bản gốc, không qua chỉnh sửa.</p>
+    <div class="actions">
+      <button id="review-send" class="primary">Gửi bản thu</button>
+      <button id="review-redo">Thu lại</button>
+    </div>
+  </section>
+
+  <!-- Thông báo -->
+  <section id="message" class="card" hidden>
+    <h2 id="message-title"></h2>
+    <p id="message-text" class="muted"></p>
   </section>
 </main>
 <script type="module" src="/static/app.js"></script>

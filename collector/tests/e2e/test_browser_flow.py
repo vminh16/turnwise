@@ -169,35 +169,46 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         page.on("pageerror", lambda error: console.append(f"pageerror: {error}"))
         page.goto(f"{base}/?t={invite['token']}")
 
+        consent_locked = page.is_disabled("#consent-submit")  # chưa tích gì thì chưa cho đi tiếp
         page.check("input[name=purpose_evaluation]")
         page.check("input[name=adult]")
         page.check("input[name=wired_headphones]")
-        page.select_option("select[name=dialect]", "north")
-        page.click("#consent-form button[type=submit]")
+        page.get_by_text("Bắc", exact=True).click()
+        page.click("#consent-submit")
 
-        page.wait_for_selector("#miccheck:not([hidden])")
-        page.wait_for_function("document.getElementById('level').value > 0.05", timeout=10000)
-        mic_warning_hidden = page.is_hidden("#mic-warning")
+        page.wait_for_selector("#mic:not([hidden])")
+        page.click("#mic-start")
+        page.wait_for_function("!document.getElementById('mic-ok').disabled", timeout=10000)
+        mic_warning_hidden = page.is_hidden("#banner")
         page.click("#mic-ok")
 
-        page.get_by_role("button", name=SCRIPT_TITLE).click()
+        page.wait_for_selector("#list:not([hidden])")
+        offered_before = page.text_content("#scenario-list")
+        page.locator(".scenario", has_text=SCRIPT_TITLE).get_by_role("button").click()
         # Lỗi đã gặp: nút bấm được trong lúc đang tải giọng bot, cú bấm bị nuốt mất.
         disabled_while_loading = page.is_disabled("#run-next")
         button = page.locator("#run-next")
-        page.wait_for_function("!document.getElementById('run-next').disabled", timeout=20000)
-        button.click()  # bước 0
+        page.wait_for_function("document.getElementById('run-next').textContent === 'Bắt đầu'")
+        button.click()  # bắt đầu ghi + bước 0
+        page.wait_for_selector("#run-recorder.recording")
+        recording_indicator = page.is_visible("#run-recorder.recording .rec-dot")
         page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
         instruction_0 = page.text_content("#run-instruction")
         page.wait_for_timeout(700)  # khách "nói"
         button.click()  # bước 1
         page.wait_for_function(
-            "document.getElementById('run-next').textContent.includes('Kết thúc')", timeout=10000
+            "document.getElementById('run-next').textContent === 'Kết thúc'", timeout=10000
         )
         page.wait_for_timeout(500)
-        button.click()  # kết thúc
-        page.wait_for_function(
-            "document.getElementById('status').textContent.includes('Đã lưu')", timeout=20000
+        button.click()  # kết thúc -> nghe lại
+        page.wait_for_selector("#review:not([hidden])", timeout=20000)
+        review_audio_ready = page.eval_on_selector(
+            "#review-audio", "a => a.src.startsWith('blob:')"
         )
+        uploaded_before_send = httpx.get(f"{base}/api/admin/recordings", headers=admin).json()
+        page.click("#review-send")
+        page.wait_for_selector("#list:not([hidden]), #message:not([hidden])", timeout=20000)
+        offered_after = page.text_content("#scenario-list")
         browser.close()
 
     export = httpx.get(f"{base}/api/admin/export", headers=admin, timeout=60)
@@ -212,7 +223,101 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         "mic_warning_hidden": mic_warning_hidden,
         "disabled_while_loading": disabled_while_loading,
         "instruction_0": instruction_0,
+        "consent_locked": consent_locked,
+        "recording_indicator": recording_indicator,
+        "review_audio_ready": review_audio_ready,
+        "uploaded_before_send": uploaded_before_send,
+        "offered_before": offered_before,
+        "offered_after": offered_after,
+        "base": base,
+        "token": token,
+        "mic": mic,
+        "invite_token": invite["token"],
     }
+
+
+def test_consent_cannot_be_submitted_empty(recorded: dict) -> None:
+    assert recorded["consent_locked"]
+
+
+def test_recording_shows_a_live_indicator(recorded: dict) -> None:
+    assert recorded["recording_indicator"]
+
+
+def test_nothing_is_uploaded_until_the_participant_listens_and_sends(recorded: dict) -> None:
+    assert recorded["review_audio_ready"]
+    assert recorded["uploaded_before_send"] == []
+
+
+def test_a_sent_scenario_disappears_from_the_participant_list(recorded: dict) -> None:
+    assert SCRIPT_TITLE in recorded["offered_before"]
+    assert SCRIPT_TITLE not in recorded["offered_after"]
+
+
+def test_admin_records_a_bot_line_and_deleting_a_recording_brings_the_scenario_back(
+    recorded: dict,
+) -> None:
+    """Luồng quản trị qua giao diện thật: thu, nghe lại, lưu; xoá bản ghi thì tình huống hiện lại"""
+    from playwright.sync_api import sync_playwright
+
+    base, token = recorded["base"], recorded["token"]
+    admin = {"X-Admin-Token": token}
+    before = {
+        (line["script"], line["step"]): line["recorded"]
+        for line in httpx.get(f"{base}/api/admin/lines", headers=admin).json()
+    }
+    target = ("n1-a-outage-reading-number", 0)
+    assert before[target] is False
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(
+            executable_path=str(CHROME) if CHROME.exists() else None,
+            headless=True,
+            args=[
+                "--use-fake-ui-for-media-stream",
+                "--use-fake-device-for-media-stream",
+                f"--use-file-for-fake-audio-capture={recorded['mic']}",
+                "--autoplay-policy=no-user-gesture-required",
+            ],
+        )
+        page = browser.new_page()
+        page.on("dialog", lambda dialog: dialog.accept())
+        page.goto(f"{base}/admin")
+        page.fill("#token", token)
+        page.click("#login-form button[type=submit]")
+        page.wait_for_selector("#panel:not([hidden])")
+
+        group = page.locator("details[data-script='n1-a-outage-reading-number']")
+        if not group.evaluate("d => d.open"):
+            group.locator("summary").click()
+        row = group.locator(".row").first
+        row.get_by_role("button", name="Thu", exact=True).click()
+        page.wait_for_selector(".panel .recorder.recording")
+        page.wait_for_timeout(1200)
+        row.get_by_role("button", name="Dừng").click()
+        assert row.locator(".panel audio").count() == 1
+        assert row.get_by_text("Chưa lưu").is_visible()
+        row.get_by_role("button", name="Lưu").click()
+        page.wait_for_function(
+            "document.getElementById('banner').textContent.includes('Đã lưu câu 1')"
+        )
+
+        page.locator("#recordings tr", has_text=SCRIPT_TITLE).get_by_role(
+            "button", name="Xoá"
+        ).click()
+        page.wait_for_function(
+            "document.getElementById('banner').textContent.includes('Đã xoá bản ghi')"
+        )
+        browser.close()
+
+    after = {
+        (line["script"], line["step"]): line["recorded"]
+        for line in httpx.get(f"{base}/api/admin/lines", headers=admin).json()
+    }
+    assert after[target] is True
+    assert httpx.get(f"{base}/api/admin/recordings", headers=admin).json() == []
+    offered = httpx.get(f"{base}/api/config", params={"t": recorded["invite_token"]}).json()
+    assert SCRIPT in {script["name"] for script in offered["scripts"]}
 
 
 def db_rows(export: Path, sql: str, *args: object) -> list[sqlite3.Row]:

@@ -3,37 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Turnwise — quản trị thu âm</title>
+  <title>Quản trị thu âm</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<main>
-  <h1>Quản trị thu âm</h1>
-  <p id="status" class="status"></p>
+<main class="wide">
+  <header class="top">
+    <h1>Quản trị thu âm</h1>
+    <span class="actions" style="margin: 0">
+      <button id="export" hidden>Tải toàn bộ dữ liệu</button>
+      <button id="logout" class="link" hidden>Thoát</button>
+    </span>
+  </header>
+  <div id="banner" class="banner" hidden></div>
 
-  <section>
-    <label>Admin token <input id="token" type="password" autocomplete="off"></label>
-    <button id="load">Mở</button>
+  <section id="login" class="card">
+    <h2>Đăng nhập</h2>
+    <form id="login-form" class="actions" style="margin-top: 0">
+      <input id="token" type="password" autocomplete="current-password" placeholder="Admin token" style="flex: 1; min-width: 14rem">
+      <button type="submit" class="primary">Mở</button>
+    </form>
   </section>
 
-  <section id="panel" hidden>
-    <h2>Người thu</h2>
-    <button id="invite">Tạo link mời mới</button>
-    <table>
-      <thead><tr><th>Mã</th><th>Đồng ý</th><th>Số tình huống đã thu</th><th>Link</th></tr></thead>
-      <tbody id="invites"></tbody>
-    </table>
-    <button id="export">Tải toàn bộ dữ liệu (.zip)</button>
+  <div id="panel" hidden>
+    <section class="card">
+      <div class="scenario" style="align-items: baseline">
+        <h2>1 · Giọng tổng đài</h2>
+        <span id="prompt-progress" class="small muted"></span>
+      </div>
+      <p class="small muted">Đeo tai nghe có dây, đọc đúng từng chữ; dấu <b>/</b> là chỗ ngắt hơi.
+        Bấm <b>Thu</b>, đọc, bấm <b>Dừng</b>, nghe lại rồi <b>Lưu</b>. Một tình huống chỉ hiện cho người thu
+        khi đã lưu đủ mọi câu của nó.</p>
+      <div id="groups"></div>
+    </section>
 
-    <h2>Giọng tổng đài</h2>
-    <p>Đeo tai nghe có dây. Đọc đúng từng chữ; dấu <b>/</b> là chỗ ngắt hơi ngắn. Bấm Thu, đọc, bấm
-      Dừng, nghe lại, rồi Lưu. Thu lại bao nhiêu lần cũng được.</p>
-    <table>
-      <thead><tr><th>Tình huống / bước</th><th>Lời tổng đài</th><th></th></tr></thead>
-      <tbody id="lines"></tbody>
-    </table>
-  </section>
+    <section class="card">
+      <div class="scenario" style="align-items: baseline">
+        <h2>2 · Người thu</h2>
+        <button id="invite" class="primary">Tạo link mời</button>
+      </div>
+      <div id="new-invite" class="panel" hidden></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Mã</th><th>Trạng thái</th><th>Đã gửi</th><th>Link</th><th></th></tr></thead>
+          <tbody id="invites"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="scenario" style="align-items: baseline">
+        <h2>3 · Bản ghi</h2>
+        <span id="recording-count" class="small muted"></span>
+      </div>
+      <p class="small muted">Xoá một bản ghi thì tình huống đó hiện lại cho đúng người thu ấy.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Thời điểm</th><th>Mã</th><th>Tình huống</th><th>Độ dài</th><th>Nghe</th><th></th></tr></thead>
+          <tbody id="recordings"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </main>
 <script type="module" src="/static/admin.js"></script>
 </body>

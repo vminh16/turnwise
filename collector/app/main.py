@@ -92,7 +92,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         speaker_id = speaker(t)
         recorded = store.recorded_scripts(speaker_id)
         prompts = store.prompt_keys()
+        # Tình huống người này đã gửi thì không hiện nữa, cho tới khi quản trị xoá bản ghi đó.
         return {
+            "done": len(recorded & set(scripts)),
+            "total": len(scripts),
             "speaker_id": speaker_id,
             "consented": store.consent_of(speaker_id) is not None,
             "sample_rate_hz": settings.sample_rate_hz,
@@ -103,12 +106,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "scripts": [
                 {
                     **participant_view(script),
-                    "recorded": name in recorded,
                     "prompts_ready": all(
                         f"{name}/{index}" in prompts for index in range(len(script["steps"]))
                     ),
                 }
                 for name, script in scripts.items()
+                if name not in recorded
             ],
         }
 
@@ -147,6 +150,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(403, "consent is required before recording")
         if script not in scripts:
             raise HTTPException(404, f"unknown script {script!r}")
+        if script in store.recorded_scripts(speaker_id):
+            raise HTTPException(409, "this scenario is already recorded for this speaker")
         data = await read_limited(audio)
         try:
             frames = check_wav(data, channels=2, sample_rate_hz=settings.sample_rate_hz)
@@ -188,11 +193,43 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         logger.info("speaker %s withdrew; %d recordings deleted", speaker_id, deleted)
         return {"speaker_id": speaker_id, "recordings_deleted": deleted}
 
+    @app.get("/api/admin/recordings", dependencies=[Depends(admin)])
+    def recordings() -> list[dict[str, Any]]:
+        return [
+            {
+                "id": row["id"],
+                "speaker_id": row["speaker_id"],
+                "script": row["script"],
+                "title": scripts.get(row["script"], {}).get("title", row["script"]),
+                "seconds": round(row["frames"] / settings.sample_rate_hz, 2),
+                "created_at": row["created_at"],
+            }
+            for row in store.list_recordings()
+        ]
+
+    @app.get("/api/admin/recordings/{recording_id}.wav", dependencies=[Depends(admin)])
+    def recording_audio(recording_id: int) -> FileResponse:
+        path = store.recording_path(recording_id)
+        if path is None or not path.exists():
+            raise HTTPException(404, "recording not found")
+        return FileResponse(path, media_type="audio/wav")
+
+    @app.delete("/api/admin/recordings/{recording_id}", dependencies=[Depends(admin)])
+    def delete_recording(recording_id: int) -> dict[str, int]:
+        if not store.delete_recording(recording_id):
+            raise HTTPException(404, "recording not found")
+        logger.info("recording %d deleted by admin", recording_id)
+        return {"deleted": recording_id}
+
     @app.get("/api/admin/lines", dependencies=[Depends(admin)])
     def lines() -> list[dict[str, Any]]:
         recorded = store.prompt_keys()
         return [
-            {**line, "recorded": f"{line['script']}/{line['step']}" in recorded}
+            {
+                **line,
+                "title": scripts[line["script"]]["title"],
+                "recorded": f"{line['script']}/{line['step']}" in recorded,
+            }
             for line in prompt_lines(scripts)
         ]
 
