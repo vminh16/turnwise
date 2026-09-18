@@ -1,0 +1,26 @@
+# Render Blueprint for the data collector (docs/runbook/collect-data.md, "Deploy lên Render").
+# Only the collector is deployed; the voice agent itself runs on a laptop.
+services:
+  - type: web
+    name: turnwise-collector
+    runtime: docker
+    dockerfilePath: ./collector/Dockerfile
+    dockerContext: .
+    branch: feat/repo-setup
+    region: singapore
+    # Persistent disks need a paid instance; 512 MB is enough for one person uploading at a time.
+    plan: 0.5c-512mb
+    # A disk pins the service to one instance and every deploy has a few seconds of downtime,
+    # so deploy by hand between recording sessions, never on push.
+    numInstances: 1
+    autoDeployTrigger: "off"
+    healthCheckPath: /admin
+    disk:
+      name: collector-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: COLLECTOR_ADMIN_TOKEN
+        sync: false
+      - key: COLLECTOR_DATA_CONTROLLER
+        sync: false

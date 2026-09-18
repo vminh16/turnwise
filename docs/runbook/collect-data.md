@@ -31,19 +31,23 @@ docker run -p 8000:8000 -e COLLECTOR_ADMIN_TOKEN=<token> -v turnwise-data:/data 
 
 Thiếu `-v ...:/data` thì app **không chịu khởi động**: dữ liệu trong container mất khi xoá container.
 
-## Deploy (Railway, Render)
+## Deploy lên Render
 
-- Nguồn: image `mixp123/turnwise-collector:<commit>` trên Docker Hub, hoặc repo này với Dockerfile
-  `collector/Dockerfile` và build context là gốc repo. Build lại rồi push:
-  `docker build -f collector/Dockerfile -t mixp123/turnwise-collector:$(git rev-parse --short HEAD) .`
-  rồi `docker push ...`. Railway nên trỏ vào tag commit, không trỏ `latest`, để biết đang chạy bản nào.
-- Railway: chỉ chạy **1 replica** (SQLite nằm trên volume, volume chỉ gắn được vào một replica).
-- Gắn **ổ đĩa bền** vào `/data`. Không có thì app báo lỗi và không chạy, thay vì chạy rồi mất sạch
-  bản ghi ở lần deploy lại.
-- Biến môi trường: `COLLECTOR_ADMIN_TOKEN` (bắt buộc), `COLLECTOR_DATA_CONTROLLER` (tên và cách
-  liên hệ bên kiểm soát dữ liệu, hiện trên phiếu đồng ý). Nền tảng tự cấp `PORT` và HTTPS.
-- Container chạy bằng user uid 10001. Ổ đĩa gắn với quyền root thì app báo lỗi quyền ghi lúc khởi
-  động; trên Railway đặt `RAILWAY_RUN_UID=0`.
+Cấu hình nằm ở `render.yaml` (Blueprint): Docker, Singapore, 1 instance, ổ đĩa 5 GB ở `/data`.
+
+1. Push nhánh có trong `render.yaml` lên GitHub.
+2. Render Dashboard: **New** → **Blueprint**, chọn repo, Render đọc `render.yaml`.
+3. Điền `COLLECTOR_ADMIN_TOKEN` (ít nhất 16 ký tự) và `COLLECTOR_DATA_CONTROLLER` (tên và cách liên
+   hệ bên kiểm soát dữ liệu, hiện trên phiếu đồng ý). Render tự cấp `PORT` và HTTPS.
+4. Deploy **bằng tay** (Manual Deploy), giữa các buổi thu: có ổ đĩa thì mỗi lần deploy server tắt
+   vài giây, bản gửi đúng lúc đó sẽ báo lỗi và người thu phải bấm Gửi lại.
+
+Thiếu ổ đĩa ở `/data` thì app báo lỗi và không chạy, thay vì chạy rồi mất sạch bản ghi ở lần deploy
+lại. Container khởi động bằng root, giao `/data` cho uid 10001 rồi bỏ quyền root trước khi chạy app,
+nên ổ đĩa của nền tảng thuộc root cũng ghi được.
+
+Nguồn khác: image `mixp123/turnwise-collector:<commit>` trên Docker Hub, build bằng
+`docker build -f collector/Dockerfile -t mixp123/turnwise-collector:$(git rev-parse --short HEAD) .`.
 
 Các biến khác có giá trị mặc định trong `collector/app/settings.py`.
 
