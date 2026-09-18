@@ -206,6 +206,34 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
             "#review-audio", "a => a.src.startsWith('blob:')"
         )
         uploaded_before_send = httpx.get(f"{base}/api/admin/recordings", headers=admin).json()
+        # Mạng hỏng lúc gửi: lần 1 không tới server, lần 2 server đã lưu nhưng mất phản hồi.
+        # Bản thu phải còn nguyên để gửi lại, và gửi lại không được tạo bản ghi thứ hai.
+        attempts: list[str] = []
+
+        def flaky(route: object) -> None:
+            attempts.append("sent")
+            if len(attempts) == 1:
+                route.abort()
+            elif len(attempts) == 2:
+                route.fetch()
+                route.abort()
+            else:
+                route.continue_()
+
+        page.route("**/api/recordings", flaky)
+        failed_sends = []
+        for _ in range(2):
+            page.click("#review-send")
+            page.wait_for_function(
+                "document.getElementById('review-send').textContent === 'Gửi lại'"
+            )
+            failed_sends.append(
+                {
+                    "banner": page.text_content("#banner"),
+                    "still_reviewing": page.is_visible("#review"),
+                    "rows": len(httpx.get(f"{base}/api/admin/recordings", headers=admin).json()),
+                }
+            )
         page.click("#review-send")
         page.wait_for_selector("#list:not([hidden]), #message:not([hidden])", timeout=20000)
         offered_after = page.text_content("#scenario-list")
@@ -227,6 +255,8 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         "recording_indicator": recording_indicator,
         "review_audio_ready": review_audio_ready,
         "uploaded_before_send": uploaded_before_send,
+        "failed_sends": failed_sends,
+        "send_attempts": len(attempts),
         "offered_before": offered_before,
         "offered_after": offered_after,
         "base": base,
@@ -247,6 +277,16 @@ def test_recording_shows_a_live_indicator(recorded: dict) -> None:
 def test_nothing_is_uploaded_until_the_participant_listens_and_sends(recorded: dict) -> None:
     assert recorded["review_audio_ready"]
     assert recorded["uploaded_before_send"] == []
+
+
+def test_a_failed_send_keeps_the_take_and_a_retry_never_duplicates_it(recorded: dict) -> None:
+    lost, response_lost = recorded["failed_sends"]
+    assert lost["still_reviewing"] and response_lost["still_reviewing"]
+    assert "Bản thu vẫn còn" in lost["banner"]
+    assert (lost["rows"], response_lost["rows"]) == (0, 1)
+    assert recorded["send_attempts"] == 3
+    rows = db_rows(recorded["work"], "SELECT id FROM recordings")
+    assert len(rows) == 1
 
 
 def test_a_sent_scenario_disappears_from_the_participant_list(recorded: dict) -> None:
@@ -347,7 +387,16 @@ def the_recording(recorded: dict) -> tuple[sqlite3.Row, np.ndarray, dict]:
 
 
 def test_the_page_ran_without_errors(recorded: dict) -> None:
-    errors = [line for line in recorded["console"] if line.startswith(("error", "pageerror"))]
+    # Ba lỗi mạng do chính test gây ra ở bước gửi (hai lần hỏng, lần gửi lại nhận 409).
+    injected = {
+        "error: Failed to load resource: net::ERR_FAILED",
+        "error: Failed to load resource: the server responded with a status of 409 (Conflict)",
+    }
+    errors = [
+        line
+        for line in recorded["console"]
+        if line.startswith(("error", "pageerror")) and line not in injected
+    ]
     assert not errors, errors
 
 
