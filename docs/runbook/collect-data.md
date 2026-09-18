@@ -29,14 +29,17 @@ docker build -f collector/Dockerfile -t turnwise-collector .
 docker run -p 8000:8000 -e COLLECTOR_ADMIN_TOKEN=<token> -v turnwise-data:/data turnwise-collector
 ```
 
+Thiếu `-v ...:/data` thì app **không chịu khởi động**: dữ liệu trong container mất khi xoá container.
+
 ## Deploy (Railway, Render)
 
 - Nguồn: repo này, Dockerfile `collector/Dockerfile`, build context là gốc repo.
-- Gắn **ổ đĩa bền** vào `/data`. Không có ổ bền thì mỗi lần deploy lại mất sạch bản ghi.
+- Gắn **ổ đĩa bền** vào `/data`. Không có thì app báo lỗi và không chạy, thay vì chạy rồi mất sạch
+  bản ghi ở lần deploy lại.
 - Biến môi trường: `COLLECTOR_ADMIN_TOKEN` (bắt buộc), `COLLECTOR_DATA_CONTROLLER` (tên và cách
   liên hệ bên kiểm soát dữ liệu, hiện trên phiếu đồng ý). Nền tảng tự cấp `PORT` và HTTPS.
-- Container chạy bằng user không phải root. Nếu ổ đĩa của nền tảng chỉ cho root ghi, app báo lỗi
-  quyền ghi ngay lúc khởi động; khi đó chỉnh quyền ổ theo hướng dẫn của nền tảng.
+- Container chạy bằng user uid 10001. Ổ đĩa gắn với quyền root thì app báo lỗi quyền ghi lúc khởi
+  động; trên Railway đặt `RAILWAY_RUN_UID=0`.
 
 Các biến khác có giá trị mặc định trong `collector/app/settings.py`.
 
@@ -47,6 +50,7 @@ Các biến khác có giá trị mặc định trong `collector/app/settings.py`
 - [ ] Điền `COLLECTOR_DATA_CONTROLLER`.
 - [ ] Người đọc giọng bot đã ký phụ lục B của `docs/annotation-guide.md`.
 - [ ] Đã tự thu thử một tình huống và nghe lại cả hai kênh.
+- [ ] Đã redeploy một lần sau khi thu thử, và bản ghi thử vẫn còn (ổ đĩa bền hoạt động thật).
 
 ## Quy trình
 
@@ -57,8 +61,13 @@ Các biến khác có giá trị mặc định trong `collector/app/settings.py`
    tiếp tục chỉ mở khi micro nghe thấy giọng), chọn tình huống, bấm Bắt đầu, nói xong mới bấm nút.
    Hết tình huống thì **nghe lại** rồi **gửi** hoặc thu lại; chưa bấm gửi thì chưa có gì lên server.
    Tình huống đã gửi không hiện lại cho người đó, trừ khi quản trị xoá bản ghi.
-4. **Nghe và xoá bản ghi** ở `/admin`, mục Bản ghi. Xoá thì tình huống hiện lại cho người thu đó.
+4. **Nghe và xoá bản ghi** ở `/admin`, mục Bản ghi. Mỗi bản ghi là trọn cuộc gọi của một tình
+   huống, file wav 2 kênh: nghe bằng tai nghe thì tai trái là người thu, tai phải là bot. Xoá thì
+   tình huống hiện lại cho người thu đó.
 5. **Tải về** ở `/admin` bằng nút tải toàn bộ dữ liệu (.zip), rồi chạy `tools/audit_export.py`.
+   Tải sau **mỗi buổi thu**: bản zip trên máy là bản sao lưu, server hỏng thì vẫn còn nó.
+   Trong zip: `sessions/<mã người>/<tình huống>-<thời điểm>.wav` kèm `.json` cùng tên (nhật ký phát
+   bot, đồng ý), `prompts/` và `collector.sqlite3`. Mở wav bằng Audacity để thấy hai kênh.
    Muốn biết một bản ghi chứa lời gì: `cd asr-check && uv run python transcribe.py <export.zip>`
    (chỉ để kiểm thử, xem `docs/progress.md` §6.7).
 6. **Rút lại đồng ý**: người thu liên hệ, quản trị bấm "Rút lại & xoá" ở `/admin`. Bản ghi và bản
