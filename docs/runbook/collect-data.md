@@ -33,7 +33,11 @@ Thiếu `-v ...:/data` thì app **không chịu khởi động**: dữ liệu tr
 
 ## Deploy (Railway, Render)
 
-- Nguồn: repo này, Dockerfile `collector/Dockerfile`, build context là gốc repo.
+- Nguồn: image `mixp123/turnwise-collector:<commit>` trên Docker Hub, hoặc repo này với Dockerfile
+  `collector/Dockerfile` và build context là gốc repo. Build lại rồi push:
+  `docker build -f collector/Dockerfile -t mixp123/turnwise-collector:$(git rev-parse --short HEAD) .`
+  rồi `docker push ...`. Railway nên trỏ vào tag commit, không trỏ `latest`, để biết đang chạy bản nào.
+- Railway: chỉ chạy **1 replica** (SQLite nằm trên volume, volume chỉ gắn được vào một replica).
 - Gắn **ổ đĩa bền** vào `/data`. Không có thì app báo lỗi và không chạy, thay vì chạy rồi mất sạch
   bản ghi ở lần deploy lại.
 - Biến môi trường: `COLLECTOR_ADMIN_TOKEN` (bắt buộc), `COLLECTOR_DATA_CONTROLLER` (tên và cách
