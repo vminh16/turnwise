@@ -31,6 +31,18 @@ docker run -p 8000:8000 -e COLLECTOR_ADMIN_TOKEN=<token> -v turnwise-data:/data 
 
 Thiếu `-v ...:/data` thì app **không chịu khởi động**: dữ liệu trong container mất khi xoá container.
 
+## Thu qua laptop (miễn phí)
+
+Server là container Docker trên laptop; Cloudflare Tunnel cho nó một địa chỉ HTTPS công khai. Dữ
+liệu nằm trên laptop, không nằm trên server nước ngoài. Laptop phải bật và có mạng suốt buổi thu.
+
+1. Cài một lần: `winget install --id Cloudflare.cloudflared`, mở terminal mới.
+2. Mỗi buổi: bật Docker Desktop (container tự chạy lại), rồi
+   `cloudflared tunnel --url http://localhost:8000`. Lệnh in ra `https://<tên>.trycloudflare.com`.
+3. Mở `<địa chỉ đó>/admin`. Link mời lấy theo địa chỉ đang mở, nên mỗi buổi chép lại link từ bảng
+   Người thu (địa chỉ đổi mỗi lần bật tunnel, mã trong link thì giữ nguyên).
+4. Hết buổi: Ctrl+C để tắt tunnel, rồi tải zip về làm bản sao lưu.
+
 ## Deploy lên Render
 
 Cấu hình nằm ở `render.yaml` (Blueprint): Docker, Singapore, 1 instance, ổ đĩa 5 GB ở `/data`.
