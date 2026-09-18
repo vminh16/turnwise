@@ -267,7 +267,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 closing(sqlite3.connect(snapshot)) as target,
             ):
                 source.backup(target)
-            with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
+            # Không nén: PCM gần như không nhỏ đi (~7%) mà nén làm chậm gấp nhiều lần.
+            with zipfile.ZipFile(archive, "w", zipfile.ZIP_STORED) as bundle:
                 bundle.write(snapshot, "collector.sqlite3")
                 for folder in ("sessions", "prompts"):
                     for path in sorted((settings.data_dir / folder).rglob("*")):
