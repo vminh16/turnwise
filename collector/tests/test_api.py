@@ -97,6 +97,19 @@ def test_the_app_refuses_to_start_without_a_strong_admin_token(
         load_settings()
 
 
+def test_the_app_refuses_to_start_when_the_data_dir_is_not_a_mounted_volume(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Trên Railway/Render không gắn volume thì mỗi lần deploy lại là mất sạch dữ liệu."""
+    from app.settings import load_settings
+
+    monkeypatch.setenv("COLLECTOR_ADMIN_TOKEN", "a" * 32)
+    monkeypatch.setenv("COLLECTOR_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("COLLECTOR_REQUIRE_VOLUME", "1")
+    with pytest.raises(RuntimeError, match="volume"):
+        load_settings()
+
+
 def test_admin_routes_need_the_admin_token(client: TestClient) -> None:
     assert client.post("/api/admin/invites").status_code == 401
     assert client.post("/api/admin/invites", headers={"X-Admin-Token": "b" * 32}).status_code == 401

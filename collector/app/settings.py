@@ -35,8 +35,21 @@ def load_settings() -> Settings:
         raise RuntimeError(
             f"COLLECTOR_ADMIN_TOKEN must be set to at least {MIN_ADMIN_TOKEN_CHARS} characters"
         )
+    data_dir = Path(os.environ.get("COLLECTOR_DATA_DIR", REPO_ROOT / "data" / "collector"))
+    # Image Docker bật cờ này: không gắn volume thì dữ liệu nằm trong container và mất sạch ở
+    # lần deploy lại, nên thà không chạy còn hơn chạy mà âm thầm mất.
+    if os.environ.get("COLLECTOR_REQUIRE_VOLUME") == "1" and not os.path.ismount(data_dir):
+        raise RuntimeError(
+            f"{data_dir} is not a mounted volume; attach a persistent volume there, "
+            "or every redeploy deletes all recordings"
+        )
+    if data_dir.exists() and not os.access(data_dir, os.W_OK):
+        raise RuntimeError(
+            f"{data_dir} is not writable by the app user (uid 10001 in the image); a volume "
+            "mounted as root needs chown to that uid, or on Railway set RAILWAY_RUN_UID=0"
+        )
     return Settings(
-        data_dir=Path(os.environ.get("COLLECTOR_DATA_DIR", REPO_ROOT / "data" / "collector")),
+        data_dir=data_dir,
         roleplay_dir=Path(os.environ.get("COLLECTOR_ROLEPLAY_DIR", REPO_ROOT / "roleplay")),
         admin_token=token,
         sample_rate_hz=int(os.environ.get("COLLECTOR_SAMPLE_RATE_HZ", "16000")),

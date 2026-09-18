@@ -14,12 +14,13 @@ COPY roleplay /srv/roleplay
 ENV PATH="/srv/collector/.venv/bin:$PATH" \
     COLLECTOR_ROLEPLAY_DIR=/srv/roleplay \
     COLLECTOR_DATA_DIR=/data \
+    COLLECTOR_REQUIRE_VOLUME=1 \
     PYTHONUNBUFFERED=1
 
 RUN useradd --create-home --uid 10001 collector && mkdir -p /data && chown collector /data
 USER collector
-VOLUME /data
 EXPOSE 8000
 
-# Railway and Render inject PORT; COLLECTOR_ADMIN_TOKEN must be set or the app refuses to start.
+# Railway and Render inject PORT. The app refuses to start unless COLLECTOR_ADMIN_TOKEN is set
+# and /data is a mounted volume: run with -v <name>:/data, or attach a volume at /data.
 CMD ["sh", "-c", "uvicorn app.main:app_factory --factory --host 0.0.0.0 --port ${PORT:-8000}"]
