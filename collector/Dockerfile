@@ -31,10 +31,12 @@ ENV PATH="/srv/collector/.venv/bin:$PATH" \
     COLLECTOR_REQUIRE_VOLUME=1 \
     PYTHONUNBUFFERED=1
 
+COPY --chmod=755 collector/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN useradd --create-home --uid 10001 collector && mkdir -p /data && chown collector /data
-USER collector
 EXPOSE 8000
 
-# Railway and Render inject PORT. The app refuses to start unless COLLECTOR_ADMIN_TOKEN is set
-# and /data is a mounted volume: run with -v <name>:/data, or attach a volume at /data.
+# The entrypoint gives /data to uid 10001 and drops root before the app starts.
+# Render and Railway inject PORT. The app refuses to start unless COLLECTOR_ADMIN_TOKEN is set
+# and /data is a mounted volume: run with -v <name>:/data, or attach a disk at /data.
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sh", "-c", "uvicorn app.main:app_factory --factory --host 0.0.0.0 --port ${PORT:-8000}"]
