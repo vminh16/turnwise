@@ -1,13 +1,27 @@
 # Build from the repository root: docker build -f collector/Dockerfile -t turnwise-collector .
 # The root is the build context because the role-play scripts live in roleplay/.
-FROM python:3.12-slim
 
-COPY --from=ghcr.io/astral-sh/uv:0.11.28 /uv /uvx /bin/
+# --- build: resolve and install dependencies into /srv/collector/.venv ----------------------
+FROM python:3.12-slim AS build
+
+COPY --from=ghcr.io/astral-sh/uv:0.11.28 /uv /bin/
+
+# Use the base image's Python (same path in the runtime stage), copy files instead of
+# hard-linking out of uv's cache, and precompile bytecode so the first request is not slow.
+ENV UV_PYTHON_DOWNLOADS=never \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1
 
 WORKDIR /srv/collector
 COPY collector/pyproject.toml collector/uv.lock collector/.python-version ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
 
+# --- runtime: no uv, no build cache, only the venv, the app and the scripts -----------------
+FROM python:3.12-slim
+
+WORKDIR /srv/collector
+COPY --from=build /srv/collector/.venv ./.venv
 COPY collector/app ./app
 COPY roleplay /srv/roleplay
 
