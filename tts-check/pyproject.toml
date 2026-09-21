@@ -1,0 +1,11 @@
+[project]
+name = "turnwise-tts-check"
+version = "0.1.0"
+description = "Test-only: listen to and time candidate TTS voices for the bot; not wired into src/"
+requires-python = ">=3.12"
+dependencies = [
+    "vieneu>=3.8",
+]
+
+[tool.uv]
+package = false
