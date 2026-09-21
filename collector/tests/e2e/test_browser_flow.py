@@ -196,9 +196,7 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
         instruction_0 = page.text_content("#run-instruction")
         for _ in prompts[1:]:  # các bước sau, mỗi bước chờ bot nói xong rồi khách "nói"
-            page.wait_for_function(
-                "!document.getElementById('run-next').disabled", timeout=10000
-            )
+            page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
             page.wait_for_timeout(700)
             button.click()
         page.wait_for_function(
