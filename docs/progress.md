@@ -256,7 +256,7 @@ Không giải bằng cách nới script chặn.
 
 ### 6.3 Pha 1.1 — kịch bản đóng vai
 
-Chín kịch bản cho năm luồng, 46 lượt bot, cộng `roleplay/common.yaml` với các câu dùng
+Chín kịch bản cho năm luồng, 57 lượt bot, cộng `roleplay/common.yaml` với các câu dùng
 chung khi buổi thu lệch kịch bản. `uv run pytest tests/unit/test_roleplay_scripts.py`: 28
 test. Commit `111577e`, sửa theo rà soát độ tự nhiên ở `17dace2`.
 
@@ -266,7 +266,8 @@ test. Commit `111577e`, sửa theo rà soát độ tự nhiên ở `17dace2`.
 | Mỗi hành vi có ở ít nhất hai luồng | ngập ngừng, tiếng đệm, câu dài: 4 luồng; ngắt lời: 3; gặp nhân viên: 3; câu ngắn: 5 |
 | Gặp nhân viên giữa lúc bot đang đọc, ngoài N5 | có ở N2 và N4 |
 | "Dạ." là một câu trả lời trọn, không chỉ là tiếng đệm | có ở bốn luồng |
-| Gợi ý câu trả lời ngắn phủ sáu thanh ở âm tiết cuối | nặng 15, sắc 15, ngang 12, huyền 9, hỏi 6, ngã 3 |
+| Gợi ý câu trả lời ngắn phủ sáu thanh ở âm tiết cuối | nặng 17, sắc 15, ngang 15, huyền 9, hỏi 7, ngã 5 |
+| Mọi cuộc gọi do bot khép lại: chào kết thúc, hoặc chuyển máy nếu khách đòi gặp nhân viên | đủ chín |
 | Mọi đoạn bot đọc có dấu `/` đánh chỗ ngắt hơi | kiểm lúc nạp |
 
 Đã thử phá: bỏ ba câu gợi ý kết thúc bằng thanh ngã thì kiểm tra độ phủ thanh báo thiếu.
@@ -308,6 +309,13 @@ Quyết định và lý do:
 - **`final_syllable_tone()` đọc thanh từ chữ viết** bằng `unicodedata` của thư viện chuẩn.
   Hiện nằm trong `evaluation/roleplay.py`; pha 1.6 cần đúng hàm này để gán thanh cho lời
   khách, lúc đó mới quyết định chỗ đặt chung.
+
+**Bước kết thúc.** Bản đầu dừng ở câu hỏi cuối của bot: câu chào kết thúc nằm ở
+`common.yaml` cho người điều khiển bấm, mà web tự phục vụ không có người điều khiển, nên cuộc
+gọi cụt. Nay mỗi kịch bản tự khép lại: sáu luồng chào kết thúc, ba luồng có đòi gặp nhân viên thì
+chuyển máy. N3 và N4 thêm câu "còn cần hỗ trợ gì thêm" như tổng đài thật, lấy thêm câu trả lời
+ngắn (thanh ngã từ 3 lên 5). Ở N3 đổi lịch, bỏ gợi ý "Đổi sang chiều." vì câu bot kế tiếp thu
+sẵn không đáp lại được yêu cầu đó. Test `test_every_call_is_closed_by_the_bot` giữ quy tắc này.
 
 Giới hạn: nội dung kịch bản chưa được người bản ngữ ngoài nhóm đọc thử. Độ phủ thanh điệu
 ở đây là của **gợi ý**; thanh thật của lời khách chỉ biết sau khi gán nhãn ở 1.6.
