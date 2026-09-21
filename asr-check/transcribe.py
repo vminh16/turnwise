@@ -25,29 +25,26 @@ from __future__ import annotations
 import io
 import json
 import sys
-import wave
 import zipfile
 from pathlib import Path
 
 import numpy as np
 import yaml
 from faster_whisper import WhisperModel
+from faster_whisper.audio import decode_audio
 
 HERE = Path(__file__).resolve().parent
 MODEL_DIR = HERE / "models" / "faster-whisper-small"
 MODEL_REPO = "Systran/faster-whisper-small"
 MODEL_REVISION = "536b0662742c02347bc0e980a01041f333bce120"
 ROLEPLAY_DIR = HERE.parent / "roleplay"
-EXPECTED_RATE = 16000
+WHISPER_RATE = 16000
 
 
 def pcm(data: bytes, channel: int) -> np.ndarray:
-    with wave.open(io.BytesIO(data)) as wav:
-        if wav.getframerate() != EXPECTED_RATE or wav.getsampwidth() != 2:
-            raise ValueError("expected PCM16 at 16 kHz")
-        frames = np.frombuffer(wav.readframes(wav.getnframes()), np.int16)
-        frames = frames.reshape(-1, wav.getnchannels())
-    return frames[:, channel].astype(np.float32) / 32768.0
+    """Một kênh của file WAV, hạ về 16 kHz cho Whisper. Collector lưu 48 kHz (raw)."""
+    left, right = decode_audio(io.BytesIO(data), sampling_rate=WHISPER_RATE, split_stereo=True)
+    return left if channel == 0 else right
 
 
 def bot_lines() -> dict[str, str]:
@@ -67,7 +64,7 @@ def show(model: WhisperModel, label: str, audio: np.ndarray, expected: str | Non
     segments, _ = model.transcribe(
         audio, language="vi", beam_size=5, vad_filter=True, condition_on_previous_text=False
     )
-    out(f"\n== {label}  ({len(audio) / EXPECTED_RATE:.2f}s)")
+    out(f"\n== {label}  ({len(audio) / WHISPER_RATE:.2f}s)")
     if expected:
         out(f"   expected: {expected}")
     heard = False
