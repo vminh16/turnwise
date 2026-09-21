@@ -6,10 +6,11 @@ cổng trống; đặt `COLLECTOR_E2E_URL` và `COLLECTOR_E2E_ADMIN_TOKEN` để
 
 Tín hiệu giả được chọn để mỗi lỗi có một dấu vết riêng:
 
-- **Giọng bot** là sóng sin 440 Hz (bước 0, có một chỗ ngắt hơi im tuyệt đối ở giữa) và 660 Hz
-  (bước 1). Kênh bot trong file phải **trùng từng mẫu** với file đã upload, tại đúng vị trí
-  nhật ký ghi. Lệch một mẫu là sóng sin lệch pha, sai số nhảy vọt.
-- **Micro giả** phát 1500 Hz. Kênh khách phải có 1500 Hz và **không** có 440/660 Hz: có nghĩa là
+- **Giọng bot** là sóng sin 440 Hz (bước 0, có một chỗ ngắt hơi im tuyệt đối ở giữa), 660 Hz
+  (bước 1) và 880 Hz (bước 2, lời chuyển máy khép cuộc gọi). Kênh bot trong file phải **trùng
+  từng mẫu** với file đã upload, tại đúng vị trí nhật ký ghi. Lệch một mẫu là sóng sin lệch pha,
+  sai số nhảy vọt.
+- **Micro giả** phát 1500 Hz. Kênh khách phải có 1500 Hz và **không** có tần số bot: có nghĩa là
   tiếng bot đã lọt vào kênh khách.
 """
 
@@ -42,7 +43,7 @@ pytestmark = pytest.mark.skipif(
 RATE = 48000  # COLLECTOR_SAMPLE_RATE_HZ mặc định
 SCRIPT = "n5-a-agent-first"
 SCRIPT_TITLE = "Gặp nhân viên, nói đè ngay từ lời chào"
-BOT_FREQS = (440.0, 660.0)
+BOT_FREQS = (440.0, 660.0, 880.0)
 MIC_FREQ = 1500.0
 LEAD_SAMPLES = 4800  # COLLECTOR_PLAYBACK_LEAD_MS=100 mặc định, ở 48 kHz
 CHROME = Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
@@ -67,7 +68,7 @@ def bot_prompts() -> list[np.ndarray]:
     first = np.concatenate(
         [sine(440, 0.5, RATE), np.zeros(RATE * 3 // 10, np.int16), sine(440, 0.4, RATE)]
     )
-    return [first, sine(660, 0.8, RATE)]
+    return [first, sine(660, 0.8, RATE), sine(880, 0.6, RATE)]
 
 
 def dominant_freq(signal: np.ndarray, rate: int) -> float:
@@ -194,8 +195,12 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         recording_indicator = page.is_visible("#run-recorder.recording .rec-dot")
         page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
         instruction_0 = page.text_content("#run-instruction")
-        page.wait_for_timeout(700)  # khách "nói"
-        button.click()  # bước 1
+        for _ in prompts[1:]:  # các bước sau, mỗi bước chờ bot nói xong rồi khách "nói"
+            page.wait_for_function(
+                "!document.getElementById('run-next').disabled", timeout=10000
+            )
+            page.wait_for_timeout(700)
+            button.click()
         page.wait_for_function(
             "document.getElementById('run-next').textContent === 'Kết thúc'", timeout=10000
         )
@@ -435,10 +440,10 @@ def test_consent_and_prompts_are_in_the_database(recorded: dict) -> None:
     assert {f"{SCRIPT}/0", f"{SCRIPT}/1"} <= keys
 
 
-def test_playback_log_has_both_steps_with_the_configured_lead(recorded: dict) -> None:
+def test_playback_log_has_every_step_with_the_configured_lead(recorded: dict) -> None:
     _, audio, sidecar = the_recording(recorded)
     log = sidecar["playback"]
-    assert [entry["step"] for entry in log] == [0, 1]
+    assert [entry["step"] for entry in log] == list(range(len(recorded["prompts"])))
     for entry, prompt in zip(log, recorded["prompts"], strict=True):
         assert entry["end_sample"] - entry["start_sample"] == len(prompt)
         assert abs(entry["start_sample"] - entry["pressed_sample"] - LEAD_SAMPLES) <= 1
