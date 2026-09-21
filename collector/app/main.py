@@ -180,6 +180,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         token = secrets.token_urlsafe(16)
         return {"token": token, "speaker_id": store.create_invite(token)}
 
+    @app.get("/api/admin/config", dependencies=[Depends(admin)])
+    def admin_config() -> dict[str, int]:
+        return {"sample_rate_hz": settings.sample_rate_hz}
+
     @app.get("/api/admin/invites", dependencies=[Depends(admin)])
     def invites() -> list[dict[str, Any]]:
         return store.list_invites()

@@ -47,7 +47,7 @@ def read_wav(data: bytes) -> tuple[tuple[int, int, int], np.ndarray]:
     return shape, samples.reshape(-1, shape[0])
 
 
-def audit(export: Path) -> Audit:
+def audit(export: Path, rate: int = 48000) -> Audit:
     result = Audit()
     bundle = zipfile.ZipFile(export)
     names = set(bundle.namelist())
@@ -57,13 +57,15 @@ def audit(export: Path) -> Audit:
         db = sqlite3.connect(db_path)
         db.row_factory = sqlite3.Row
         try:
-            run(result, db, bundle, names)
+            run(result, db, bundle, names, rate)
         finally:
             db.close()
     return result
 
 
-def run(result: Audit, db: sqlite3.Connection, bundle: zipfile.ZipFile, names: set[str]) -> None:
+def run(
+    result: Audit, db: sqlite3.Connection, bundle: zipfile.ZipFile, names: set[str], rate: int
+) -> None:
     result.info("database")
     result.check(db.execute("PRAGMA integrity_check").fetchone()[0] == "ok", "integrity_check")
     result.check(not db.execute("PRAGMA foreign_key_check").fetchall(), "foreign_key_check")
@@ -95,9 +97,9 @@ def run(result: Audit, db: sqlite3.Connection, bundle: zipfile.ZipFile, names: s
         data = bundle.read(row["file"])
         shape, samples = read_wav(data)
         result.check(
-            hashlib.sha256(data).hexdigest() == row["sha256"] and shape == (1, 16000, 2),
-            f"prompt {key}: sha256 and mono PCM16 16 kHz",
-            f"{len(samples) / 16000:.2f}s",
+            hashlib.sha256(data).hexdigest() == row["sha256"] and shape == (1, rate, 2),
+            f"prompt {key}: sha256 and mono PCM16 {rate} Hz",
+            f"{len(samples) / rate:.2f}s",
         )
         prompt_audio[key] = samples[:, 0]
 
@@ -124,7 +126,11 @@ def run(result: Audit, db: sqlite3.Connection, bundle: zipfile.ZipFile, names: s
             digest == row["sha256"] == sidecar["sha256"] and len(data) == row["bytes"],
             "sha256 and size: file = db = sidecar",
         )
-        result.check(shape == (2, 16000, 2), "stereo PCM16 16 kHz", str(shape))
+        result.check(
+            shape == (2, rate, 2) and sidecar["sample_rate_hz"] == rate,
+            f"stereo PCM16 {rate} Hz, sidecar agrees",
+            str(shape),
+        )
         result.check(len(audio) == row["frames"], "frames = db", f"{len(audio)} vs {row['frames']}")
         result.check(
             sidecar["speaker_id"] == row["speaker_id"] and sidecar["script"] == row["script"],
@@ -168,7 +174,7 @@ def run(result: Audit, db: sqlite3.Connection, bundle: zipfile.ZipFile, names: s
             clipped < 0.001, "caller channel not clipping", f"{100 * clipped:.3f}% clipped"
         )
         result.info(
-            f"    {len(audio) / 16000:.2f}s, {len(log)} bot lines, "
+            f"    {len(audio) / rate:.2f}s, {len(log)} bot lines, "
             f"dc {caller.mean() / 32768:+.4f}, "
             f"latency base {sidecar['client'].get('base_latency_s')}s "
             f"output {sidecar['client'].get('output_latency_s')}s"
@@ -192,10 +198,10 @@ def run(result: Audit, db: sqlite3.Connection, bundle: zipfile.ZipFile, names: s
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        sys.stderr.write("usage: audit_export.py <export.zip>\n")
+    if len(sys.argv) not in (2, 3):
+        sys.stderr.write("usage: audit_export.py <export.zip> [sample_rate_hz, default 48000]\n")
         return 2
-    result = audit(Path(sys.argv[1]))
+    result = audit(Path(sys.argv[1]), int(sys.argv[2]) if len(sys.argv) == 3 else 48000)
     sys.stdout.write("\n".join(result.lines) + "\n")
     sys.stdout.write(f"{len(result.failures)} failed checks\n")
     return 1 if result.failures else 0

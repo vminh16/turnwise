@@ -39,12 +39,12 @@ pytestmark = pytest.mark.skipif(
     os.environ.get("COLLECTOR_E2E") != "1", reason="set COLLECTOR_E2E=1 to run the browser flow"
 )
 
-RATE = 16000
+RATE = 48000  # COLLECTOR_SAMPLE_RATE_HZ mặc định
 SCRIPT = "n5-a-agent-first"
 SCRIPT_TITLE = "Gặp nhân viên, nói đè ngay từ lời chào"
 BOT_FREQS = (440.0, 660.0)
 MIC_FREQ = 1500.0
-LEAD_SAMPLES = 1600  # COLLECTOR_PLAYBACK_LEAD_MS=100 mặc định
+LEAD_SAMPLES = 4800  # COLLECTOR_PLAYBACK_LEAD_MS=100 mặc định, ở 48 kHz
 CHROME = Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
 
 

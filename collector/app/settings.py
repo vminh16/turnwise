@@ -1,9 +1,10 @@
 """Cấu hình của collector, đọc từ biến môi trường.
 
 Collector chạy trên một server riêng (Railway, Render, Docker), không có `configs/` của repo
-bên cạnh, nên cấu hình đi qua biến môi trường như mọi web app. Tốc độ lấy mẫu phải khớp
-`audio.sample_rate_hz` trong `configs/default.yaml`; lệch thì `WavFrameSource` từ chối file
-ngay khi đọc, nên lỗi không lọt qua được.
+bên cạnh, nên cấu hình đi qua biến môi trường như mọi web app. Thu và lưu ở 48 kHz, tức là
+raw: người thu nghe giọng bot đúng chất lượng gốc, và không phần nào của tín hiệu bị bỏ lúc thu.
+Dây chuyền đo chạy ở `audio.sample_rate_hz` của `configs/default.yaml` (16 kHz), nên bước đọc dữ
+liệu ở pha 1.5 phải hạ tần số; `WavFrameSource` từ chối file lệch tần số, nên không lọt qua được.
 """
 
 from __future__ import annotations
@@ -52,8 +53,8 @@ def load_settings() -> Settings:
         data_dir=data_dir,
         roleplay_dir=Path(os.environ.get("COLLECTOR_ROLEPLAY_DIR", REPO_ROOT / "roleplay")),
         admin_token=token,
-        sample_rate_hz=int(os.environ.get("COLLECTOR_SAMPLE_RATE_HZ", "16000")),
-        max_upload_bytes=int(os.environ.get("COLLECTOR_MAX_UPLOAD_BYTES", str(64 * 1024 * 1024))),
+        sample_rate_hz=int(os.environ.get("COLLECTOR_SAMPLE_RATE_HZ", "48000")),
+        max_upload_bytes=int(os.environ.get("COLLECTOR_MAX_UPLOAD_BYTES", str(96 * 1024 * 1024))),
         playback_lead_ms=int(os.environ.get("COLLECTOR_PLAYBACK_LEAD_MS", "100")),
         tail_ms=int(os.environ.get("COLLECTOR_TAIL_MS", "1500")),
         guide_version=os.environ.get("COLLECTOR_GUIDE_VERSION", "1.2"),

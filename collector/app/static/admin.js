@@ -2,7 +2,7 @@ import { encodeWav, flatten, openAudio, startRecording } from "/static/audio.js"
 import { clock, createMeter } from "/static/meter.js";
 
 const $ = (id) => document.getElementById(id);
-const SAMPLE_RATE_HZ = 16000;
+let SAMPLE_RATE_HZ = null; // lấy từ server lúc mở trang, không đoán
 const TOTAL_SCENARIOS_LABEL = (done, total) => `${done}/${total}`;
 const el = (tag, props = {}, ...children) => {
   const node = Object.assign(document.createElement(tag), props);
@@ -64,6 +64,7 @@ $("logout").addEventListener("click", () => {
 
 async function open() {
   try {
+    SAMPLE_RATE_HZ = (await (await api("/api/admin/config")).json()).sample_rate_hz;
     await loadLines(); // cần số tình huống trước khi vẽ bảng người thu
     await Promise.all([loadInvites(), loadRecordings()]);
   } catch (error) {

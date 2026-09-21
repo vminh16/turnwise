@@ -110,6 +110,19 @@ def test_the_app_refuses_to_start_when_the_data_dir_is_not_a_mounted_volume(
         load_settings()
 
 
+def test_collection_defaults_to_48_khz_and_admin_page_reads_the_rate_from_the_server(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
+    """Thu raw: 48 kHz mặc định. Trang admin không được tự đoán tần số."""
+    from app.settings import load_settings
+
+    monkeypatch.setenv("COLLECTOR_ADMIN_TOKEN", "a" * 32)
+    monkeypatch.delenv("COLLECTOR_SAMPLE_RATE_HZ", raising=False)
+    assert load_settings().sample_rate_hz == 48000
+    response = client.get("/api/admin/config", headers=ADMIN)
+    assert response.json() == {"sample_rate_hz": RATE}
+
+
 def test_admin_routes_need_the_admin_token(client: TestClient) -> None:
     assert client.post("/api/admin/invites").status_code == 401
     assert client.post("/api/admin/invites", headers={"X-Admin-Token": "b" * 32}).status_code == 401
