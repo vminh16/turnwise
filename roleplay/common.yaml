@@ -1,4 +1,6 @@
 # Câu bot dùng chung, người điều khiển bấm phát khi buổi thu lệch khỏi kịch bản.
+# Web thu tự phục vụ (collector/) không phát các câu này: nó chỉ phát các bước trong kịch bản,
+# nên lời chào kết thúc và lời chuyển máy là bước cuối của từng file nX-*.yaml.
 # Không gắn với luồng nào. Thu sẵn cùng giọng với lời bot trong các file nX-*.yaml.
 prompts:
   greeting: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"

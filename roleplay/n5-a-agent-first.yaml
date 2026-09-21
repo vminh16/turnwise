@@ -17,3 +17,5 @@ steps:
     customer: Trả lời ngắn một chủ đề bất kỳ.
     behaviours: [short_answer]
     replies: ["Cước.", "Mạng.", "Lịch hẹn.", "Khiếu nại."]
+  - bot: "Em chuyển máy cho nhân viên hỗ trợ ngay, quý khách vui lòng giữ máy ạ."
+    customer: Chờ được chuyển máy như khi gọi thật; muốn nói gì hay im lặng đều được.

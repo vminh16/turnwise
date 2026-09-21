@@ -136,6 +136,22 @@ def test_da_is_elicited_as_a_complete_answer_not_only_as_a_backchannel() -> None
     assert len(flows) >= 2, f'"Dạ." trọn lượt chỉ có ở {flows}'
 
 
+def test_every_call_is_closed_by_the_bot() -> None:
+    """Không tổng đài nào cúp máy ngay sau một câu hỏi.
+
+    Web thu tự phục vụ chỉ phát các bước trong kịch bản, nên lời chào kết thúc hay lời chuyển
+    máy phải là bước cuối của chính kịch bản. Thiếu nó thì cuộc gọi cụt, và mất luôn lượt khách
+    chào lại — thường ngắn và hay chồng lên lời bot.
+    """
+    for script in load_all(ROLEPLAY_DIR):
+        last = " ".join(script.steps[-1].bot.split())
+        assert not last.endswith("?"), f"{script.name} kết thúc bằng câu hỏi: {last}"
+        if "agent_request" in script.behaviours:
+            assert "chuyển máy" in last, f"{script.name} đòi gặp nhân viên nhưng không chuyển máy"
+        else:
+            assert "Cảm ơn quý khách" in last, f"{script.name} không chào kết thúc: {last}"
+
+
 def test_common_prompts_cover_what_the_operator_needs_off_script() -> None:
     prompts = load_common(ROLEPLAY_DIR).prompts
     assert {"repeat", "sorry_stop", "transfer", "goodbye"} <= set(prompts)

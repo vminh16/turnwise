@@ -33,3 +33,5 @@ steps:
     customer: Trả lời ngắn.
     behaviours: [short_answer]
     replies: ["Dạ có.", "Có ạ.", "Phải.", "Khỏi."]
+  - bot: "Em đã ghi nhận yêu cầu của quý khách. Cảm ơn quý khách đã gọi tổng đài NetCo, chúc quý khách một ngày tốt lành ạ."
+    customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

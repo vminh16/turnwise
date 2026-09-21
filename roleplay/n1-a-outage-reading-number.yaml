@@ -46,3 +46,5 @@ steps:
     customer: Trả lời là không cần gì nữa.
     behaviours: [short_answer]
     replies: ["Không.", "Không cần nữa.", "Hết rồi.", "Thôi, cảm ơn."]
+  - bot: "Cảm ơn quý khách đã gọi tổng đài NetCo. Chúc quý khách một ngày tốt lành ạ."
+    customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

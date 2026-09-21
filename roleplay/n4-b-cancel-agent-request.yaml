@@ -29,3 +29,5 @@ steps:
       Bạn không đồng ý trả phí huỷ. Nghe tới phí huỷ thì bảo bot cho gặp nhân viên. Muốn nói lúc
       nào thì nói.
     behaviours: [agent_request]
+  - bot: "Em chuyển máy cho nhân viên hỗ trợ ngay để trao đổi về phí huỷ. Quý khách không cần nhắc lại thông tin đã cung cấp ạ."
+    customer: Chờ được chuyển máy như khi gọi thật; muốn nói gì hay im lặng đều được.

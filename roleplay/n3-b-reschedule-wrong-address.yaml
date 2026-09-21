@@ -28,4 +28,6 @@ steps:
   - bot: "Quý khách vẫn giữ khung giờ sáng thứ sáu chứ ạ?"
     customer: Trả lời ngắn.
     behaviours: [short_answer]
-    replies: ["Dạ.", "Giữ lịch cũ.", "Vẫn giữ.", "Đổi sang chiều."]
+    replies: ["Dạ.", "Giữ lịch cũ.", "Vẫn giữ.", "Giữ nguyên."]
+  - bot: "Em đã cập nhật địa chỉ mới cho lịch hẹn sáng thứ sáu. Cảm ơn quý khách đã gọi tổng đài NetCo ạ."
+    customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

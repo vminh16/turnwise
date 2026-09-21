@@ -38,3 +38,11 @@ steps:
     customer: Đồng ý bằng một câu ngắn.
     behaviours: [short_answer]
     replies: ["Dạ vâng.", "Đồng ý.", "Được ạ.", "Chốt."]
+  - bot: >
+      Em đã đổi lịch thành công. Kỹ thuật viên sẽ gọi cho quý khách khoảng ba mươi phút trước khi
+      đến. Quý khách còn cần hỗ trợ gì thêm không ạ?
+    customer: Trả lời là không cần gì nữa.
+    behaviours: [short_answer]
+    replies: ["Không có gì nữa.", "Hết rồi ạ.", "Thế thôi.", "Không, cảm ơn em."]
+  - bot: "Cảm ơn quý khách đã gọi tổng đài NetCo. Chúc quý khách một ngày tốt lành ạ."
+    customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

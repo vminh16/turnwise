@@ -35,3 +35,5 @@ steps:
     customer: Đồng ý bằng một câu ngắn.
     behaviours: [short_answer]
     replies: ["Dạ.", "Có.", "Đồng ý.", "Được."]
+  - bot: "Em đã đặt lịch cho quý khách. Em xin lỗi vì quý khách phải gọi lại lần này. Cảm ơn quý khách đã gọi tổng đài NetCo ạ."
+    customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

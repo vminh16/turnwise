@@ -35,3 +35,11 @@ steps:
     customer: Xác nhận rõ ràng bằng một câu ngắn.
     behaviours: [short_answer]
     replies: ["Dạ đồng ý.", "Xác nhận.", "Đăng ký.", "Ừ, được."]
+  - bot: >
+      Em đã đăng ký gói Tốc Độ ba trăm cho quý khách, gói có hiệu lực từ kỳ cước tiếp theo. Quý
+      khách còn cần hỗ trợ gì thêm không ạ?
+    customer: Trả lời là không cần gì nữa.
+    behaviours: [short_answer]
+    replies: ["Không ạ.", "Vậy được rồi.", "Thế là đủ.", "Không có gì nữa."]
+  - bot: "Cảm ơn quý khách đã tin dùng NetCo. Chúc quý khách một ngày tốt lành ạ."
+    customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.
