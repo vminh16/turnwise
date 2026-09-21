@@ -435,3 +435,33 @@ không thay người gán nhãn. Chọn ASR cho các vai đó là quyết địn
 cáo YouTube trên đoạn im lặng; bật bộ lọc (chỉ trong bộ nhớ, mốc thời gian vẫn theo file gốc) thì
 hết. Với câu ngắn, nhỏ tiếng, kết quả dao động giữa các cách chạy ("ồ ồ", "à lâu quá", "alô alô")
 — đó là giới hạn của mô hình nhỏ, nên kết quả chỉ dùng để gợi ý, phải nghe lại bằng tai.
+
+### 6.8 Giọng bot và tần số thu
+
+**Giọng bot: VieNeu-TTS v3 Turbo, preset "Minh Quân Pro", int8.** Bằng chứng giấy phép và tốc độ:
+`docs/research/tts-voice.md` (Apache-2.0, audio sinh ra không bị ràng buộc thêm; các lựa chọn
+tiếng Việt nổi tiếng khác đều phi thương mại). Chọn bằng tai trên 3 giọng × 3 câu. Cùng engine sẽ
+dùng cho Giai đoạn 4, để bộ dữ liệu vàng đo đúng giọng của sản phẩm. Một giọng cho cả bộ dữ liệu:
+hai giọng là thêm một biến mà 24–30 người không đủ để tách.
+
+Đo trên laptop này (i5-11400H, 6 nhân, `tts-check/synth.py`), trung vị 2 lần: int8 RTF 0,33–0,55,
+tiếng đầu tiên sau 168–334 ms; fp32 RTF 0,39–0,55, 212–400 ms. int8 nghe không khác fp32; khác
+biệt nghe được giữa hai lần sinh chủ yếu do mô hình lấy mẫu ngẫu nhiên, nên câu nào hỏng thì sinh
+lại riêng câu đó.
+
+Quyết định và lý do:
+
+- **Dấu `/` đổi thành dấu phẩy, không chèn khoảng lặng.** Chèn khoảng lặng giữa các đoạn nghe có
+  nhịp hơn, nhưng lúc bot chạy thật không làm vậy; dữ liệu phải đo đúng thứ sẽ chạy.
+- **Không giao việc đọc ngày, giờ, tiền, số thuê bao cho TTS.** VieNeu đọc "25/9" thành "hai lăm
+  chín". Giai đoạn 4, `dialog/` tự viết slot thành chữ trước khi đưa cho TTS, và test bằng unit
+  test. Kịch bản Giai đoạn 1 đã viết sẵn bằng chữ nên không bị ảnh hưởng.
+- **Giữ watermark mặc định của VieNeu**: đánh dấu giọng AI, tai không nghe thấy. Chưa kiểm chứng
+  nó không ảnh hưởng phép đo.
+- **Collector thu và lưu 48 kHz thay vì 16 kHz.** Ở 16 kHz người thu nghe bot như loa điện thoại,
+  tệ hơn sản phẩm thật (WebRTC phát đầy đủ), và phần trên 8 kHz của cả hai kênh mất vĩnh viễn —
+  trái nguyên tắc thu raw. Giá: ~11,5 MB mỗi phút thay vì ~3,8 MB; tự host trên laptop nên chấp
+  nhận. Hạ về 16 kHz là việc của bước đọc dữ liệu ở pha 1.5.
+
+`tts-check/render_prompts.py` sinh mọi câu từ `/api/admin/lines` và nạp thẳng vào collector,
+ghi `tts-check/prompts/manifest.json` (giọng, phiên bản, sha256 từng câu; gitignore).

@@ -96,10 +96,11 @@ Các biến khác có giá trị mặc định trong `collector/app/settings.py`
 ## Mỗi bản ghi gồm
 
 ```
-sessions/S001/n1-a-outage-reading-number-<thời điểm>.wav    PCM 16-bit, 16 kHz, kênh 0 khách, kênh 1 bot
+sessions/S001/n1-a-outage-reading-number-<thời điểm>.wav    PCM 16-bit, 48 kHz, kênh 0 khách, kênh 1 bot
 sessions/S001/n1-a-outage-reading-number-<thời điểm>.json   nhật ký phát, trình duyệt, bản đồng ý, sha256
 collector.sqlite3                                            link mời, đồng ý, danh sách bản ghi
 ```
 
-Đọc bằng `WavFrameSource` với `bot_intervals` lấy từ nhật ký:
-`(start_sample / 16000, end_sample / 16000)` cho từng mục.
+Lưu 48 kHz là raw. `WavFrameSource` chạy ở 16 kHz của `configs/default.yaml` và từ chối file lệch
+tần số, nên pha 1.5 phải hạ tần số trước khi đọc; `bot_intervals` lấy từ nhật ký là
+`(start_sample / 48000, end_sample / 48000)` cho từng mục, tính bằng giây nên không đổi khi hạ.

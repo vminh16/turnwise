@@ -42,8 +42,10 @@ làm bản sao lưu.
 
 ## Một buổi thu, gọn
 
-1. `/admin` → mục **Giọng tổng đài**: thu đủ câu bot của tình huống định dùng. Tình huống chỉ hiện
-   cho người thu khi mọi câu bot của nó đã thu.
+1. Nạp giọng bot: `cd tts-check && COLLECTOR_ADMIN_TOKEN=... uv run python render_prompts.py`
+   sinh mọi câu bằng giọng đã chốt (`docs/progress.md` §6.8) và nạp vào collector. Nghe lại ở
+   `/admin` → **Giọng tổng đài**; câu nào hỏng thì sinh lại riêng bằng `--only <script>/<step>`.
+   Tình huống chỉ hiện cho người thu khi mọi câu bot của nó đã có.
 2. **Tạo link mời** → gửi mỗi người một link.
 3. Người thu: đồng ý → bật micro → chọn tình huống → Bắt đầu → nghe lại → Gửi. Chưa bấm Gửi thì
    chưa có gì lên server; gửi hỏng thì bản thu vẫn còn để bấm Gửi lại.
@@ -52,8 +54,8 @@ làm bản sao lưu.
 
 ## Dữ liệu
 
-Tất cả nằm trên volume `/data`: `collector.sqlite3`, `sessions/<mã người>/<tình huống>-<mốc>.wav`
-kèm file `.json` cùng tên (nhật ký bot phát câu nào ở mẫu nào, phiếu đồng ý, thông tin máy), và
+Thu và lưu 48 kHz, cả hai kênh, khoảng 11,5 MB mỗi phút. Tất cả nằm trên volume `/data`:
+`collector.sqlite3`, `sessions/<mã người>/<tình huống>-<mốc>.wav` kèm file `.json` cùng tên (nhật ký bot phát câu nào ở mẫu nào, phiếu đồng ý, thông tin máy), và
 `prompts/` là giọng bot. File zip tải về có đúng các thứ đó.
 
 Thu **raw**: không cắt, không chuẩn hoá âm lượng, không lọc ồn. Xử lý là việc của lúc phân tích.
