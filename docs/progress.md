@@ -471,5 +471,9 @@ Quyết định và lý do:
   trái nguyên tắc thu raw. Giá: ~11,5 MB mỗi phút thay vì ~3,8 MB; tự host trên laptop nên chấp
   nhận. Hạ về 16 kHz là việc của bước đọc dữ liệu ở pha 1.5.
 
+**Người thu `S001` là tác giả kịch bản** (thu từ 2026-09-22). Biết trước chỗ bot đọc sai và
+dự án đo gì, nên bản ghi của `S001` chỉ vào phần dev hoặc làm bản thu thử, **không bao giờ vào
+holdout**. Pha 1.5 phải áp quy tắc này khi chia tập.
+
 `tts-check/render_prompts.py` sinh mọi câu từ `/api/admin/lines` và nạp thẳng vào collector,
 ghi `tts-check/prompts/manifest.json` (giọng, phiên bản, sha256 từng câu; gitignore).
