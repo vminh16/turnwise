@@ -12,10 +12,13 @@ props:
   subscriber_id: "307 942 186"
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Mạng nhà tôi cứ chập chờn từ tối qua, giờ thì mất hẳn luôn."
     customer: Báo mạng chập chờn rồi mất hẳn.
   - bot: "Quý khách cho em xin số thuê bao ạ."
+    example: "Số thuê bao là… (đọc số trên thẻ)"
     customer: Đọc số trên hoá đơn.
   - bot: "Mạng bắt đầu mất từ khoảng mấy giờ ạ?"
+    example: "Mất từ… hình như khoảng tối qua… (nhớ lại giờ)"
     customer: Nhớ lại rồi trả lời. Không chắc thì cứ vừa nghĩ vừa nói.
     behaviours: [hesitation]
   - bot: >
@@ -23,6 +26,7 @@ steps:
       ba mươi giây, / cắm lại dây nguồn, / sau đó chờ thêm hai phút đến khi đèn Internet sáng xanh
       ổn định, / rồi kiểm tra lại kết nối.
     reading: terms
+    example: "Ơ em ơi, khoan đã, tôi rút điện cắm lại hai lần rồi, không được đâu."
     customer: >
       Bạn đã làm đúng các bước này hai lần rồi. Khi nhận ra bot đang hướng dẫn lại, nói cho bot
       biết. Muốn nói lúc nào thì nói, không cần chờ bot đọc xong. Ngắt lời như với một nhân viên thật.
@@ -36,4 +40,5 @@ steps:
     behaviours: [short_answer]
     replies: ["Dạ.", "Có.", "Đồng ý.", "Được."]
   - bot: "Em đã đặt lịch cho quý khách. Em xin lỗi vì quý khách phải gọi lại lần này. Cảm ơn quý khách đã gọi tổng đài NetCo ạ."
+    example: "Ừ, chào em."
     customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

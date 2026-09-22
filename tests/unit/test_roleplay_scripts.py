@@ -136,6 +136,21 @@ def test_da_is_elicited_as_a_complete_answer_not_only_as_a_backchannel() -> None
     assert len(flows) >= 2, f'"Dạ." trọn lượt chỉ có ở {flows}'
 
 
+def test_every_turn_the_caller_must_speak_has_an_example_line() -> None:
+    """Người thu cần biết phải nói gì; câu mẫu cho điều đó, còn lời dặn thì dễ bị bỏ qua.
+
+    Câu trả lời ngắn đã có `replies`; lúc bot đang đọc mà khách chỉ đáp lời thì không có câu
+    nào để nói, và đưa sẵn "ừ, vâng" sẽ làm người thu chêm nhiều hơn bình thường.
+    """
+    missing = [
+        f"{script.name}/{index}"
+        for script in load_all(ROLEPLAY_DIR)
+        for index, step in enumerate(script.steps)
+        if not step.example and not {"short_answer", "backchannel"} & set(step.behaviours)
+    ]
+    assert not missing, f"thiếu câu mẫu: {missing}"
+
+
 def test_every_call_is_closed_by_the_bot() -> None:
     """Không tổng đài nào cúp máy ngay sau một câu hỏi.
 

@@ -13,8 +13,10 @@ props:
   appointment_code: "L 47 20 93"
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Chào em, tôi muốn đổi lịch hẹn kỹ thuật viên."
     customer: Nói muốn đổi lịch hẹn kỹ thuật viên.
   - bot: "Quý khách cho em xin mã lịch hẹn trong tin nhắn xác nhận ạ."
+    example: "Mã lịch hẹn à, em chờ tôi một chút… (tìm mã trong tin nhắn trên thẻ)"
     customer: >
       Mã nằm trong tin nhắn in trên thẻ, giữa nhiều chữ khác. Tìm và đọc; cần thì bảo bot chờ.
     behaviours: [hesitation]
@@ -45,4 +47,5 @@ steps:
     behaviours: [short_answer]
     replies: ["Không có gì nữa.", "Hết rồi ạ.", "Thế thôi.", "Không, cảm ơn em."]
   - bot: "Cảm ơn quý khách đã gọi tổng đài NetCo. Chúc quý khách một ngày tốt lành ạ."
+    example: "Cảm ơn em nhé."
     customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

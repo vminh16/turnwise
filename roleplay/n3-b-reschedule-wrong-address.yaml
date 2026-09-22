@@ -12,18 +12,22 @@ props:
   new_address: "số 8 ngõ 17 đường Hoa Mai"
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Em ơi, tôi muốn kiểm tra lại lịch hẹn kỹ thuật viên."
     customer: Nói muốn kiểm tra lại lịch hẹn kỹ thuật viên.
   - bot: "Quý khách cho em xin mã lịch hẹn ạ."
+    example: "(Đọc mã lịch hẹn trên thẻ)"
     customer: Đọc mã trên thẻ.
   - bot: >
       Lịch hẹn của quý khách: / kỹ thuật viên đến vào sáng thứ sáu, / từ tám giờ đến mười giờ, / tại
       số mười hai, ngõ bốn mươi lăm, đường Hoa Sữa. / Kỹ thuật viên sẽ mang theo modem mới để thay.
     reading: address
+    example: "Ơ khoan đã em ơi, địa chỉ đó là nhà cũ rồi."
     customer: >
       Địa chỉ bot đọc là nhà cũ. Sửa lại ngay khi nhận ra, không cần chờ bot đọc xong.
       Ngắt lời như với một nhân viên thật.
     behaviours: [barge_in]
   - bot: "Dạ, em xin lỗi. Quý khách cho em xin địa chỉ mới ạ."
+    example: "Địa chỉ mới là… (đọc địa chỉ mới trên thẻ). Nhà tôi mới chuyển tuần trước."
     customer: Đọc địa chỉ mới trên thẻ và nói thêm là vừa chuyển nhà, bằng lời của mình.
     behaviours: [long_answer]
   - bot: "Quý khách vẫn giữ khung giờ sáng thứ sáu chứ ạ?"
@@ -31,4 +35,5 @@ steps:
     behaviours: [short_answer]
     replies: ["Dạ.", "Giữ lịch cũ.", "Vẫn giữ.", "Giữ nguyên."]
   - bot: "Em đã cập nhật địa chỉ mới cho lịch hẹn sáng thứ sáu. Cảm ơn quý khách đã gọi tổng đài NetCo ạ."
+    example: "Ừ, cảm ơn em."
     customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

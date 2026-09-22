@@ -12,9 +12,11 @@ props:
   plan: "Gói Tốc Độ 300"
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Chào em, tôi muốn nâng gói Internet. Dạo này cả nhà dùng chung nên mạng chậm lắm."
     customer: Nói muốn nâng gói Internet và lý do, bằng lời của mình.
     behaviours: [long_answer]
   - bot: "Quý khách cho em xin số thuê bao in trên hoá đơn ạ."
+    example: "Số thuê bao hả, chờ tôi xíu… (tìm trên hoá đơn rồi đọc)"
     customer: >
       Số thuê bao nằm trên hoá đơn cùng mã khách hàng. Tìm và đọc; cần thì bảo bot chờ.
     behaviours: [hesitation]
@@ -42,4 +44,5 @@ steps:
     behaviours: [short_answer]
     replies: ["Không ạ.", "Vậy được rồi.", "Thế là đủ.", "Không có gì nữa."]
   - bot: "Cảm ơn quý khách đã tin dùng NetCo. Chúc quý khách một ngày tốt lành ạ."
+    example: "Cảm ơn em."
     customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

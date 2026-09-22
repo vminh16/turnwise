@@ -15,8 +15,10 @@ steps:
     behaviours: [short_answer]
     replies: ["Tôi muốn huỷ.", "Huỷ gói.", "Huỷ mạng.", "Cắt hợp đồng."]
   - bot: "Quý khách cho em xin số thuê bao ạ."
+    example: "(Đọc số thuê bao trên thẻ)"
     customer: Đọc số trên hoá đơn.
   - bot: "Quý khách cho em hỏi lý do huỷ gói để em ghi nhận ạ."
+    example: "À, nhà tôi sắp chuyển… (kể lý do theo ý bạn)"
     customer: Giải thích lý do bằng lời của mình; cứ vừa nghĩ vừa nói.
     behaviours: [long_answer, hesitation]
   - bot: >
@@ -25,9 +27,11 @@ steps:
       còn lại, / tổng cộng một triệu hai trăm năm mươi nghìn đồng. / Modem cần hoàn trả trong vòng
       mười lăm ngày.
     reading: terms
+    example: "Ơ em ơi, sao lại phải trả phí huỷ? Thôi cho tôi nói chuyện với nhân viên."
     customer: >
       Bạn không đồng ý trả phí huỷ. Nghe tới phí huỷ thì bảo bot cho gặp nhân viên. Muốn nói lúc
       nào thì nói. Ngắt lời như với một nhân viên thật.
     behaviours: [agent_request]
   - bot: "Em chuyển máy cho nhân viên hỗ trợ ngay để trao đổi về phí huỷ. Quý khách không cần nhắc lại thông tin đã cung cấp ạ."
+    example: "Ừ."
     customer: Chờ được chuyển máy như khi gọi thật; muốn nói gì hay im lặng đều được.

@@ -10,10 +10,13 @@ props:
   subscriber_id: "519 083 274"
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Chào em, tôi muốn kiểm tra cước tháng này."
     customer: Nói muốn kiểm tra cước.
   - bot: "Quý khách cho em xin số thuê bao ạ."
+    example: "(Đọc số thuê bao trên thẻ)"
     customer: Đọc số trên hoá đơn.
   - bot: "Quý khách muốn tra cước tháng nào ạ?"
+    example: "Tháng… (chọn tháng muốn tra)"
     customer: Trả lời tháng muốn tra. Chưa chắc thì cứ vừa nghĩ vừa nói; đổi ý cũng được.
     behaviours: [hesitation]
   - bot: >
@@ -26,6 +29,7 @@ steps:
       thường; không ngắt lời.
     behaviours: [backchannel]
   - bot: "Quý khách có thắc mắc về khoản nào không ạ?"
+    example: "Cái khoản truyền hình bổ sung ấy, tôi không nhớ là có đăng ký bao giờ. Em xem giúp tôi với."
     customer: >
       Bạn không nhớ đã đăng ký truyền hình bổ sung. Hỏi bot về khoản đó bằng lời của mình.
     behaviours: [long_answer]
@@ -34,4 +38,5 @@ steps:
     behaviours: [short_answer]
     replies: ["Dạ có.", "Có ạ.", "Phải.", "Khỏi."]
   - bot: "Em đã ghi nhận yêu cầu của quý khách. Cảm ơn quý khách đã gọi tổng đài NetCo, chúc quý khách một ngày tốt lành ạ."
+    example: "Cảm ơn em."
     customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.

@@ -10,13 +10,16 @@ props:
   subscriber_id: "662 190 537"
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Em ơi, tôi muốn tra cước tháng này."
     customer: Nói muốn tra cước tháng này.
   - bot: "Quý khách cho em xin số thuê bao ạ."
+    example: "(Đọc số thuê bao trên thẻ)"
     customer: Đọc số trên hoá đơn.
   - bot: >
       Em xin đọc lại số thuê bao: / sáu sáu hai / một chín không / năm bảy ba. / Em tra cước cho số
       này nhé.
     reading: number
+    example: "À không em ơi, số đó sai rồi… (đọc lại số đúng)"
     customer: >
       Số bot đọc khác với hoá đơn. Sửa lại cho bot ngay khi nhận ra, không cần chờ bot đọc xong.
       Ngắt lời như với một nhân viên thật.
@@ -30,9 +33,11 @@ steps:
       trước năm mươi nghìn đồng. / Hạn thanh toán là ngày hai mươi lăm. / Quý khách có thể thanh
       toán qua ứng dụng NetCo / hoặc tại các điểm giao dịch.
     reading: amount
+    example: "Khoan đã em, tháng trước tôi đóng đúng hạn rồi mà. Cho tôi gặp nhân viên."
     customer: >
       Nghe tới khoản phí đóng muộn thì bảo bot cho gặp nhân viên. Muốn nói lúc nào thì nói.
       Ngắt lời như với một nhân viên thật.
     behaviours: [agent_request]
   - bot: "Em chuyển máy cho nhân viên hỗ trợ ngay. Quý khách không cần nhắc lại thông tin đã cung cấp ạ."
+    example: "Ừ."
     customer: Chờ được chuyển máy như khi gọi thật; muốn nói gì hay im lặng đều được.

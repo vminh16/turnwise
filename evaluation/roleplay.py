@@ -84,6 +84,9 @@ class Step(_Node):
     bot: str
     reading: Literal["number", "amount", "address", "schedule", "terms"] | None = None
     customer: str
+    # Câu mẫu hiện cho người thu: biết phải nói gì, nhưng được dặn nói theo cách của mình.
+    # Không bao giờ chứa đáp án phải tự tìm (số trên hoá đơn), kẻo mất ngập ngừng thật.
+    example: str | None = None
     behaviours: tuple[Behaviour, ...] = ()
     replies: tuple[str, ...] = ()
 

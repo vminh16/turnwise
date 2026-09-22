@@ -13,8 +13,10 @@ props:
   subscriber_id: "824 615 390"
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Alô, mạng nhà tôi mất từ sáng tới giờ, không vào được gì cả."
     customer: Nói là mạng ở nhà bị mất, bằng lời của mình.
   - bot: "Quý khách cho em xin số thuê bao in trên hoá đơn ạ."
+    example: "Số thuê bao hả em, để tôi xem hoá đơn đã… (tìm rồi đọc số trên thẻ)"
     customer: >
       Số thuê bao nằm trên hoá đơn, lẫn với mã khách hàng và số hợp đồng. Cần tìm thì cứ nói với
       bot như khi gọi tổng đài thật, rồi tìm và đọc theo cách quen của mình.
@@ -25,6 +27,7 @@ steps:
     behaviours: [short_answer]
     replies: ["Dạ.", "Đúng rồi.", "Dạ đúng.", "Ừ, đúng đấy."]
   - bot: "Quý khách mô tả giúp em tình trạng mạng, ví dụ đèn trên modem đang thế nào ạ?"
+    example: "Từ sáng bật lên là không vào được. Đèn trên modem thì… (kể theo ý bạn)"
     customer: >
       Kể như kể với nhân viên thật: mất từ lúc nào, đèn modem ra sao, đã thử khởi động lại chưa.
       Nói bao nhiêu tuỳ ý.
@@ -47,4 +50,5 @@ steps:
     behaviours: [short_answer]
     replies: ["Không.", "Không cần nữa.", "Hết rồi.", "Thôi, cảm ơn."]
   - bot: "Cảm ơn quý khách đã gọi tổng đài NetCo. Chúc quý khách một ngày tốt lành ạ."
+    example: "Ừ, cảm ơn em nhé."
     customer: Chào lại như khi kết thúc một cuộc gọi thật, hoặc không nói gì cũng được.
