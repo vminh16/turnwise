@@ -197,6 +197,7 @@ async function runScript(script) {
   $("run-status").textContent = "Sẵn sàng";
   $("run-status").className = "pill";
   $("run-instruction").textContent = "Đọc thẻ bên trên. Khi sẵn sàng, bấm Bắt đầu.";
+  $("run-example").hidden = true;
   $("run-replies").replaceChildren();
   $("run-label").textContent = "Chưa ghi";
   $("run-time").textContent = "00:00";
@@ -250,7 +251,10 @@ async function runScript(script) {
     $("run-step").textContent = `Lượt ${current + 1}/${script.steps.length}`;
     $("run-status").replaceChildren(document.createTextNode("Tổng đài đang nói"), Object.assign(document.createElement("span"), { className: "dots" }));
     $("run-status").className = "pill";
-    $("run-instruction").textContent = script.steps[current].customer;
+    const { customer, example } = script.steps[current];
+    $("run-example").hidden = !example;
+    $("run-example-line").textContent = example ? `“${example}”` : "";
+    $("run-instruction").textContent = customer;
     $("run-replies").replaceChildren(
       ...script.steps[current].replies.map((reply) => Object.assign(document.createElement("span"), { textContent: reply })),
     );

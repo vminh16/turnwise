@@ -35,7 +35,11 @@ def participant_view(script: dict[str, Any]) -> dict[str, Any]:
         "persona": script["persona"],
         "props": script.get("props", {}),
         "steps": [
-            {"customer": step["customer"], "replies": step.get("replies", [])}
+            {
+                "customer": step["customer"],
+                "example": step.get("example"),
+                "replies": step.get("replies", []),
+            }
             for step in script["steps"]
         ],
     }

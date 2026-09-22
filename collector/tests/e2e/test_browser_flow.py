@@ -195,6 +195,7 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         recording_indicator = page.is_visible("#run-recorder.recording .rec-dot")
         page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
         instruction_0 = page.text_content("#run-instruction")
+        example_0 = page.text_content("#run-example-line")
         for _ in prompts[1:]:  # các bước sau, mỗi bước chờ bot nói xong rồi khách "nói"
             page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
             page.wait_for_timeout(700)
@@ -254,6 +255,7 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         "mic_warning_hidden": mic_warning_hidden,
         "disabled_while_loading": disabled_while_loading,
         "instruction_0": instruction_0,
+        "example_0": example_0,
         "consent_locked": consent_locked,
         "recording_indicator": recording_indicator,
         "review_audio_ready": review_audio_ready,
@@ -413,6 +415,7 @@ def test_chrome_honoured_raw_microphone_constraints(recorded: dict) -> None:
 
 def test_instructions_follow_the_bot_line(recorded: dict) -> None:
     assert "gặp người thật" in recorded["instruction_0"]
+    assert "gặp nhân viên" in recorded["example_0"]
 
 
 def test_database_row_matches_the_file_and_sidecar(recorded: dict) -> None:
