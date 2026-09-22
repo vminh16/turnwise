@@ -32,6 +32,7 @@ def participant_view(script: dict[str, Any]) -> dict[str, Any]:
         "name": script["name"],
         "flow": script["flow"],
         "title": script["title"],
+        "brief": script["brief"],
         "persona": script["persona"],
         "props": script.get("props", {}),
         "steps": [

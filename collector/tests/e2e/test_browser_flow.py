@@ -188,6 +188,8 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         page.locator(".scenario", has_text=SCRIPT_TITLE).get_by_role("button").click()
         # Lỗi đã gặp: nút bấm được trong lúc đang tải giọng bot, cú bấm bị nuốt mất.
         disabled_while_loading = page.is_disabled("#run-next")
+        overview_items = page.locator("#run-overview-list li").count()
+        brief = page.text_content("#run-brief")
         button = page.locator("#run-next")
         page.wait_for_function("document.getElementById('run-next').textContent === 'Bắt đầu'")
         button.click()  # bắt đầu ghi + bước 0
@@ -196,6 +198,7 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
         instruction_0 = page.text_content("#run-instruction")
         example_0 = page.text_content("#run-example-line")
+        overview_hidden_while_calling = page.is_hidden("#run-overview")
         for _ in prompts[1:]:  # các bước sau, mỗi bước chờ bot nói xong rồi khách "nói"
             page.wait_for_function("!document.getElementById('run-next').disabled", timeout=10000)
             page.wait_for_timeout(700)
@@ -256,6 +259,9 @@ def recorded(server: tuple[str, str], tmp_path_factory: pytest.TempPathFactory) 
         "disabled_while_loading": disabled_while_loading,
         "instruction_0": instruction_0,
         "example_0": example_0,
+        "overview_items": overview_items,
+        "brief": brief,
+        "overview_hidden_while_calling": overview_hidden_while_calling,
         "consent_locked": consent_locked,
         "recording_indicator": recording_indicator,
         "review_audio_ready": review_audio_ready,
@@ -416,6 +422,13 @@ def test_chrome_honoured_raw_microphone_constraints(recorded: dict) -> None:
 def test_instructions_follow_the_bot_line(recorded: dict) -> None:
     assert "gặp người thật" in recorded["instruction_0"]
     assert "gặp nhân viên" in recorded["example_0"]
+
+
+def test_the_caller_sees_a_brief_and_every_turn_before_starting(recorded: dict) -> None:
+    """Đọc lướt một lần trước khi gọi, rồi lúc gọi chỉ còn lượt hiện tại."""
+    assert "nhân viên" in recorded["brief"]
+    assert recorded["overview_items"] == len(recorded["prompts"])
+    assert recorded["overview_hidden_while_calling"]
 
 
 def test_database_row_matches_the_file_and_sidecar(recorded: dict) -> None:

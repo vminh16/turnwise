@@ -186,7 +186,12 @@ async function runScript(script) {
   next.textContent = "Đang tải…";
   banner("");
   $("run-title").textContent = script.title;
+  $("run-brief").textContent = script.brief;
   $("run-persona").textContent = script.persona;
+  $("run-overview").hidden = false;
+  $("run-overview-list").replaceChildren(
+    ...script.steps.map((step) => Object.assign(document.createElement("li"), { textContent: step.example })),
+  );
   $("run-props").replaceChildren(
     ...Object.entries(script.props).flatMap(([key, value]) => [
       Object.assign(document.createElement("dt"), { textContent: PROP_LABELS[key] || key }),
@@ -251,6 +256,7 @@ async function runScript(script) {
     $("run-step").textContent = `Lượt ${current + 1}/${script.steps.length}`;
     $("run-status").replaceChildren(document.createTextNode("Tổng đài đang nói"), Object.assign(document.createElement("span"), { className: "dots" }));
     $("run-status").className = "pill";
+    $("run-overview").hidden = true; // đang gọi thì chỉ hiện lượt hiện tại, đỡ phải đọc
     const { customer, example } = script.steps[current];
     $("run-example").hidden = !example;
     $("run-example-line").textContent = example ? `“${example}”` : "";

@@ -124,6 +124,9 @@ input[type="password"], input[type="text"] {
 .props dt { color: var(--muted); }
 .props dd { margin: 0; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.92rem; overflow-wrap: anywhere; }
 .instruction { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; margin: 4px 0 12px; font-size: 1.05rem; }
+.brief { font-size: 1.05rem; margin: 0 0 6px; }
+.overview { margin: 6px 0 0; padding-left: 1.4rem; }
+.overview li { margin: 3px 0; }
 .example { margin: 4px 0 10px; }
 .example .small { margin: 0 0 4px; }
 .example-line { font-size: 1.15rem; margin: 0; }
