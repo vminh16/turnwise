@@ -1,0 +1,119 @@
+# Lời khách mẫu cho cuộc gọi nghe thử (demo_calls.py). CHỈ ĐỂ NGHE THỬ trước buổi thu:
+# không bao giờ đưa vào collector hay bộ dữ liệu — dữ liệu turn-taking bằng giọng TTS là đúng cái
+# lỗi đã thấy ở tập test tiếng Việt của smart-turn.
+#
+# Mỗi mục `turns` ứng với một bước bot, cùng thứ tự với roleplay/<tên>.yaml:
+#   say:         khách nói sau khi bot nói xong. Chuỗi, hoặc danh sách xen số giây im lặng
+#                (ngập ngừng thật là chỗ ngắt dài giữa các mẩu).
+#   at:          khách bắt đầu nói ở tỉ lệ này của câu bot (0..1): nói đè. Bot vẫn đọc tiếp tới
+#                hết, đúng như web thu hiện nay — câu bot là file thu sẵn, không dừng giữa chừng.
+#   backchannel: tiếng đệm đặt vào các chỗ ngắt hơi trong câu bot.
+#   null:        khách không nói gì.
+
+n1-a-outage-reading-number:
+  voice: Ngọc Huyền
+  turns:
+    - say: "Alô, em ơi, mạng nhà chị mất từ sáng tới giờ, không vào được gì cả."
+    - say: ["Số thuê bao hả em.", 1.0, "Chờ chị một xíu, để chị tìm cái hoá đơn.", 1.6, "Đây rồi. Tám hai bốn,", 0.7, "sáu một năm,", 0.5, "ba chín không."]
+    - say: "Dạ."
+    - say: "Từ sáng nay chị bật lên là không vào được. Cái đèn nguồn trên modem vẫn xanh, nhưng đèn Internet thì nháy đỏ. Chị rút điện ra cắm lại một lần rồi mà vẫn thế em ạ."
+    - say: "Sáng mai."
+    - backchannel: ["Ừ.", "Vâng.", "Ừ."]
+      say: "Ừ, chị ghi rồi."
+    - say: "Không, thế thôi em."
+    - at: 0.8
+      say: "Ừ, cảm ơn em nhé."
+
+n1-b-outage-barge-in:
+  voice: Xuân Vĩnh
+  turns:
+    - say: "Em ơi, mạng nhà anh cứ chập chờn từ tối qua, giờ thì mất hẳn luôn."
+    - say: "Số thuê bao là ba không bảy, chín bốn hai, một tám sáu."
+    - say: ["Mất từ.", 1.0, "hình như khoảng mười giờ tối qua.", 0.6, "À không, chắc tầm chín rưỡi."]
+    - at: 0.3
+      say: "Em ơi, anh rút điện cắm lại hai lần rồi, không được đâu."
+    - say: "Mai."
+    - say: "Được."
+    - at: 0.85
+      say: "Ừ, chào em."
+
+n2-a-bill-backchannel:
+  voice: Ngọc Huyền
+  turns:
+    - say: "Chào em, chị muốn kiểm tra cước tháng này."
+    - say: "Năm một chín, không tám ba, hai bảy bốn."
+    - say: ["Tháng.", 0.9, "tháng tám, à ừ, tháng tám em nhé."]
+    - backchannel: ["Ừ.", "Dạ.", "Ừ ừ."]
+      say: "Ừ, chị ghi rồi."
+    - say: "Cái khoản truyền hình bổ sung sáu mươi lăm nghìn ấy, chị không nhớ là mình có đăng ký bao giờ. Em xem giúp chị nó ở đâu ra với."
+    - say: "Có em."
+    - at: 0.8
+      say: "Cảm ơn em."
+
+n2-b-bill-wrong-number:
+  voice: Xuân Vĩnh
+  turns:
+    - say: "Em ơi, anh muốn tra cước tháng này."
+    - say: "Sáu sáu hai, một chín không, năm ba bảy."
+    - at: 0.55
+      say: "Không phải, năm ba bảy chứ không phải năm bảy ba."
+    - say: "Đúng rồi."
+    - at: 0.35
+      say: "Thôi em cho anh gặp nhân viên đi, tháng trước anh đóng đúng hạn rồi mà."
+    - say: "Ừ."
+
+n3-a-reschedule-code:
+  voice: Ngọc Huyền
+  turns:
+    - say: "Chào em, chị muốn đổi lịch hẹn kỹ thuật viên."
+    - say: ["Mã lịch hẹn à. Em chờ chị một tí nhé.", 1.6, "Đây rồi. L bốn bảy,", 0.6, "hai không, chín ba."]
+    - say: "Thứ năm."
+    - say: "Buổi chiều."
+    - backchannel: ["Vâng.", "Ừ."]
+      say: "Vâng."
+    - say: "Đồng ý."
+    - say: "Không có gì nữa."
+    - at: 0.8
+      say: "Cảm ơn em nhé."
+
+n3-b-reschedule-wrong-address:
+  voice: Xuân Vĩnh
+  turns:
+    - say: "Em ơi, anh muốn kiểm tra lại lịch hẹn kỹ thuật viên."
+    - say: "Mã là L tám một, ba sáu, không năm."
+    - at: 0.6
+      say: "Ơ không, nhà đấy anh chuyển đi rồi em ơi."
+    - say: "Địa chỉ mới là số tám, ngõ mười bảy, đường Hoa Mai. Nhà anh mới chuyển tuần trước nên chắc bên em chưa cập nhật."
+    - say: "Vẫn giữ."
+    - say: "Ừ, cảm ơn em."
+
+n4-a-plan-terms-backchannel:
+  voice: Ngọc Huyền
+  turns:
+    - say: "Chào em, chị muốn nâng gói Internet. Dạo này con chị học trực tuyến, cả nhà dùng chung nên mạng chậm lắm."
+    - say: ["Số thuê bao hả, chờ chị xíu.", 1.4, "hai bốn tám, sáu ba không, chín một năm."]
+    - say: "Gói ba trăm."
+    - backchannel: ["Ừ.", "Vâng.", "Ừ.", "Dạ."]
+      say: "Ừ."
+    - say: "Dạ đồng ý."
+    - say: "Không ạ."
+    - at: 0.8
+      say: "Cảm ơn em."
+
+n4-b-cancel-agent-request:
+  voice: Xuân Vĩnh
+  turns:
+    - say: "Huỷ gói."
+    - say: "Bảy ba một, bốn năm tám, không sáu hai."
+    - say: ["À, nhà anh sắp chuyển.", 0.8, "Chỗ mới thì bên nhà mạng khác họ có sẵn rồi, nên anh huỷ bên này."]
+    - at: 0.65
+      say: "Sao lại phải trả phí huỷ? Thôi cho anh gặp nhân viên."
+    - null
+
+n5-a-agent-first:
+  voice: Ngọc Huyền
+  turns:
+    - at: 0.35
+      say: "Thôi em ơi, cho chị gặp nhân viên luôn đi."
+    - say: "Cước."
+    - null
