@@ -35,6 +35,10 @@ PRECISION = "int8"
 MODEL = "pnnbao-ump/VieNeu-TTS-v3-Turbo"
 
 
+def emit(line: object = "") -> None:
+    sys.stdout.write(f"{line}\n")
+
+
 def clean(text: str) -> str:
     """Dấu "/" là chỗ ngắt hơi cho người đọc; với TTS đổi thành dấu phẩy."""
     out: list[str] = []
@@ -74,8 +78,13 @@ def main() -> None:
     manifest = json.loads(manifest_path.read_text("utf-8")) if manifest_path.exists() else {}
     manifest.setdefault("lines", {})
     manifest.update(
-        voice=VOICE, precision=PRECISION, model=MODEL, vieneu=version("vieneu"),
-        sample_rate_hz=tts.sample_rate, watermark=True, pause_marker="comma",
+        voice=VOICE,
+        precision=PRECISION,
+        model=MODEL,
+        vieneu=version("vieneu"),
+        sample_rate_hz=tts.sample_rate,
+        watermark=True,
+        pause_marker="comma",
     )
     for line in wanted:
         key = f"{line['script']}/{line['step']}"
@@ -101,12 +110,15 @@ def main() -> None:
         )
         response.raise_for_status()
         manifest["lines"][key] = {
-            "text": text, "sha256": hashlib.sha256(data).hexdigest(),
-            "seconds": round(len(audio) / tts.sample_rate, 2), "peak": round(peak, 3),
+            "text": text,
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "seconds": round(len(audio) / tts.sample_rate, 2),
+            "peak": round(peak, 3),
         }
-        print(f"{key:<32} {len(audio) / tts.sample_rate:5.2f} s  (sinh {seconds:4.1f} s)  peak {peak:.2f}")
+        length = len(audio) / tts.sample_rate
+        emit(f"{key:<32} {length:5.2f} s  (sinh {seconds:4.1f} s)  peak {peak:.2f}")
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), "utf-8")
-    print(f"{len(wanted)} câu đã nạp vào {args.url}")
+    emit(f"{len(wanted)} câu đã nạp vào {args.url}")
 
 
 if __name__ == "__main__":

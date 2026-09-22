@@ -37,6 +37,10 @@ PAUSE_RMS = 0.01
 PAUSE_MIN_S = 0.2
 
 
+def emit(line: object = "") -> None:
+    sys.stdout.write(f"{line}\n")
+
+
 def pauses(audio: np.ndarray) -> list[float]:
     """Mốc bắt đầu (giây) của các chỗ ngắt hơi trong câu bot, bỏ đầu và cuối câu."""
     frame = RATE // 50
@@ -99,7 +103,8 @@ def main() -> None:
                 continue
             said = utterance(voice, turn["say"])
             start = t + turn["at"] * len(bot) / RATE if "at" in turn else bot_end + REPLY_GAP_S
-            text = " … ".join(p for p in (turn["say"] if isinstance(turn["say"], list) else [turn["say"]]) if isinstance(p, str))
+            parts = turn["say"] if isinstance(turn["say"], list) else [turn["say"]]
+            text = " … ".join(p for p in parts if isinstance(p, str))
             events.append(("khách", start, said, text + ("  [nói đè]" if "at" in turn else "")))
             t = max(bot_end, start + len(said) / RATE) + PRESS_GAP_S
         total = int(RATE * (t + TAIL_S))
@@ -110,7 +115,8 @@ def main() -> None:
             stereo[i : i + len(audio), col] += audio[: total - i]
         stereo /= max(1.0, float(np.abs(stereo).max()))
         sf.write(OUT / f"{name}.wav", stereo, RATE, subtype="PCM_16")
-        print(f"{name:<32} {t + TAIL_S:5.1f} s, {sum(e[0] == 'khách' for e in events)} lượt khách")
+        turns_said = sum(e[0] == "khách" for e in events)
+        emit(f"{name:<32} {t + TAIL_S:5.1f} s, {turns_said} lượt khách")
         lines = "".join(
             f'<tr class="{c}"><td>{s:5.1f}s</td><td>{"Khách" if c == "khách" else "Bot"}</td>'
             f"<td>{html.escape(x)}</td></tr>"
