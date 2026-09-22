@@ -31,7 +31,7 @@ n1-b-outage-barge-in:
     - say: "Số thuê bao là ba không bảy, chín bốn hai, một tám sáu."
     - say: ["Mất từ.", 1.0, "hình như khoảng mười giờ tối qua.", 0.6, "À không, chắc tầm chín rưỡi."]
     - at: 0.3
-      say: "Em ơi, anh rút điện cắm lại hai lần rồi, không được đâu."
+      say: "Ơ em ơi, khoan đã, nhưng mà anh rút điện cắm lại hai lần rồi, không được đâu em."
     - say: "Mai."
     - say: "Được."
     - at: 0.85
@@ -56,10 +56,10 @@ n2-b-bill-wrong-number:
     - say: "Em ơi, anh muốn tra cước tháng này."
     - say: "Sáu sáu hai, một chín không, năm ba bảy."
     - at: 0.55
-      say: "Không phải, năm ba bảy chứ không phải năm bảy ba."
+      say: "À không em ơi, năm ba bảy chứ không phải năm bảy ba."
     - say: "Đúng rồi."
     - at: 0.35
-      say: "Thôi em cho anh gặp nhân viên đi, tháng trước anh đóng đúng hạn rồi mà."
+      say: "Khoan khoan, em ơi, tháng trước anh đóng đúng hạn rồi mà. Thôi em cho anh gặp nhân viên đi."
     - say: "Ừ."
 
 n3-a-reschedule-code:
@@ -82,7 +82,7 @@ n3-b-reschedule-wrong-address:
     - say: "Em ơi, anh muốn kiểm tra lại lịch hẹn kỹ thuật viên."
     - say: "Mã là L tám một, ba sáu, không năm."
     - at: 0.6
-      say: "Ơ không, nhà đấy anh chuyển đi rồi em ơi."
+      say: "Ơ, khoan đã em ơi, nhà đấy anh chuyển đi rồi."
     - say: "Địa chỉ mới là số tám, ngõ mười bảy, đường Hoa Mai. Nhà anh mới chuyển tuần trước nên chắc bên em chưa cập nhật."
     - say: "Vẫn giữ."
     - say: "Ừ, cảm ơn em."
@@ -107,13 +107,13 @@ n4-b-cancel-agent-request:
     - say: "Bảy ba một, bốn năm tám, không sáu hai."
     - say: ["À, nhà anh sắp chuyển.", 0.8, "Chỗ mới thì bên nhà mạng khác họ có sẵn rồi, nên anh huỷ bên này."]
     - at: 0.65
-      say: "Sao lại phải trả phí huỷ? Thôi cho anh gặp nhân viên."
+      say: "Ơ em ơi, sao lại phải trả phí huỷ? Thôi cho anh nói chuyện với nhân viên."
     - null
 
 n5-a-agent-first:
   voice: Ngọc Huyền
   turns:
     - at: 0.35
-      say: "Thôi em ơi, cho chị gặp nhân viên luôn đi."
+      say: "Alô, em ơi, thôi cho chị gặp nhân viên luôn đi."
     - say: "Cước."
     - null

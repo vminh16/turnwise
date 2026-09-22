@@ -23,6 +23,7 @@ os.environ.setdefault("HF_HOME", str(HERE / "models"))
 import numpy as np  # noqa: E402
 import soundfile as sf  # noqa: E402
 import yaml  # noqa: E402
+from render_prompts import clean  # noqa: E402
 
 ROLEPLAY = HERE.parent / "roleplay"
 PROMPTS = HERE / "prompts"
@@ -91,7 +92,7 @@ def main() -> None:
         t = 0.5
         for index, (step, turn) in enumerate(zip(steps, turns, strict=True)):
             bot, _ = sf.read(PROMPTS / name / f"{index}.wav", dtype="float32")
-            events.append(("bot", t, bot, " ".join(step["bot"].split()).replace(" / ", ", ")))
+            events.append(("bot", t, bot, clean(step["bot"])))
             bot_end = t + len(bot) / RATE
             if turn is None:
                 t = bot_end + SILENT_TURN_S
