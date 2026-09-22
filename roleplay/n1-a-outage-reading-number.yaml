@@ -11,6 +11,7 @@ props:
   customer_code: "KH 5530 2178"
   contract_no: "HĐ 0917 44"
   subscriber_id: "824 615 390"
+brief: "Bạn gọi báo mạng nhà bị mất. Tổng đài sẽ hỏi số thuê bao, tình trạng modem, rồi hẹn kỹ thuật viên."
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     example: "Alô, mạng nhà tôi mất từ sáng tới giờ, không vào được gì cả."
@@ -23,6 +24,7 @@ steps:
     behaviours: [hesitation]
   - bot: "Em xin đọc lại: tám hai bốn / sáu một năm / ba chín không. Đúng không ạ?"
     reading: number
+    example: "Dạ."
     customer: Nếu khớp với hoá đơn thì xác nhận ngắn; nếu khác thì sửa lại.
     behaviours: [short_answer]
     replies: ["Dạ.", "Đúng rồi.", "Dạ đúng.", "Ừ, đúng đấy."]
@@ -33,6 +35,7 @@ steps:
       Nói bao nhiêu tuỳ ý.
     behaviours: [long_answer]
   - bot: "Kỹ thuật viên có thể qua vào sáng mai hoặc chiều mai. Quý khách chọn buổi nào ạ?"
+    example: "Sáng mai."
     customer: Chọn một buổi.
     behaviours: [short_answer]
     replies: ["Sáng mai.", "Chiều.", "Sáng.", "Buổi nào cũng được."]
@@ -41,11 +44,13 @@ steps:
       địa chỉ đăng ký của thuê bao. / Trước khi đến khoảng ba mươi phút, / kỹ thuật viên sẽ gọi
       điện cho quý khách.
     reading: schedule
+    example: "(Vừa ghi giờ hẹn ra giấy vừa nghe, đáp lời như khi nghe điện thoại)"
     customer: >
       Ghi giờ hẹn ra giấy trong lúc bot đọc. Nghe và đáp lời như khi nghe điện thoại bình thường;
       không ngắt lời.
     behaviours: [backchannel]
   - bot: "Quý khách còn cần hỗ trợ gì thêm không ạ?"
+    example: "Không."
     customer: Trả lời là không cần gì nữa.
     behaviours: [short_answer]
     replies: ["Không.", "Không cần nữa.", "Hết rồi.", "Thôi, cảm ơn."]

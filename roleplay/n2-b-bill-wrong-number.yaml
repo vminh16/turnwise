@@ -8,6 +8,7 @@ summary: >
 persona: Đang vội. Tháng trước đã thanh toán đúng hạn qua ứng dụng.
 props:
   subscriber_id: "662 190 537"
+brief: "Bạn đang vội, gọi tra cước tháng này. Nghe kỹ những gì tổng đài đọc lại."
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     example: "Em ơi, tôi muốn tra cước tháng này."
@@ -25,6 +26,7 @@ steps:
       Ngắt lời như với một nhân viên thật.
     behaviours: [barge_in]
   - bot: "Dạ, em xin lỗi. Quý khách xác nhận giúp em ba số cuối là năm ba bảy đúng không ạ?"
+    example: "Dạ."
     customer: Xác nhận ngắn.
     behaviours: [short_answer]
     replies: ["Dạ.", "Đúng rồi.", "Phải.", "Ừ."]

@@ -8,6 +8,7 @@ summary: >
 persona: Cước tháng này cao hơn mọi tháng. Muốn nghe rõ từng khoản để so với hoá đơn.
 props:
   subscriber_id: "519 083 274"
+brief: "Bạn gọi tra cước vì tháng này cao bất thường. Tổng đài sẽ đọc từng khoản; bạn ghi ra giấy để so."
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     example: "Chào em, tôi muốn kiểm tra cước tháng này."
@@ -24,6 +25,7 @@ steps:
       đồng; / phí thuê thiết bị phát sóng ba mươi nghìn đồng; / phí truyền hình bổ sung sáu mươi lăm
       nghìn đồng. / Tổng cộng ba trăm bốn mươi bốn nghìn đồng, / đã bao gồm VAT.
     reading: amount
+    example: "(Vừa ghi từng khoản ra giấy vừa nghe, đáp lời như khi nghe điện thoại)"
     customer: >
       Ghi từng khoản ra giấy trong lúc bot đọc. Nghe và đáp lời như khi nghe điện thoại bình
       thường; không ngắt lời.
@@ -34,6 +36,7 @@ steps:
       Bạn không nhớ đã đăng ký truyền hình bổ sung. Hỏi bot về khoản đó bằng lời của mình.
     behaviours: [long_answer]
   - bot: "Quý khách có muốn em gửi chi tiết cước qua tin nhắn không ạ?"
+    example: "Dạ có."
     customer: Trả lời ngắn.
     behaviours: [short_answer]
     replies: ["Dạ có.", "Có ạ.", "Phải.", "Khỏi."]

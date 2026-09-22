@@ -27,10 +27,12 @@ name: fixture
 flow: N2
 title: fixture
 summary: fixture
+brief: fixture
 persona: fixture
 steps:
   - bot: "Cước tháng này gồm: / cước gói ba trăm nghìn đồng."
     reading: amount
+    example: "(Nghe và đáp lời)"
     customer: Chêm "dạ".
     behaviours: [backchannel]
 """
@@ -136,19 +138,21 @@ def test_da_is_elicited_as_a_complete_answer_not_only_as_a_backchannel() -> None
     assert len(flows) >= 2, f'"Dạ." trọn lượt chỉ có ở {flows}'
 
 
-def test_every_turn_the_caller_must_speak_has_an_example_line() -> None:
-    """Người thu cần biết phải nói gì; câu mẫu cho điều đó, còn lời dặn thì dễ bị bỏ qua.
+def test_backchannel_examples_describe_the_task_and_never_supply_words() -> None:
+    """Đưa sẵn "ừ, vâng" thì người thu chêm nhiều hơn bình thường; chỉ tả việc cần làm."""
+    for script in load_all(ROLEPLAY_DIR):
+        for step in script.steps:
+            if "backchannel" in step.behaviours:
+                assert step.example.startswith("(") and step.example.endswith(")"), step.example
 
-    Câu trả lời ngắn đã có `replies`; lúc bot đang đọc mà khách chỉ đáp lời thì không có câu
-    nào để nói, và đưa sẵn "ừ, vâng" sẽ làm người thu chêm nhiều hơn bình thường.
-    """
-    missing = [
-        f"{script.name}/{index}"
-        for script in load_all(ROLEPLAY_DIR)
-        for index, step in enumerate(script.steps)
-        if not step.example and not {"short_answer", "backchannel"} & set(step.behaviours)
-    ]
-    assert not missing, f"thiếu câu mẫu: {missing}"
+
+def test_examples_never_give_away_what_the_caller_must_look_up() -> None:
+    """Số và mã trên thẻ phải tự tìm; câu mẫu chứa sẵn thì mất ngập ngừng thật."""
+    for script in load_all(ROLEPLAY_DIR):
+        secrets = [value.replace(" ", "") for value in script.props.values()]
+        for step in script.steps:
+            flat = step.example.replace(" ", "")
+            assert not any(value in flat for value in secrets), step.example
 
 
 def test_every_call_is_closed_by_the_bot() -> None:

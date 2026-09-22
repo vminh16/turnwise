@@ -11,6 +11,7 @@ props:
     NetCo: Lich hen lap dat cua Quy khach vao 09:00 thu Ba. Ma lich hen: L 47 20 93. Ky thuat vien
     se goi truoc 30 phut. Tong dai ho tro 24/7.
   appointment_code: "L 47 20 93"
+brief: "Bạn gọi dời lịch hẹn kỹ thuật viên. Mã lịch hẹn nằm trong tin nhắn trên thẻ."
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     example: "Chào em, tôi muốn đổi lịch hẹn kỹ thuật viên."
@@ -21,10 +22,12 @@ steps:
       Mã nằm trong tin nhắn in trên thẻ, giữa nhiều chữ khác. Tìm và đọc; cần thì bảo bot chờ.
     behaviours: [hesitation]
   - bot: "Quý khách muốn dời sang ngày nào ạ?"
+    example: "Thứ năm."
     customer: Nói ngày mới.
     behaviours: [short_answer]
     replies: ["Thứ năm.", "Chủ nhật.", "Tuần sau.", "Ngày kia."]
   - bot: "Quý khách chọn buổi sáng hay buổi chiều ạ?"
+    example: "Sáng."
     customer: Chọn một buổi.
     behaviours: [short_answer]
     replies: ["Sáng.", "Chiều.", "Buổi chiều.", "Sáng sớm."]
@@ -32,17 +35,20 @@ steps:
       Em đọc lại lịch hẹn mới: / thứ năm tuần này, buổi chiều, / từ một giờ ba mươi đến bốn giờ ba
       mươi. / Địa chỉ giữ nguyên như lịch hẹn cũ.
     reading: schedule
+    example: "(Vừa ghi lịch mới ra giấy vừa nghe, đáp lời như khi nghe điện thoại)"
     customer: >
       Ghi lịch mới ra giấy trong lúc bot đọc. Nghe và đáp lời như khi nghe điện thoại bình thường;
       không ngắt lời.
     behaviours: [backchannel]
   - bot: "Quý khách xác nhận đổi sang lịch hẹn mới này chứ ạ?"
+    example: "Dạ vâng."
     customer: Đồng ý bằng một câu ngắn.
     behaviours: [short_answer]
     replies: ["Dạ vâng.", "Đồng ý.", "Được ạ.", "Chốt."]
   - bot: >
       Em đã đổi lịch thành công. Kỹ thuật viên sẽ gọi cho quý khách khoảng ba mươi phút trước khi
       đến. Quý khách còn cần hỗ trợ gì thêm không ạ?
+    example: "Không có gì nữa."
     customer: Trả lời là không cần gì nữa.
     behaviours: [short_answer]
     replies: ["Không có gì nữa.", "Hết rồi ạ.", "Thế thôi.", "Không, cảm ơn em."]

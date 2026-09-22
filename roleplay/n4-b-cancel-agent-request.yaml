@@ -9,8 +9,10 @@ persona: Chuyển sang nhà mạng khác vì chuyển nhà. Không nghĩ là ph�
 props:
   subscriber_id: "731 458 062"
   plan: "Gói Gia Đình"
+brief: "Bạn gọi huỷ gói vì sắp chuyển nhà và đổi sang nhà mạng khác."
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
+    example: "Tôi muốn huỷ."
     customer: Nói ngắn là muốn huỷ gói.
     behaviours: [short_answer]
     replies: ["Tôi muốn huỷ.", "Huỷ gói.", "Huỷ mạng.", "Cắt hợp đồng."]

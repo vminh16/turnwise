@@ -10,6 +10,7 @@ props:
   appointment_code: "L 81 36 05"
   old_address: "số 12 ngõ 45 đường Hoa Sữa"
   new_address: "số 8 ngõ 17 đường Hoa Mai"
+brief: "Bạn gọi kiểm tra lịch hẹn kỹ thuật viên. Bạn vừa chuyển nhà tuần trước."
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     example: "Em ơi, tôi muốn kiểm tra lại lịch hẹn kỹ thuật viên."
@@ -31,6 +32,7 @@ steps:
     customer: Đọc địa chỉ mới trên thẻ và nói thêm là vừa chuyển nhà, bằng lời của mình.
     behaviours: [long_answer]
   - bot: "Quý khách vẫn giữ khung giờ sáng thứ sáu chứ ạ?"
+    example: "Dạ."
     customer: Trả lời ngắn.
     behaviours: [short_answer]
     replies: ["Dạ.", "Giữ lịch cũ.", "Vẫn giữ.", "Giữ nguyên."]

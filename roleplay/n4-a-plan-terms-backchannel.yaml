@@ -10,6 +10,7 @@ props:
   customer_code: "KH 7702 9314"
   subscriber_id: "248 630 915"
   plan: "Gói Tốc Độ 300"
+brief: "Bạn gọi nâng gói Internet. Tổng đài phải đọc điều khoản trước khi đăng ký."
 steps:
   - bot: "Tổng đài NetCo xin nghe. Quý khách cần hỗ trợ gì ạ?"
     example: "Chào em, tôi muốn nâng gói Internet. Dạo này cả nhà dùng chung nên mạng chậm lắm."
@@ -21,6 +22,7 @@ steps:
       Số thuê bao nằm trên hoá đơn cùng mã khách hàng. Tìm và đọc; cần thì bảo bot chờ.
     behaviours: [hesitation]
   - bot: "Hiện có gói Tốc Độ ba trăm và gói Tốc Độ năm trăm. Quý khách chọn gói nào ạ?"
+    example: "Ba trăm."
     customer: Chọn gói ghi trên thẻ.
     behaviours: [short_answer]
     replies: ["Ba trăm.", "Gói ba trăm.", "Gói nhỏ.", "Cái rẻ hơn."]
@@ -30,16 +32,19 @@ steps:
       phí huỷ bằng hai tháng cước. / Gói có hiệu lực từ kỳ cước tiếp theo, / gói hiện tại giữ nguyên
       đến hết kỳ này.
     reading: terms
+    example: "(Nghe điều khoản, đáp lời như khi nghe điện thoại)"
     customer: >
       Nghe điều khoản như khi nghe tổng đài thật và đáp lời theo thói quen của mình; không ngắt lời.
     behaviours: [backchannel]
   - bot: "Quý khách xác nhận đăng ký gói Tốc Độ ba trăm với các điều khoản trên chứ ạ?"
+    example: "Dạ đồng ý."
     customer: Xác nhận rõ ràng bằng một câu ngắn.
     behaviours: [short_answer]
     replies: ["Dạ đồng ý.", "Xác nhận.", "Đăng ký.", "Ừ, được."]
   - bot: >
       Em đã đăng ký gói Tốc Độ ba trăm cho quý khách, gói có hiệu lực từ kỳ cước tiếp theo. Quý
       khách còn cần hỗ trợ gì thêm không ạ?
+    example: "Không ạ."
     customer: Trả lời là không cần gì nữa.
     behaviours: [short_answer]
     replies: ["Không ạ.", "Vậy được rồi.", "Thế là đủ.", "Không có gì nữa."]

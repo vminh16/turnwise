@@ -85,8 +85,9 @@ class Step(_Node):
     reading: Literal["number", "amount", "address", "schedule", "terms"] | None = None
     customer: str
     # Câu mẫu hiện cho người thu: biết phải nói gì, nhưng được dặn nói theo cách của mình.
-    # Không bao giờ chứa đáp án phải tự tìm (số trên hoá đơn), kẻo mất ngập ngừng thật.
-    example: str | None = None
+    # Không bao giờ chứa đáp án phải tự tìm (số trên hoá đơn), kẻo mất ngập ngừng thật. Lượt
+    # chỉ đáp lời trong lúc bot đọc thì câu mẫu tả việc cần làm trong ngoặc, không đưa sẵn từ.
+    example: str
     behaviours: tuple[Behaviour, ...] = ()
     replies: tuple[str, ...] = ()
 
@@ -126,6 +127,9 @@ class Script(_Node):
     flow: Flow
     title: str
     summary: str
+    # Một hai câu cho người thu đọc lướt trước khi bắt đầu: gọi để làm gì, tổng đài sẽ hỏi gì.
+    # Không lộ chỗ bot cố ý đọc sai.
+    brief: str
     persona: str
     props: dict[str, str] = {}
     steps: tuple[Step, ...]

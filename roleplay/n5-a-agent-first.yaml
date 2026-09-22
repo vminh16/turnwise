@@ -6,6 +6,7 @@ summary: >
   Khách đòi gặp người thật khi bot còn đang đọc danh sách dịch vụ (N5 ở điểm sớm nhất). Nếu bot hỏi
   lại để chuyển đúng bộ phận, khách trả lời ngắn.
 persona: Chỉ muốn nói chuyện với người thật, không muốn nghe máy đọc danh sách.
+brief: "Bạn chỉ muốn nói chuyện với nhân viên thật, không muốn nghe máy đọc."
 steps:
   - bot: >
       Tổng đài NetCo xin nghe. / Để được hỗ trợ nhanh hơn, quý khách vui lòng cho biết nhu cầu: /
@@ -17,6 +18,7 @@ steps:
       Ngắt lời như với một nhân viên thật.
     behaviours: [agent_request]
   - bot: "Quý khách cần hỗ trợ về vấn đề gì để em chuyển đúng bộ phận ạ?"
+    example: "Cước."
     customer: Trả lời ngắn một chủ đề bất kỳ.
     behaviours: [short_answer]
     replies: ["Cước.", "Mạng.", "Lịch hẹn.", "Khiếu nại."]
