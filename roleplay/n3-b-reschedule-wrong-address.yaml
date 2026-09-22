@@ -21,6 +21,7 @@ steps:
     reading: address
     customer: >
       Địa chỉ bot đọc là nhà cũ. Sửa lại ngay khi nhận ra, không cần chờ bot đọc xong.
+      Ngắt lời như với một nhân viên thật.
     behaviours: [barge_in]
   - bot: "Dạ, em xin lỗi. Quý khách cho em xin địa chỉ mới ạ."
     customer: Đọc địa chỉ mới trên thẻ và nói thêm là vừa chuyển nhà, bằng lời của mình.

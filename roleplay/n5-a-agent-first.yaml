@@ -11,7 +11,9 @@ steps:
       Tổng đài NetCo xin nghe. / Để được hỗ trợ nhanh hơn, quý khách vui lòng cho biết nhu cầu: /
       báo sự cố mạng, / tra cứu cước, / đổi lịch hẹn kỹ thuật viên, / hoặc đăng ký và huỷ gói cước.
     reading: terms
-    customer: Bạn chỉ muốn gặp người thật. Nói ra lúc nào tuỳ ý, không cần chờ bot đọc hết.
+    customer: >
+      Bạn chỉ muốn gặp người thật. Nói ra lúc nào tuỳ ý, không cần chờ bot đọc hết.
+      Ngắt lời như với một nhân viên thật.
     behaviours: [agent_request]
   - bot: "Quý khách cần hỗ trợ về vấn đề gì để em chuyển đúng bộ phận ạ?"
     customer: Trả lời ngắn một chủ đề bất kỳ.

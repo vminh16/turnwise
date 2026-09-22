@@ -25,7 +25,7 @@ steps:
     reading: terms
     customer: >
       Bạn đã làm đúng các bước này hai lần rồi. Khi nhận ra bot đang hướng dẫn lại, nói cho bot
-      biết. Muốn nói lúc nào thì nói, không cần chờ bot đọc xong.
+      biết. Muốn nói lúc nào thì nói, không cần chờ bot đọc xong. Ngắt lời như với một nhân viên thật.
     behaviours: [barge_in]
   - bot: "Dạ, em xin lỗi. Em đặt lịch kỹ thuật viên qua kiểm tra. Quý khách muốn hẹn ngày nào ạ?"
     customer: Chọn ngày.

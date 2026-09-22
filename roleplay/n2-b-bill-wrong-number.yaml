@@ -19,6 +19,7 @@ steps:
     reading: number
     customer: >
       Số bot đọc khác với hoá đơn. Sửa lại cho bot ngay khi nhận ra, không cần chờ bot đọc xong.
+      Ngắt lời như với một nhân viên thật.
     behaviours: [barge_in]
   - bot: "Dạ, em xin lỗi. Quý khách xác nhận giúp em ba số cuối là năm ba bảy đúng không ạ?"
     customer: Xác nhận ngắn.
@@ -31,6 +32,7 @@ steps:
     reading: amount
     customer: >
       Nghe tới khoản phí đóng muộn thì bảo bot cho gặp nhân viên. Muốn nói lúc nào thì nói.
+      Ngắt lời như với một nhân viên thật.
     behaviours: [agent_request]
   - bot: "Em chuyển máy cho nhân viên hỗ trợ ngay. Quý khách không cần nhắc lại thông tin đã cung cấp ạ."
     customer: Chờ được chuyển máy như khi gọi thật; muốn nói gì hay im lặng đều được.
