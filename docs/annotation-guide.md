@@ -173,6 +173,13 @@ và bằng chứng tốt nhất của ý định là việc khách làm tiếp t
 | Khách quay sang nói với người khác trong phòng | `aside` |
 | Khách cười hoặc ho, không có lời | không phải IPU của `caller_act`; gán vào `nonspeech` |
 
+**Nói đè khi bot không dừng.** Web thu phát câu bot tới hết, kể cả khi bị nói đè; nhãn
+`barge_in` ghi điều bot *lẽ ra* phải làm. Nhãn và mốc tính ở **đầu IPU nói đè** — đó là chỗ
+phép đo "thời gian từ lúc khách nói đè tới lúc bot im" bắt đầu đếm. Phần còn lại của lượt đó,
+khi hai bên cứ nói chồng lên nhau, không đại diện cho sản phẩm (bot thật đã dừng, khách sẽ nói
+khác): vẫn gán nhãn cho đủ, nhưng các chỉ số §9.1 **không chấm** quyết định nào nằm sau mốc nói
+đè cho tới khi câu bot kết thúc.
+
 Ca "Dạ." và "dạ" là ca khó nhất của R4 (`SPEC.md` §2) và là lý do nhãn **không bao giờ** gán
 theo từ. Cùng một chuỗi âm, hai nhãn khác nhau; chỉ ngữ cảnh phân biệt được.
 
