@@ -239,3 +239,75 @@ dự án ứng dụng thì đó là lỗi tốn kém hơn hẳn so với dự á
 `SPEC.md` R12 chặn chỗ đó: chọn giọng TTS ở GĐ 4 theo điểm tự nhiên người nghe chấm, so với
 giọng người thật đã thu ở GĐ 1; lời thoại có đồng cảm, có biến thể, không lặp một câu cho mọi
 lần.
+
+---
+
+## 8. Timeline tạm — 2026-09-25, **không phải nguồn chân lý**
+
+Mục này là **bản nháp làm việc**, viết ngày 2026-09-25, không có sức nặng của `SPEC.md` hay
+`docs/adr/`. Nó là một phép chia thời gian theo quan hệ phụ thuộc đã biết tại thời điểm viết, và
+**mọi quyết định trong nó được phép đổi ở bất kỳ pha nào** khi số đo nói khác. Mâu thuẫn với
+`SPEC.md` hay một ADR thì hai cái kia đúng. Đổi thì sửa thẳng mục này, không cần ADR.
+
+Giả định đang giữ, cái nào sai thì cả bảng lệch theo: mốc cuối **2026-10-20**; **6–8 người thu**,
+mỗi người chín kịch bản; một người gán nhãn chính; `docs/progress.md` §5 vẫn đúng về chỗ còn
+trống (`audio/`, `dialog/`, `transport/`, B2, B3, `fusion` đều rỗng).
+
+| Tuần | Nghiên cứu | Sản phẩm | Cổng chặn |
+|---|---|---|---|
+| 1 — 25/9 → 1/10 | pha 1.5, pha 1.6, B2 | `audio/ring_buffer`, `audio/capture` | B1 và B2 chạy được trên một bản đã gán nhãn |
+| 2 — 2/10 → 8/10 | gán nhãn, B3 kèm độ trễ ASR, `run_system.py` | `audio/aec`, `audio/features` | ba baseline có số trên tập dev; `pytest -m latency` xanh |
+| 3 — 9/10 → 15/10 | kết luận GĐ 2, ADR chốt hướng, **một** scorer ngôn điệu, `fusion` | `dialog/` năm luồng, `slots`, `backend_stub` | ablation nói được scorer đóng góp bao nhiêu, ở thanh nào |
+| 4 — 16/10 → 20/10 | mở holdout **một lần**, báo cáo | `transport/wiring`, nối ASR và TTS, bảng theo dõi | năm phép thử `SPEC.md` §10 với người chưa từng dùng hệ thống |
+
+**Thứ tự cắt khi trượt tiến độ**, cắt từ trên xuống: WebRTC (dùng micro và loa tại máy, giữ
+`transport/webrtc.py` rỗng) → bảng theo dõi xuống mức log cộng báo cáo tĩnh → giảm còn 6 người
+thu → không có người gán thứ hai thì tự gán lại hai buổi sau ba ngày và **báo cáo ghi rõ đó là độ
+ổn định của một người gán, không phải κ giữa hai người** → bỏ scorer ngôn điệu, ship baseline tốt
+nhất kèm ADR nói rõ vì sao.
+
+**Không nằm trong danh sách cắt:** holdout chia theo người nói và mở đúng một lần; ít nhất một
+baseline có sẵn; độ trễ đo trên hệ chạy sống; và luật §9.3 quy tắc 1 — không báo tỉ lệ cắt lời mà
+thiếu độ trễ.
+
+### 8.1 Pha 1.5 — manifest, chia tập, khoá holdout
+
+Pha này không sinh ra mô hình nào. Nó biến một đống file thu thành **một tập dữ liệu có thể trích
+dẫn**: biết chính xác gồm những gì, ai nói, bản nào thuộc tập nào, và chứng minh được là chưa bị
+sửa. Mọi con số về sau đều treo trên nó, nên nó đi trước B2 và B3.
+
+**Đầu vào:** một hoặc nhiều gói export từ `collector/` — wav hai kênh 48 kHz, file `.json` đi kèm,
+`collector.sqlite3`, và thư mục `prompts/`. Không sửa gì trong đó (`docs/progress.md` §6.6: dữ liệu
+thu giữ nguyên dạng thô).
+
+**Sinh ra bốn thứ:**
+
+1. **Manifest** — một dòng cho mỗi bản thu, có: đường dẫn, `sha256`, `speaker_id`, tên kịch bản,
+   số mẫu, tần số, `dialect`, thiết bị phát (`headset` / `loudspeaker`), `noise`, các cờ đồng ý,
+   `base_latency_s` và `output_latency_s`, phiên bản hướng dẫn gán nhãn, và **tập** mà bản đó
+   thuộc về. Manifest nhỏ, không chứa âm thanh, nên commit được — đó là điểm chính: người khác đọc
+   báo cáo có thể kiểm bộ dữ liệu khớp hay không mà không cần file thu.
+2. **Bản dẫn xuất 16 kHz mono kênh khách**, cho B2 (smart-turn cần 16 kHz mono, tối đa 8 giây) và
+   cho ASR của B3. Sinh một lần rồi cache, vì ASR sẽ chạy lại nhiều lượt. File dẫn xuất **tái sinh
+   được từ bản thô**, nên gitignore; bản thô 48 kHz vẫn là nguồn duy nhất đáng tin.
+3. **Chia tập theo người nói.** Quy tắc, không phải con số: chia **theo người**, không theo phát
+   ngôn; holdout có **ít nhất hai người nói**, rải theo `dialect` nếu đủ người; hạt giống ngẫu
+   nhiên cố định và ghi vào manifest; **S001 và S002 là tác giả kịch bản, luôn nằm ngoài holdout**
+   (`docs/progress.md`). Tỉ lệ cụ thể chốt khi biết số người thật.
+4. **Khoá holdout** — một file liệt kê `sha256` của từng bản trong holdout. Sau khi khoá thì danh
+   sách đóng băng; phát hiện lỗi nhãn về sau thì ghi vào errata kèm báo cáo, không sửa nhãn
+   (`docs/annotation-guide.md` §6.4).
+
+**Kiểm tự động, `scripts/validate_manifests.py`** (hiện rỗng 0 byte): mọi `sha256` khớp file; mỗi
+bản thuộc **đúng một** tập; không người nói nào xuất hiện ở hai tập; mọi bản đều có đồng ý và
+không thuộc người đã rút lại; tần số và số mẫu khớp file `.json`; tác giả kịch bản không có trong
+holdout. Lỗi nào cũng làm thoát khác 0.
+
+**Một cái bẫy đã biết:** `scripts/check_holdout_isolation.py` chặn **mọi** file trong `scripts/`
+có chữ "holdout", nên bước khoá holdout không thể là một script trong `scripts/`. Nó thuộc
+`evaluation/`, đúng tầng duy nhất được phép đọc holdout. **Không giải bằng cách nới script chặn** —
+script đó tồn tại để một luật trong tài liệu biến thành một build đỏ.
+
+**Xong khi:** `validate_manifests.py` thoát 0 trên toàn bộ dữ liệu đã thu; `evaluation/` đọc được
+một tập bằng tên và lặp qua các khung kèm cờ `bot_speaking` (pha 1.3 đã có `WavFrameSource`); và
+`uv run python scripts/check_holdout_isolation.py` vẫn xanh.
