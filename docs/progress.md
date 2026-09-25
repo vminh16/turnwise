@@ -477,3 +477,35 @@ holdout**. Pha 1.5 phải áp quy tắc này khi chia tập.
 
 `tts-check/render_prompts.py` sinh mọi câu từ `/api/admin/lines` và nạp thẳng vào collector,
 ghi `tts-check/prompts/manifest.json` (giọng, phiên bản, sha256 từng câu; gitignore).
+
+---
+
+## 7. Giai đoạn 2 — Đo cái có sẵn: **đang làm**
+
+### 7.1 B2 — `smart-turn` v3.2
+
+`src/turnwise/turn/deciders/acoustic_onnx.py`, cấu hình `configs/baseline/acoustic-onnx.yaml`.
+Trọng số nguyên bản, khoá revision và sha256 trong file cấu hình. Vận hành chép từ pipecat: hỏi
+mô hình khi khách im 200 ms, nhận lượt khi xác suất > 0,5 hoặc khi im 3 giây. Cổng có tiếng dùng
+chung với B1 thay cho Silero VAD, để hai baseline khác nhau ở đúng một chỗ.
+
+Đặc trưng lấy từ `faster_whisper.feature_extractor` (nhóm `asr`), đối chiếu với
+`transformers.WhisperFeatureExtractor` của bản gốc trên bốn đoạn thật: lệch tối đa 4,3e-6.
+
+**Đo trên chín bản thu thử của S002, i5-11400H, chạy lại từ file, 2026-09-26:**
+
+| | |
+|---|---|
+| Số lần hỏi mô hình | 64 |
+| Thời gian một lần hỏi | trung vị 22,3 ms, p95 23,5 ms, tối đa 24,4 ms |
+| Tỉ lệ trả "xong" | 83% |
+
+Chưa có nhãn nên chưa biết lần nào đúng. Hai điều đã biết chắc:
+
+- **Một lần hỏi tốn 22 ms, gấp đôi ngân sách 10 ms mỗi khung.** Trên đường chạy sống, phần nối dây
+  phải đẩy lời gọi ra khỏi thread tiêu thụ, như pipecat đẩy sang executor. Chạy lại từ file thì
+  không sao.
+- **Tiếng bot lọt vào micro chạm cổng im lặng.** Lần chạy đầu, cả 64 lần hỏi đều rơi vào lúc bot
+  đang nói: tiếng bot vọng ở −44 dBFS, vượt cổng −45 dBFS của B1 và B2, và mô hình chấm một đoạn
+  gần như im lặng thành "xong" (0,985). Cổng này ảnh hưởng cả B1. Khi viết `run_system.py`, mỗi
+  lượt khách bắt đầu **lúc bot dứt lời**, và khung trong lúc bot nói chỉ dùng cho phép đo nói đè.
