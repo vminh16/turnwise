@@ -204,13 +204,13 @@ bot im, tỉ lệ bot nhận nhầm tiếng của chính mình, và chênh lệc
 bộ §9.2 — thời gian hoàn tất luồng, tỉ lệ không phải chuyển người, số lần khách lặp lại —
 chưa có gì vì `dialog/` còn rỗng.
 
-Hai quyết định còn treo, cả hai cỡ một ADR:
+Hai quyết định trước đây còn treo, nay đã đóng:
 
-- **`praat-parselmouth` là GPLv3 và nằm trong `[project] dependencies`**, tức đường chạy
-  chính, trong khi `LICENSE` của repo đang rỗng 0 byte. Chốt trước Giai đoạn 3.
-- **Giọng TTS tiếng Việt** chưa có nguồn chính thức: `rhasspy/piper-voices` không có mục
-  `vi`, và `piper-tts` trên PyPI đã chuyển sang GPL-3.0-or-later. Chốt trước Giai đoạn 4,
-  **theo độ tự nhiên trước** (`SPEC.md` R12), rồi mới tới giấy phép và độ trễ.
+- **Giấy phép** — ADR-0006: đồ án phi thương mại nên chấp nhận cả NC và GPL, kể cả đường
+  chạy chính; `praat-parselmouth` ở lại; `LICENSE` giữ rỗng và repo không công khai trong
+  học kỳ này. Chỉ trọng số có điều khoản ND là không được tinh chỉnh rồi công bố.
+- **Giọng TTS tiếng Việt** — §6.8: VieNeu-TTS v3 Turbo, preset "Minh Quân Pro", int8,
+  Apache-2.0. `piper-tts` trong nhóm `tts` của `pyproject.toml` thành thừa, chờ gỡ.
 
 **Chưa có bot.** Tính tới 2026-09-15: `dialog/`, `transport/` và toàn bộ `audio/` trừ
 `source.py` đều rỗng; chưa cài gói ASR hay TTS nào. Bot giống người là yêu cầu R12, không phải
