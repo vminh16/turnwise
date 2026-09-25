@@ -246,7 +246,7 @@ phần **holdout** khoá lại cho báo cáo cuối. Cả hai đều chỉ dùng
 | 1.2 Hướng dẫn gán nhãn + đồng ý | `docs/annotation-guide.md` | **xong**, ba giả định chờ chốt ở 1.6 |
 | 1.3 Đọc được hai kênh | `FeatureFrame.bot_speaking`, `WavFrameSource` đọc file khách + bot kèm log phát | **xong** |
 | 1.4 Web thu tự phục vụ + buổi thử | `collector/` (FastAPI + SQLite + Docker), `docs/runbook/collect-data.md` | code **xong**; chờ deploy và buổi thử |
-| 1.5 Manifest, chia tập, khoá holdout | `scripts/validate_manifests.py`, chia theo người nói | chưa |
+| 1.5 Manifest, chia tập, khoá holdout | `evaluation/dataset.py`, `data/manifests/recordings.csv` | **xong** bản gọn; holdout chưa khoá, chờ đủ người |
 | 1.6 Quy trình gán nhãn | nhãn tự động + nhãn người, đo độ đồng thuận | chưa |
 | 1.7 Thu thật, đóng giai đoạn | điều kiện xong của `roadmap.md` §6 | chưa |
 

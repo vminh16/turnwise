@@ -272,42 +272,24 @@ thiếu độ trễ.
 
 ### 8.1 Pha 1.5 — manifest, chia tập, khoá holdout
 
-Pha này không sinh ra mô hình nào. Nó biến một đống file thu thành **một tập dữ liệu có thể trích
-dẫn**: biết chính xác gồm những gì, ai nói, bản nào thuộc tập nào, và chứng minh được là chưa bị
-sửa. Mọi con số về sau đều treo trên nó, nên nó đi trước B2 và B3.
+Bản gọn, một module: `evaluation/dataset.py`.
 
-**Đầu vào:** một hoặc nhiều gói export từ `collector/` — wav hai kênh 48 kHz, file `.json` đi kèm,
-`collector.sqlite3`, và thư mục `prompts/`. Không sửa gì trong đó (`docs/progress.md` §6.6: dữ liệu
-thu giữ nguyên dạng thô).
+```bash
+uv run python -m evaluation.dataset ingest <export.zip>   # nạp, mọi người vào dev
+uv run python -m evaluation.dataset lock S005 S009        # chuyển hai người sang holdout, một lần
+uv run python -m evaluation.dataset check                 # manifest khớp file
+```
 
-**Sinh ra bốn thứ:**
+- **Nạp:** bản thô 48 kHz vào `data/raw/<người nói>/`, không bao giờ bị sửa; cạnh nó một bản
+  `.16k.wav` hai kênh cho `WavFrameSource`, sinh lại được. Nạp lại cùng gói thì không đổi gì.
+- **Manifest:** `data/manifests/recordings.csv`, một dòng mỗi bản thu, có `sha256` và tập. Được
+  commit, để kiểm bộ dữ liệu mà không cần file âm thanh.
+- **Chia tập theo người nói.** Ai mới nạp cũng vào `dev`. Chọn người cho holdout **một lần**, khi
+  đã đủ người, bằng `lock`; holdout chuyển sang `data/holdout/`. S001 và S002 — tác giả kịch
+  bản — bị từ chối.
+- **Đọc:** `dataset.recordings("dev")` rồi `dataset.frame_source(rec, audio)` cho ra khung tiếng
+  khách kèm cờ `bot_speaking` từ log phát.
 
-1. **Manifest** — một dòng cho mỗi bản thu, có: đường dẫn, `sha256`, `speaker_id`, tên kịch bản,
-   số mẫu, tần số, `dialect`, thiết bị phát (`headset` / `loudspeaker`), `noise`, các cờ đồng ý,
-   `base_latency_s` và `output_latency_s`, phiên bản hướng dẫn gán nhãn, và **tập** mà bản đó
-   thuộc về. Manifest nhỏ, không chứa âm thanh, nên commit được — đó là điểm chính: người khác đọc
-   báo cáo có thể kiểm bộ dữ liệu khớp hay không mà không cần file thu.
-2. **Bản dẫn xuất 16 kHz mono kênh khách**, cho B2 (smart-turn cần 16 kHz mono, tối đa 8 giây) và
-   cho ASR của B3. Sinh một lần rồi cache, vì ASR sẽ chạy lại nhiều lượt. File dẫn xuất **tái sinh
-   được từ bản thô**, nên gitignore; bản thô 48 kHz vẫn là nguồn duy nhất đáng tin.
-3. **Chia tập theo người nói.** Quy tắc, không phải con số: chia **theo người**, không theo phát
-   ngôn; holdout có **ít nhất hai người nói**, rải theo `dialect` nếu đủ người; hạt giống ngẫu
-   nhiên cố định và ghi vào manifest; **S001 và S002 là tác giả kịch bản, luôn nằm ngoài holdout**
-   (`docs/progress.md`). Tỉ lệ cụ thể chốt khi biết số người thật.
-4. **Khoá holdout** — một file liệt kê `sha256` của từng bản trong holdout. Sau khi khoá thì danh
-   sách đóng băng; phát hiện lỗi nhãn về sau thì ghi vào errata kèm báo cáo, không sửa nhãn
-   (`docs/annotation-guide.md` §6.4).
-
-**Kiểm tự động, `scripts/validate_manifests.py`** (hiện rỗng 0 byte): mọi `sha256` khớp file; mỗi
-bản thuộc **đúng một** tập; không người nói nào xuất hiện ở hai tập; mọi bản đều có đồng ý và
-không thuộc người đã rút lại; tần số và số mẫu khớp file `.json`; tác giả kịch bản không có trong
-holdout. Lỗi nào cũng làm thoát khác 0.
-
-**Một cái bẫy đã biết:** `scripts/check_holdout_isolation.py` chặn **mọi** file trong `scripts/`
-có chữ "holdout", nên bước khoá holdout không thể là một script trong `scripts/`. Nó thuộc
-`evaluation/`, đúng tầng duy nhất được phép đọc holdout. **Không giải bằng cách nới script chặn** —
-script đó tồn tại để một luật trong tài liệu biến thành một build đỏ.
-
-**Xong khi:** `validate_manifests.py` thoát 0 trên toàn bộ dữ liệu đã thu; `evaluation/` đọc được
-một tập bằng tên và lặp qua các khung kèm cờ `bot_speaking` (pha 1.3 đã có `WavFrameSource`); và
-`uv run python scripts/check_holdout_isolation.py` vẫn xanh.
+Chưa làm, và chưa cần: tiếng ồn nền và phiên bản hướng dẫn trong manifest; kiểm đồng ý ở bước
+nạp (đã có `collector/tools/audit_export.py`, chạy nó trước khi nạp). `check` không băm bản
+holdout: sha256 đã ghi lúc nạp, và holdout chỉ mở khi làm báo cáo cuối.

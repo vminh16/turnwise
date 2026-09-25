@@ -94,7 +94,9 @@ disallow_untyped_defs = false
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["sounddevice.*", "soundfile.*", "parselmouth.*", "aec_audio_processing.*", "onnxruntime.*"]
+module = [
+    "sounddevice.*", "soundfile.*", "parselmouth.*", "aec_audio_processing.*", "onnxruntime.*", "scipy.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
