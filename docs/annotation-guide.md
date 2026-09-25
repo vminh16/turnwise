@@ -74,8 +74,9 @@ này thì hai yêu cầu đó không đo được.
 
 ## 4. Các lớp nhãn
 
-Công cụ gán nhãn (Praat TextGrid hoặc ELAN) chọn ở pha 1.6. Các lớp dưới đây độc lập với công
-cụ.
+Công cụ gán nhãn: **Praat**, file TextGrid, chốt ở pha 1.6. Bản nháp sinh bằng
+`evaluation/annotation.py`, cách bấm ở `docs/runbook/annotate.md`. Nhãn `caller_act` ghi thẳng trên
+khoảng của đoạn nói: người gán sửa ranh giới và nhãn trên cùng một lớp.
 
 ### 4.1 Lớp tự động — máy sinh, người chỉ sửa khi sai
 

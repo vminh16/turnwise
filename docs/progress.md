@@ -247,7 +247,7 @@ phần **holdout** khoá lại cho báo cáo cuối. Cả hai đều chỉ dùng
 | 1.3 Đọc được hai kênh | `FeatureFrame.bot_speaking`, `WavFrameSource` đọc file khách + bot kèm log phát | **xong** |
 | 1.4 Web thu tự phục vụ + buổi thử | `collector/` (FastAPI + SQLite + Docker), `docs/runbook/collect-data.md` | code **xong**; chờ deploy và buổi thử |
 | 1.5 Manifest, chia tập, khoá holdout | `evaluation/dataset.py`, `data/manifests/recordings.csv` | **xong** bản gọn; holdout chưa khoá, chờ đủ người |
-| 1.6 Quy trình gán nhãn | nhãn tự động + nhãn người, đo độ đồng thuận | chưa |
+| 1.6 Quy trình gán nhãn | `evaluation/annotation.py`, `docs/runbook/annotate.md`; Praat | **xong** bản gọn: bản nháp TextGrid và đọc lại nhãn; chưa đo độ đồng thuận |
 | 1.7 Thu thật, đóng giai đoạn | điều kiện xong của `roadmap.md` §6 | chưa |
 
 Việc đã biết trước cho 1.5: `scripts/check_holdout_isolation.py` chặn mọi file trong
