@@ -1,5 +1,5 @@
 # Turnwise .gitignore (per PROJECT-STRUCTURE.md)
-data/
+data/*
 !data/manifests/
 models/
 reports/
