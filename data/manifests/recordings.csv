@@ -1,0 +1,10 @@
+path,sha256,speaker_id,script,frames,sample_rate_hz,dialect,playback,split
+data/raw/S002/n1-a-outage-reading-number-20260922T142917609753Z.wav,b10c6b976d74c707957edd63036f2047ba734d39ff0965bcf0ed14f22e5963f4,S002,n1-a-outage-reading-number,3911552,48000,north,headset,dev
+data/raw/S002/n1-b-outage-barge-in-20260923T012557030967Z.wav,639c051c990be7460ca6758112b0e767a15dadd474483dab4fa1b1d9581a1156,S002,n1-b-outage-barge-in,3318656,48000,north,headset,dev
+data/raw/S002/n2-a-bill-backchannel-20260923T013004128096Z.wav,415869f6bf1c8891bb0c87be56a882058fa005df34faa4b75cd0bb02e6952ad4,S002,n2-a-bill-backchannel,3356672,48000,north,headset,dev
+data/raw/S002/n2-b-bill-wrong-number-20260923T013227907977Z.wav,2e0b0fd7e5ab53bb3f0177ee79d79ffddbfdf58e96bdd02f6d1fca6d53443c0f,S002,n2-b-bill-wrong-number,3145344,48000,north,headset,dev
+data/raw/S002/n3-a-reschedule-code-20260923T013613852037Z.wav,3f2b86a01efe3a7e19f110b1cfa47dd9af8163fc2c7416bbbc9334c33787f5ee,S002,n3-a-reschedule-code,3292800,48000,north,headset,dev
+data/raw/S002/n3-b-reschedule-wrong-address-20260923T014010898194Z.wav,5223dd5202b6ca94f1e907a4be650adafe2e44990029f001cf4f8d1f9d225f4f,S002,n3-b-reschedule-wrong-address,2910208,48000,north,headset,dev
+data/raw/S002/n4-a-plan-terms-backchannel-20260923T014250479585Z.wav,5ef4588210f7745cf469c0f110eafcb8243c445cd04c1f45bdbf41923edd996a,S002,n4-a-plan-terms-backchannel,3660928,48000,north,headset,dev
+data/raw/S002/n4-b-cancel-agent-request-20260923T014600041150Z.wav,347684eac2defac817beaf7b65d7d77c7985497cfd7e0338c0124c4852cb3951,S002,n4-b-cancel-agent-request,3139200,48000,north,headset,dev
+data/raw/S002/n5-a-agent-first-20260923T014735612018Z.wav,068284b5f3bedba8cf8e989e3ed464c4209a401f55b81b97b6d89bf3cf78a4b5,S002,n5-a-agent-first,1273472,48000,north,headset,dev
