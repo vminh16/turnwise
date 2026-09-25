@@ -1,0 +1,33 @@
+# B2 — endpointer âm thanh có sẵn, trọng số nguyên bản (ADR-0002). Chồng lên configs/default.yaml.
+#
+# pipecat-ai/smart-turn v3.2, file smart-turn-v3.2-cpu.onnx, revision Hugging Face
+# f766f81d3cfdf7737ac64aad813d91bbfd56bf93, sha256
+# 2bb026316b14a660486a75b1733cd3fbab8c2fd0314dc9af7be49f8cca967e4f, BSD-2-Clause.
+#
+# Baseline phải chạy đúng như người ta dùng nó, nếu không thì thứ bị đo không còn là
+# smart-turn. Mọi giá trị dưới đây chép từ mã của chính tác giả, không chỉnh:
+#   - pipecat-ai/smart-turn @ 4786657e, inference.py và audio_utils.py;
+#   - pipecat-ai/pipecat @ 7ebc3889, audio/turn/smart_turn/base_smart_turn.py và
+#     audio/vad/vad_analyzer.py.
+
+turn:
+  decider: acoustic_onnx
+  scorers: []
+
+  # Cổng có tiếng / im lặng: dùng chung với B1 để hai baseline khác nhau ở đúng một chỗ —
+  # có mô hình hay không. Pipecat dùng Silero VAD ở đây; khác biệt này là CÓ CHỦ Ý và phải
+  # ghi cạnh số liệu của B2.
+  silence_floor_dbfs: -45.0
+
+  acoustic_onnx:
+    model_path: models/smart-turn-v3.2/smart-turn-v3.2-cpu.onnx
+    # inference.py: `prediction = 1 if probability > 0.5 else 0`.
+    probability_threshold: 0.5
+    # vad_analyzer.py: VAD_STOP_SECS = 0.2. Im lặng đủ chừng này thì pipecat hỏi mô hình.
+    trigger_silence_ms: 200
+    # base_smart_turn.py: STOP_SECS = 3. Mô hình nói chưa xong mà im tới đây thì vẫn nhận lượt.
+    fallback_silence_ms: 3000
+    # base_smart_turn.py: PRE_SPEECH_MS = 500. Âm thanh trước lúc bắt đầu nói đưa kèm vào mô hình.
+    pre_speech_ms: 500
+    # inference.py và base_smart_turn.py: 8 giây cuối, thiếu thì đệm số 0 vào ĐẦU.
+    window_s: 8

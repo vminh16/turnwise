@@ -16,6 +16,7 @@ from collections.abc import Callable
 
 from turnwise.config import TurnConfig
 from turnwise.turn.base import TurnDecider
+from turnwise.turn.deciders.acoustic_onnx import AcousticOnnxDecider, SmartTurnModel
 from turnwise.turn.deciders.silence_threshold import SilenceThresholdDecider
 
 
@@ -28,11 +29,22 @@ def _build_silence_threshold(turn: TurnConfig) -> TurnDecider:
     return SilenceThresholdDecider(turn.silence_threshold_ms, turn.silence_floor_dbfs)
 
 
+def _build_acoustic_onnx(turn: TurnConfig) -> TurnDecider:
+    if turn.acoustic_onnx is None or turn.silence_floor_dbfs is None:
+        raise ValueError(
+            "B2 cần turn.acoustic_onnx và turn.silence_floor_dbfs; "
+            "xem configs/baseline/acoustic-onnx.yaml"
+        )
+    model = SmartTurnModel(turn.acoustic_onnx)
+    return AcousticOnnxDecider(model, turn.silence_floor_dbfs, turn.acoustic_onnx)
+
+
 BUILDERS: dict[str, Callable[[TurnConfig], TurnDecider]] = {
     "silence_threshold": _build_silence_threshold,
+    "acoustic_onnx": _build_acoustic_onnx,
 }
-"""Tên trong `turn.decider` -> hàm dựng. `fused`, `acoustic_onnx`, `semantic_onnx`
-chưa có mặt ở đây vì chúng chưa tồn tại (Giai đoạn 2)."""
+"""Tên trong `turn.decider` -> hàm dựng. `fused` và `semantic_onnx` chưa có mặt ở đây
+vì chúng chưa tồn tại (Giai đoạn 2)."""
 
 
 def build(turn: TurnConfig) -> TurnDecider:

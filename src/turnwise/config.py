@@ -31,7 +31,7 @@ from typing import Any, Literal
 
 import yaml
 from dotenv import dotenv_values
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -107,6 +107,28 @@ class DecisionConfig(_Section):
     backchannel_threshold: float | None
 
 
+class AcousticOnnxConfig(_Section):
+    """B2: `smart-turn` chạy nguyên trọng số, vận hành như pipecat. Xem
+    `configs/baseline/acoustic-onnx.yaml` cho nguồn của từng giá trị."""
+
+    model_path: Path
+    probability_threshold: float = Field(gt=0, lt=1)
+    trigger_silence_ms: int = Field(gt=0)
+    """Im lặng sau tiếng nói bao lâu thì chạy mô hình (VAD `stop_secs` của pipecat)."""
+
+    fallback_silence_ms: int = Field(gt=0)
+    """Im lặng bao lâu thì nhận lượt dù mô hình nói chưa xong (`SmartTurnParams.stop_secs`)."""
+
+    pre_speech_ms: int = Field(ge=0)
+    window_s: int = Field(gt=0)
+
+    @field_validator("model_path")
+    @classmethod
+    def _from_repo_root(cls, path: Path) -> Path:
+        """Đường dẫn tương đối tính từ gốc repo, không từ thư mục đang đứng."""
+        return _resolve(path)
+
+
 class TurnConfig(_Section):
     decider: Literal["fused", "silence_threshold", "acoustic_onnx", "semantic_onnx"]
     scorers: list[str]
@@ -125,6 +147,9 @@ class TurnConfig(_Section):
     Có trường này thì một lần chạy được mô tả trọn vẹn bằng cấu hình, và `deciders.build()`
     dựng được adapter mà không cần ai truyền tham số riêng bên cạnh config.
     """
+
+    acoustic_onnx: AcousticOnnxConfig | None = None
+    """Chỉ overlay B2 đặt. Cổng im lặng dùng chung `silence_floor_dbfs` với B1."""
 
 
 class TelemetryConfig(_Section):

@@ -46,9 +46,15 @@ def test_the_threshold_comes_from_the_config_it_was_built_from() -> None:
 
 
 def test_an_adapter_that_does_not_exist_yet_says_so() -> None:
-    """B2 và B3 là Giai đoạn 2; tới lúc đó lỗi phải nói rõ, không phải KeyError trần."""
+    """B3 là Giai đoạn 2; tới lúc đó lỗi phải nói rõ, không phải KeyError trần."""
+    turn = baseline_turn().model_copy(update={"decider": "semantic_onnx"})
+    with pytest.raises(NotImplementedError, match="semantic_onnx"):
+        build(turn)
+
+
+def test_b2_without_its_keys_is_refused() -> None:
     turn = baseline_turn().model_copy(update={"decider": "acoustic_onnx"})
-    with pytest.raises(NotImplementedError, match="acoustic_onnx"):
+    with pytest.raises(ValueError, match="acoustic_onnx"):
         build(turn)
 
 
