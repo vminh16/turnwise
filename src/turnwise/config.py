@@ -161,6 +161,24 @@ class LoggingConfig(_Section):
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
 
+class AnnotationConfig(_Section):
+    """Pha 1.6: bản nháp máy sinh cho người gán nhãn (`docs/annotation-guide.md` §4.1).
+
+    Chỉ `evaluation/annotation.py` dùng; đường chạy chính không đọc section này.
+    """
+
+    vad_frame_ms: int = Field(gt=0)
+    vad_floor_dbfs: float
+    ipu_merge_ms: int = Field(ge=0)
+    ipu_min_ms: int = Field(ge=0)
+    asr_model_dir: Path
+
+    @field_validator("asr_model_dir")
+    @classmethod
+    def _from_repo_root(cls, path: Path) -> Path:
+        return _resolve(path)
+
+
 class Settings(BaseSettings):
     """Toàn bộ cấu hình của một lần chạy, đã gộp đủ ba lớp."""
 
@@ -172,6 +190,7 @@ class Settings(BaseSettings):
     turn: TurnConfig
     telemetry: TelemetryConfig
     logging: LoggingConfig
+    annotation: AnnotationConfig
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:

@@ -82,3 +82,18 @@ telemetry:
 logging:
   # AGENTS.md: ghi log qua logging.getLogger(__name__), không bao giờ print().
   level: INFO
+
+annotation:
+  # Bản nháp cho người gán nhãn (pha 1.6). Chỉ evaluation/annotation.py đọc; người gán sửa lại
+  # ranh giới, nên các giá trị này quyết định công sửa, không quyết định nhãn.
+  vad_frame_ms: 10
+  # LỰA CHỌN THIẾT KẾ, đo trên chín bản thu thử của S002 (2026-09-26): ở -45 dBFS có 158/355
+  # đoạn nằm trọn trong lúc bot nói, phần lớn là tiếng bot lọt vào micro tai nghe (-42 tới
+  # -45 dBFS); ở -40 dBFS còn 23/175, phần lớn là tiếng đệm thật. Nền ồn của bản thu -48 tới -50.
+  vad_floor_dbfs: -40.0
+  # Heldner & Edlund (2010) §2.1: gộp khoảng lặng dưới 180 ms, bỏ đoạn nói dưới 90 ms.
+  ipu_merge_ms: 180
+  ipu_min_ms: 90
+  # Mô hình của asr-check/ (faster-whisper-small, MIT, revision khoá trong asr-check/transcribe.py).
+  # Chỉ sinh lớp chép lời nháp; không phải ASR của sản phẩm, không phải B3.
+  asr_model_dir: asr-check/models/faster-whisper-small

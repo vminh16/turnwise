@@ -171,8 +171,9 @@ def lock(speakers: Sequence[str], data: Path = DATA, root: Path = REPO) -> None:
             src = rec.raw(root)
             dest = data / LOCKED / rec.speaker_id / src.name
             dest.parent.mkdir(parents=True, exist_ok=True)
-            for suffix in (".wav", ".json", DERIVED_SUFFIX):
-                shutil.move(src.with_suffix(suffix), dest.with_suffix(suffix))
+            for suffix in (".wav", ".json", DERIVED_SUFFIX, ".TextGrid"):
+                if src.with_suffix(suffix).exists():  # nhãn đi theo âm thanh, nếu đã có
+                    shutil.move(src.with_suffix(suffix), dest.with_suffix(suffix))
             rec = Recording(
                 **{**asdict(rec), "path": dest.relative_to(root).as_posix(), "split": LOCKED}
             )
