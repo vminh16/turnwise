@@ -509,3 +509,34 @@ Chưa có nhãn nên chưa biết lần nào đúng. Hai điều đã biết ch�
   đang nói: tiếng bot vọng ở −44 dBFS, vượt cổng −45 dBFS của B1 và B2, và mô hình chấm một đoạn
   gần như im lặng thành "xong" (0,985). Cổng này ảnh hưởng cả B1. Khi viết `run_system.py`, mỗi
   lượt khách bắt đầu **lúc bot dứt lời**, và khung trong lúc bot nói chỉ dùng cho phép đo nói đè.
+
+### 7.2 Khung benchmark — 2026-09-27
+
+Một lệnh chạy mọi decider trên bộ dữ liệu vàng, chọn bằng file cấu hình:
+
+```bash
+uv run python -m evaluation.run_system configs/baseline/silence-threshold.yaml   # B1, quét dải
+uv run python -m evaluation.run_system configs/baseline/acoustic-onnx.yaml       # B2
+uv run python -m evaluation.run_system configs/baseline/semantic-onnx.yaml       # B3
+uv run python -m evaluation.run_system configs/proposed/draft.yaml --ablation    # hệ đề xuất
+```
+
+| Thành phần | Ở đâu | Trạng thái |
+|---|---|---|
+| Chấm theo từng đoạn nói đã gán nhãn | `evaluation/golden.py`, `run_system.py` | chạy được; 0 đoạn được chấm vì chưa có nhãn |
+| B1 | `deciders/silence_threshold.py` | xong từ GĐ 0 |
+| B2 | `deciders/acoustic_onnx.py` | xong, mô hình đã tải |
+| B3 | `deciders/semantic_onnx.py` | code xong; **chưa tải trọng số Namo** |
+| Hệ đề xuất | `deciders/fused.py`, `fusion.py`, `scorers/` | khung: `silence`, `smart_turn`, `final_rise`, `short_ipu`; số khởi điểm chưa hiệu chỉnh |
+| Nền ồn theo khung | `audio/features.py` | xong, cổng của hệ đề xuất dùng nó |
+
+**Một điều làm lệch phép so sánh, chưa quyết:** B1, B2 và B3 dùng cổng năng lượng cố định
+-45 dBFS. Nền ồn micro của S001 là -34 dBFS, nên với S001 mọi khung đều "có tiếng", ba baseline
+không bao giờ thấy im lặng và không bao giờ nhận lượt. Hệ đề xuất thì dùng cổng theo nền ồn. Để
+nguyên thì hệ đề xuất thắng vì micro, không vì phương pháp.
+
+### 7.3 Còn trống — đường chạy sống (GĐ 4)
+
+`audio/ring_buffer.py`, `capture.py`, `aec.py`; `dialog/machine.py`, `slots.py`,
+`backend_stub.py`; `transport/wiring.py`, `webrtc.py`; `telemetry/dashboard.py`. Nối TTS vào
+đường chạy sống cần thêm `vieneu` làm phụ thuộc của dự án (hiện chỉ nằm trong `tts-check/`).
