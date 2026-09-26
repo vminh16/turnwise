@@ -131,6 +131,52 @@ class AcousticOnnxConfig(_Section):
         return _resolve(path)
 
 
+class GateConfig(_Section):
+    """Cổng có tiếng / im lặng của các scorer trong hệ đề xuất.
+
+    Ngưỡng thật ở mỗi khung là max(`floor_dbfs`, nền ồn + `margin_db`), nền ồn do tầng `audio`
+    ước lượng (`FeatureFrame.noise_floor_dbfs`). Micro của hai người thu đầu tiên lệch nhau
+    15 dB nền ồn (S001 -34, S002 -49 dBFS), nên một ngưỡng cố định không dùng chung được.
+    """
+
+    floor_dbfs: float
+    margin_db: float = Field(gt=0)
+    merge_ms: int = Field(ge=0)
+    """Lặng ngắn hơn chừng này vẫn thuộc cùng một đoạn nói (Heldner & Edlund 2010: 180 ms)."""
+
+
+class SilenceScorerConfig(_Section):
+    full_ms: int = Field(gt=0)
+    """Im lặng dài chừng này thì điểm "xong lượt" chạm 1."""
+
+
+class FinalRiseConfig(_Section):
+    """Đường F0 cuối đoạn nói (Hà & Grice 2010: nhường lượt mang đuôi lên H%)."""
+
+    trigger_silence_ms: int = Field(gt=0)
+    window_ms: int = Field(gt=0)
+    min_voiced_frames: int = Field(gt=0)
+    pitch_floor_hz: float = Field(gt=0)
+    pitch_ceiling_hz: float = Field(gt=0)
+    slope_center_st_per_s: float
+    slope_scale_st_per_s: float = Field(gt=0)
+
+
+class ShortIpuConfig(_Section):
+    """Đoạn nói ngắn rồi im: dấu hiệu của tiếng đệm."""
+
+    max_ms: int = Field(gt=0)
+    trigger_silence_ms: int = Field(gt=0)
+
+
+class ScorerSettings(_Section):
+    """Tham số của từng scorer. Scorer nào có tên trong `turn.scorers` thì phải có mục ở đây."""
+
+    silence: SilenceScorerConfig | None = None
+    final_rise: FinalRiseConfig | None = None
+    short_ipu: ShortIpuConfig | None = None
+
+
 class TurnConfig(_Section):
     decider: Literal["fused", "silence_threshold", "acoustic_onnx", "semantic_onnx"]
     scorers: list[str]
@@ -151,7 +197,12 @@ class TurnConfig(_Section):
     """
 
     acoustic_onnx: AcousticOnnxConfig | None = None
-    """Chỉ overlay B2 đặt. Cổng im lặng dùng chung `silence_floor_dbfs` với B1."""
+    """Overlay B2 đặt; scorer `smart_turn` của hệ đề xuất dùng lại đúng mục này."""
+
+    gate: GateConfig | None = None
+    """Cổng có tiếng của hệ đề xuất. B1 và B2 dùng `silence_floor_dbfs` cố định."""
+
+    scorer_settings: ScorerSettings = ScorerSettings()
 
 
 class TelemetryConfig(_Section):

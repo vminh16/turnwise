@@ -2,6 +2,7 @@
 
     uv run python -m evaluation.run_system configs/baseline/silence-threshold.yaml
     uv run python -m evaluation.run_system configs/baseline/acoustic-onnx.yaml --during-bot
+    uv run python -m evaluation.run_system configs/proposed/draft.yaml --ablation
 
 Decider chọn bằng cấu hình (`.claude/rules/evaluation.md`): thư mục này không có đường quyết định
 nào của riêng nó. Cấu hình B1 có dải quét thì mỗi giá trị là một lần chạy, một điểm trên đường
@@ -25,14 +26,27 @@ from turnwise.turn.deciders import build
 REPORTS = Path(__file__).resolve().parent.parent / "reports" / "golden"
 
 
-def runs(turn: TurnConfig) -> list[tuple[str, TurnConfig]]:
-    """Một cấu hình thành các lần chạy: B1 quét dải, mọi decider khác chạy một lần."""
+def runs(turn: TurnConfig, ablation: bool = False) -> list[tuple[str, TurnConfig]]:
+    """Một cấu hình thành các lần chạy.
+
+    B1 quét dải. Hệ đề xuất với `ablation` chạy thêm một lần cho mỗi scorer bị tắt. Mọi decider
+    khác chạy một lần.
+    """
     if turn.decider == "silence_threshold" and turn.silence_threshold_sweep_ms:
         return [
             (f"{turn.decider}-{ms}ms", turn.model_copy(update={"silence_threshold_ms": ms}))
             for ms in turn.silence_threshold_sweep_ms
         ]
-    return [(turn.decider, turn)]
+    out: list[tuple[str, TurnConfig]] = [(turn.decider, turn)]
+    if ablation and turn.decider == "fused" and len(turn.scorers) > 1:
+        out += [
+            (
+                f"fused-without-{name}",
+                turn.model_copy(update={"scorers": [s for s in turn.scorers if s != name]}),
+            )
+            for name in turn.scorers
+        ]
+    return out
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -40,12 +54,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("config", type=Path)
     parser.add_argument("--during-bot", action="store_true", help="also score barge-in")
     parser.add_argument("--final-report", action="store_true", help="score the locked split")
+    parser.add_argument("--ablation", action="store_true", help="also run with each scorer off")
     args = parser.parse_args(argv)
 
     settings = load_settings(args.config)
     split = dataset.LOCKED if args.final_report else dataset.DEV
     recordings = dataset.recordings(split)
-    for name, turn in runs(settings.turn):
+    for name, turn in runs(settings.turn, args.ablation):
         verdicts = golden.run(build(turn), recordings, settings.audio, args.during_bot)
         path = golden.write(verdicts, REPORTS / split / f"{name}.csv")
         report = {"run": name, "split": split, "csv": path.as_posix(), **golden.summary(verdicts)}

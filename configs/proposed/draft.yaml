@@ -1,0 +1,53 @@
+# Hệ đề xuất, bản nháp đầu tiên. Chồng lên configs/default.yaml.
+#
+# MỌI SỐ Ở ĐÂY LÀ ĐIỂM XUẤT PHÁT, CHƯA HIỆU CHỈNH. Chúng được chọn lại trên tập dev khi có nhãn,
+# không bao giờ trên holdout. Mỗi số ghi rõ nó là lựa chọn thiết kế hay lấy từ nguồn nào.
+
+turn:
+  decider: fused
+
+  # Bỏ một tên khỏi danh sách = một dòng trong bảng ablation (SPEC §9.3 quy tắc 3).
+  # `run_system --ablation` tự sinh các lần chạy đó, không cần file riêng.
+  scorers: [silence, smart_turn, final_rise, short_ipu]
+
+  decision:
+    # Lựa chọn thiết kế: giữa thang. Quét trên dev khi có nhãn.
+    take_threshold: 0.5
+    backchannel_threshold: 0.5
+
+  gate:
+    # Sàn tuyệt đối, như B1. Ngưỡng thật = max(sàn, nền ồn + margin_db).
+    floor_dbfs: -45.0
+    # Đo trên 18 bản thu thử, 2026-09-27 (configs/default.yaml, mục annotation): 12 dB.
+    margin_db: 12.0
+    # Heldner & Edlund (2010) §2.1.
+    merge_ms: 180
+
+  # Scorer smart_turn dùng lại đúng mô hình và cách hỏi của B2.
+  acoustic_onnx:
+    model_path: models/smart-turn-v3.2/smart-turn-v3.2-cpu.onnx
+    probability_threshold: 0.5  # không dùng trong fused; bắt buộc bởi kiểu cấu hình của B2
+    trigger_silence_ms: 200
+    fallback_silence_ms: 3000   # không dùng trong fused
+    pre_speech_ms: 500
+    window_s: 8
+
+  scorer_settings:
+    silence:
+      # Lựa chọn thiết kế: im 1 giây thì scorer im lặng chắc chắn khách đã xong.
+      full_ms: 1000
+    final_rise:
+      trigger_silence_ms: 200
+      # Lựa chọn thiết kế: khoảng một âm tiết cuối.
+      window_ms: 300
+      min_voiced_frames: 5
+      # Dải F0 giọng nói người lớn, đủ rộng cho cả nam lẫn nữ.
+      pitch_floor_hz: 75.0
+      pitch_ceiling_hz: 500.0
+      # Lựa chọn thiết kế: dốc 0 là trung tính, 10 nửa cung/giây đổi xác suất khoảng 0,27.
+      slope_center_st_per_s: 0.0
+      slope_scale_st_per_s: 10.0
+    short_ipu:
+      # Lựa chọn thiết kế: "dạ", "vâng", "ừ" hiếm khi dài quá 400 ms.
+      max_ms: 400
+      trigger_silence_ms: 200
