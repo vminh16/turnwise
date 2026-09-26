@@ -19,29 +19,18 @@ Giống B1, B2 **không bao giờ** trả `BACKCHANNEL`: smart-turn chỉ trả 
 
 from __future__ import annotations
 
-import logging
-from collections import deque
-from collections.abc import Callable
-
 import numpy as np
 from numpy.typing import NDArray
 
 from turnwise.config import AcousticOnnxConfig
-from turnwise.turn.deciders.silence_threshold import rms_dbfs
-from turnwise.types import FeatureFrame, TurnDecision, TurnOutcome
-
-logger = logging.getLogger(__name__)
+from turnwise.turn.deciders.pause_triggered import MODEL_RATE_HZ, PauseTriggeredDecider, Predictor
 
 # Hợp đồng đầu vào của mô hình, không phải tham số để chỉnh: smart-turn học trên đặc trưng
 # log-mel của Whisper (`WhisperFeatureExtractor(chunk_length=8)` trong inference.py).
-MODEL_RATE_HZ = 16_000
 MEL_BANDS = 80
 NORMALISE_EPSILON = 1e-7  # `zero_mean_unit_var_norm` của transformers, `do_normalize=True`
 
 SCORE_KEY = "smart_turn"
-
-Predictor = Callable[[NDArray[np.float32]], float]
-"""Âm thanh 16 kHz mono của lượt đang xét -> xác suất khách đã nói xong."""
 
 
 class SmartTurnModel:
@@ -87,82 +76,11 @@ class SmartTurnModel:
         return float(probability[0][0])
 
 
-class AcousticOnnxDecider:
-    """Hỏi mô hình mỗi lần khách im đủ lâu; nhận lượt khi nó nói xong hoặc khi im quá lâu."""
-
-    name = "acoustic_onnx"
-
-    _speech_start: int | None
-    _silence_ms: int
-    _asked: bool
-    _taken: bool
-
+class AcousticOnnxDecider(PauseTriggeredDecider):
     def __init__(
         self, predict: Predictor, silence_floor_dbfs: float, config: AcousticOnnxConfig
     ) -> None:
-        self._predict = predict
-        self._floor_dbfs = silence_floor_dbfs
-        self._config = config
-        self._frames: deque[tuple[int, NDArray[np.float32]]] = deque()
-        self.reset()
+        super().__init__(predict, silence_floor_dbfs, config, "acoustic_onnx", SCORE_KEY)
 
-    def decide(self, frame: FeatureFrame) -> TurnDecision:
-        scores: dict[str, float | None] = {}
-        if not self._taken:
-            samples = frame.samples[: len(frame.samples) - frame.padded_samples]
-            self._check_rate(frame)
-            self._remember(frame, samples)
-            if len(samples) and rms_dbfs(samples) > self._floor_dbfs:
-                if self._speech_start is None:
-                    self._speech_start = frame.index
-                self._silence_ms = 0
-                self._asked = False
-            elif self._speech_start is not None:
-                self._silence_ms += round(frame.duration_s * 1000)
-                if not self._asked and self._silence_ms >= self._config.trigger_silence_ms:
-                    self._asked = True
-                    probability = self._predict(self._segment(frame))
-                    scores[SCORE_KEY] = probability
-                    self._taken = probability > self._config.probability_threshold
-                if self._silence_ms >= self._config.fallback_silence_ms:
-                    self._taken = True
-                if self._taken:
-                    logger.debug("take at frame %d (%.3fs)", frame.index, frame.start_s)
 
-        return TurnDecision(
-            outcome=TurnOutcome.TAKE if self._taken else TurnOutcome.HOLD,
-            decider=self.name,
-            frame_index=frame.index,
-            at_s=frame.start_s,
-            scores=scores,
-            final_tone=None,
-        )
-
-    def reset(self) -> None:
-        self._frames.clear()
-        self._speech_start = None
-        self._silence_ms = 0
-        self._asked = False
-        self._taken = False
-
-    def _check_rate(self, frame: FeatureFrame) -> None:
-        rate = round(len(frame.samples) / frame.duration_s)
-        if rate != MODEL_RATE_HZ:
-            raise ValueError(f"smart-turn needs {MODEL_RATE_HZ} Hz frames, got {rate} Hz")
-
-    def _remember(self, frame: FeatureFrame, samples: NDArray[np.float32]) -> None:
-        """Giữ vừa đủ khung cho một cửa sổ, cộng phần trước lúc bắt đầu nói."""
-        self._frames.append((frame.index, samples.copy()))  # khung có thể trỏ vào ring buffer
-        keep_ms = self._config.pre_speech_ms
-        if self._speech_start is not None:
-            keep_ms += self._config.window_s * 1000
-        keep = round(keep_ms / (frame.duration_s * 1000)) + 1
-        while len(self._frames) > keep:
-            self._frames.popleft()
-
-    def _segment(self, frame: FeatureFrame) -> NDArray[np.float32]:
-        """Từ `pre_speech_ms` trước lúc bắt đầu nói tới khung hiện tại."""
-        assert self._speech_start is not None
-        pre_frames = round(self._config.pre_speech_ms / (frame.duration_s * 1000))
-        first = self._speech_start - pre_frames
-        return np.concatenate([s for i, s in self._frames if i >= first])
+__all__ = ["MODEL_RATE_HZ", "SCORE_KEY", "AcousticOnnxDecider", "Predictor", "SmartTurnModel"]

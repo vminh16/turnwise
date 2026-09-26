@@ -109,11 +109,9 @@ class DecisionConfig(_Section):
     backchannel_threshold: float | None
 
 
-class AcousticOnnxConfig(_Section):
-    """B2: `smart-turn` chạy nguyên trọng số, vận hành như pipecat. Xem
-    `configs/baseline/acoustic-onnx.yaml` cho nguồn của từng giá trị."""
+class PauseTriggerConfig(_Section):
+    """Cách vận hành chung của B2 và B3: hỏi mô hình mỗi lần khách im đủ lâu."""
 
-    model_path: Path
     probability_threshold: float = Field(gt=0, lt=1)
     trigger_silence_ms: int = Field(gt=0)
     """Im lặng sau tiếng nói bao lâu thì chạy mô hình (VAD `stop_secs` của pipecat)."""
@@ -124,10 +122,34 @@ class AcousticOnnxConfig(_Section):
     pre_speech_ms: int = Field(ge=0)
     window_s: int = Field(gt=0)
 
+
+class AcousticOnnxConfig(PauseTriggerConfig):
+    """B2: `smart-turn` chạy nguyên trọng số, vận hành như pipecat. Xem
+    `configs/baseline/acoustic-onnx.yaml` cho nguồn của từng giá trị."""
+
+    model_path: Path
+
     @field_validator("model_path")
     @classmethod
     def _from_repo_root(cls, path: Path) -> Path:
         """Đường dẫn tương đối tính từ gốc repo, không từ thư mục đang đứng."""
+        return _resolve(path)
+
+
+class SemanticOnnxConfig(PauseTriggerConfig):
+    """B3: ASR ra chữ, rồi `Namo-Turn-Detector-v1-Vietnamese` xét câu đã trọn chưa.
+
+    Xem `configs/baseline/semantic-onnx.yaml`. Số của B3 vô nghĩa nếu thiếu độ trễ ASR đã nuôi
+    nó (`.claude/rules/evaluation.md`).
+    """
+
+    model_dir: Path
+    asr_model_dir: Path
+    asr_beam_size: int = Field(gt=0)
+
+    @field_validator("model_dir", "asr_model_dir")
+    @classmethod
+    def _from_repo_root(cls, path: Path) -> Path:
         return _resolve(path)
 
 
@@ -198,6 +220,9 @@ class TurnConfig(_Section):
 
     acoustic_onnx: AcousticOnnxConfig | None = None
     """Overlay B2 đặt; scorer `smart_turn` của hệ đề xuất dùng lại đúng mục này."""
+
+    semantic_onnx: SemanticOnnxConfig | None = None
+    """Chỉ overlay B3 đặt."""
 
     gate: GateConfig | None = None
     """Cổng có tiếng của hệ đề xuất. B1 và B2 dùng `silence_floor_dbfs` cố định."""
