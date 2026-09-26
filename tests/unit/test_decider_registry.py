@@ -45,10 +45,14 @@ def test_the_threshold_comes_from_the_config_it_was_built_from() -> None:
     assert taken_at == [9, 59]
 
 
-def test_an_adapter_that_does_not_exist_yet_says_so() -> None:
-    """B3 là Giai đoạn 2; tới lúc đó lỗi phải nói rõ, không phải KeyError trần."""
+def test_every_decider_named_in_the_config_schema_has_a_builder() -> None:
+    """Hệ đề xuất và ba baseline của SPEC R8 đều chọn được bằng cấu hình."""
+    assert set(BUILDERS) == {"fused", "silence_threshold", "acoustic_onnx", "semantic_onnx"}
+
+
+def test_b3_without_its_keys_is_refused() -> None:
     turn = baseline_turn().model_copy(update={"decider": "semantic_onnx"})
-    with pytest.raises(NotImplementedError, match="semantic_onnx"):
+    with pytest.raises(ValueError, match="semantic_onnx"):
         build(turn)
 
 

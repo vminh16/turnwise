@@ -18,6 +18,7 @@ import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from statistics import median
 
 from evaluation import dataset, golden
 from turnwise.config import TurnConfig, load_settings
@@ -61,9 +62,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     split = dataset.LOCKED if args.final_report else dataset.DEV
     recordings = dataset.recordings(split)
     for name, turn in runs(settings.turn, args.ablation):
-        verdicts = golden.run(build(turn), recordings, settings.audio, args.during_bot)
+        decider = build(turn)
+        verdicts = golden.run(decider, recordings, settings.audio, args.during_bot)
         path = golden.write(verdicts, REPORTS / split / f"{name}.csv")
         report = {"run": name, "split": split, "csv": path.as_posix(), **golden.summary(verdicts)}
+        # Chi phí mỗi lần hỏi mô hình của B2/B3; với B3 gần như toàn bộ là ASR. Đo trên file,
+        # nên chỉ là chi phí tính toán, không phải độ trễ của hệ chạy sống (§9.3 quy tắc 4).
+        timings = getattr(decider, "predict_ms", None)
+        if timings:
+            report["model_ms_median"] = round(median(timings), 1)
+            report["model_ms_max"] = round(max(timings), 1)
         sys.stdout.write(json.dumps(report, ensure_ascii=True) + "\n")
     return 0
 

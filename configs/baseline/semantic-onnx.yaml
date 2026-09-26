@@ -1,0 +1,26 @@
+# B3 — endpointer ngữ nghĩa có sẵn, trọng số nguyên bản (ADR-0002). Chồng lên configs/default.yaml.
+#
+# videosdk-live/Namo-Turn-Detector-v1-Vietnamese, file model_quant.onnx + tokenizer.json,
+# revision Hugging Face b9521d649636b6fb24408846e16364b399c8f9b6, Apache-2.0.
+# ASR: Systran/faster-whisper-small (MIT), bản đã tải cho asr-check/. Chọn ASR cuối cùng ở GĐ 2
+# theo số đo (ADR-0006 mục 5); đổi ASR là đổi B3, nên ghi tên ASR cạnh mọi số của B3.
+
+turn:
+  decider: semantic_onnx
+  scorers: []
+  # Cùng cổng với B1 và B2.
+  silence_floor_dbfs: -45.0
+
+  semantic_onnx:
+    model_dir: models/namo-turn-detector-v1-vi
+    asr_model_dir: asr-check/models/faster-whisper-small
+    # asr-check/transcribe.py dùng beam 5.
+    asr_beam_size: 5
+    # Model card: nhãn là argmax của hai lớp, tức xác suất lớp "End of Turn" > 0,5.
+    probability_threshold: 0.5
+    # Cùng cách vận hành với B2, để B2 và B3 khác nhau đúng ở mô hình (pause_triggered.py).
+    trigger_silence_ms: 200
+    fallback_silence_ms: 3000
+    pre_speech_ms: 500
+    # Whisper nhận tới 30 giây; một lượt khách hiếm khi dài hơn.
+    window_s: 30

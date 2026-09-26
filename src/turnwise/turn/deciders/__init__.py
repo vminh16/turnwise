@@ -52,12 +52,24 @@ def _build_fused(turn: TurnConfig) -> TurnDecider:
     return FusedDecider(build_scorers(turn), take, backchannel)
 
 
+def _build_semantic_onnx(turn: TurnConfig) -> TurnDecider:
+    if turn.semantic_onnx is None or turn.silence_floor_dbfs is None:
+        raise ValueError(
+            "B3 cần turn.semantic_onnx và turn.silence_floor_dbfs; "
+            "xem configs/baseline/semantic-onnx.yaml"
+        )
+    from turnwise.turn.deciders.semantic_onnx import build_semantic
+
+    return build_semantic(turn.semantic_onnx, turn.silence_floor_dbfs)
+
+
 BUILDERS: dict[str, Callable[[TurnConfig], TurnDecider]] = {
     "silence_threshold": _build_silence_threshold,
     "acoustic_onnx": _build_acoustic_onnx,
     "fused": _build_fused,
+    "semantic_onnx": _build_semantic_onnx,
 }
-"""Tên trong `turn.decider` -> hàm dựng. `semantic_onnx` (B3) chưa có mặt ở đây."""
+"""Tên trong `turn.decider` -> hàm dựng: ba baseline của SPEC R8 và hệ đề xuất."""
 
 
 def build(turn: TurnConfig) -> TurnDecider:
