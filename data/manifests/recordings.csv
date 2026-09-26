@@ -1,4 +1,13 @@
 path,sha256,speaker_id,script,frames,sample_rate_hz,dialect,playback,split
+data/raw/S001/n1-a-outage-reading-number-20260925T032333407711Z.wav,cefefdaeca1fc7824f331e2f976f4ae2e967fcd69d451cccef1ef2ffc2d15526,S001,n1-a-outage-reading-number,3089920,48000,north,headset,dev
+data/raw/S001/n1-b-outage-barge-in-20260925T033133660903Z.wav,7082c5e0775995b7edec773e5e56d39ff0105864b2e1e08adeb0ee98bd6551db,S001,n1-b-outage-barge-in,2583552,48000,north,headset,dev
+data/raw/S001/n2-a-bill-backchannel-20260925T033252432136Z.wav,ddc71b75862c5500b824a293cda65a2d60dfeecc323c1a4b108f8eb988582d90,S001,n2-a-bill-backchannel,2380288,48000,north,headset,dev
+data/raw/S001/n2-b-bill-wrong-number-20260925T033417933329Z.wav,2f6873a097aaba44d7297169655ddc11761451d80f1e4d080eaa67a262757b57,S001,n2-b-bill-wrong-number,2283520,48000,north,headset,dev
+data/raw/S001/n3-a-reschedule-code-20260925T033539959246Z.wav,559115a1fec2d87717580f7cc7b521dbd04781b08a7d0149672a98f193a4c267,S001,n3-a-reschedule-code,2281472,48000,north,headset,dev
+data/raw/S001/n3-b-reschedule-wrong-address-20260925T032940748597Z.wav,c3a9c5b610abe950e6e4b6ee4074a66e9e79d81c0e3d528374448fbba30f8cdf,S001,n3-b-reschedule-wrong-address,2046464,48000,north,headset,dev
+data/raw/S001/n4-a-plan-terms-backchannel-20260925T032806313480Z.wav,c3eaa57ab840d1441cbe6ea88e851dd16081633a5f669dc6091e0981f62cb437,S001,n4-a-plan-terms-backchannel,2867200,48000,north,headset,dev
+data/raw/S001/n4-b-cancel-agent-request-20260925T032630806757Z.wav,6c97d8215671735a80c2ad6860e21179eaef4f95e62b3e70c64d5988c7bcd031,S001,n4-b-cancel-agent-request,2013184,48000,north,headset,dev
+data/raw/S001/n5-a-agent-first-20260925T032424263868Z.wav,05ba00564e8f8640ac14f0ff5a1373d83f5877ed8b1de8ba9eee5992650630b9,S001,n5-a-agent-first,1174016,48000,north,headset,dev
 data/raw/S002/n1-a-outage-reading-number-20260922T142917609753Z.wav,b10c6b976d74c707957edd63036f2047ba734d39ff0965bcf0ed14f22e5963f4,S002,n1-a-outage-reading-number,3911552,48000,north,headset,dev
 data/raw/S002/n1-b-outage-barge-in-20260923T012557030967Z.wav,639c051c990be7460ca6758112b0e767a15dadd474483dab4fa1b1d9581a1156,S002,n1-b-outage-barge-in,3318656,48000,north,headset,dev
 data/raw/S002/n2-a-bill-backchannel-20260923T013004128096Z.wav,415869f6bf1c8891bb0c87be56a882058fa005df34faa4b75cd0bb02e6952ad4,S002,n2-a-bill-backchannel,3356672,48000,north,headset,dev

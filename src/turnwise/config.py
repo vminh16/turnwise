@@ -169,6 +169,9 @@ class AnnotationConfig(_Section):
 
     vad_frame_ms: int = Field(gt=0)
     vad_floor_dbfs: float
+    """Ngưỡng thấp nhất. Ngưỡng thật của mỗi bản là max(ngưỡng này, nền ồn + `vad_margin_db`)."""
+
+    vad_margin_db: float = Field(gt=0)
     ipu_merge_ms: int = Field(ge=0)
     ipu_min_ms: int = Field(ge=0)
     asr_model_dir: Path

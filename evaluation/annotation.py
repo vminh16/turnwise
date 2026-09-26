@@ -49,11 +49,16 @@ Interval = tuple[float, float, str]
 
 
 def ipus(caller: np.ndarray, rate: int, config: AnnotationConfig) -> list[tuple[float, float]]:
-    """Khoảng có tiếng theo năng lượng, gộp lặng ngắn và bỏ đoạn quá ngắn (§4.1)."""
+    """Khoảng có tiếng theo năng lượng, gộp lặng ngắn và bỏ đoạn quá ngắn (§4.1).
+
+    Ngưỡng tính theo nền ồn của chính bản thu, vì micro của mỗi người một khác.
+    """
     size = rate * config.vad_frame_ms // 1000
     n = len(caller) // size * size
     rms = np.sqrt(np.mean(caller[:n].reshape(-1, size).astype(np.float64) ** 2, axis=1))
-    loud = 20 * np.log10(np.maximum(rms, 1e-12)) > config.vad_floor_dbfs
+    level = 20 * np.log10(np.maximum(rms, 1e-12))
+    floor = max(config.vad_floor_dbfs, float(np.percentile(level, 10)) + config.vad_margin_db)
+    loud = level > floor
     edges = np.flatnonzero(np.diff(np.concatenate([[0], loud.astype(np.int8), [0]])))
     merged: list[list[int]] = []
     for start, end in zip(edges[::2], edges[1::2], strict=True):

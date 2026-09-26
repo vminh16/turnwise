@@ -91,6 +91,12 @@ annotation:
   # đoạn nằm trọn trong lúc bot nói, phần lớn là tiếng bot lọt vào micro tai nghe (-42 tới
   # -45 dBFS); ở -40 dBFS còn 23/175, phần lớn là tiếng đệm thật. Nền ồn của bản thu -48 tới -50.
   vad_floor_dbfs: -40.0
+  # Ngưỡng thật của mỗi bản = max(vad_floor_dbfs, nền ồn + vad_margin_db), nền ồn là phân vị 10
+  # của năng lượng khung. Cần vì micro khác nhau quá xa: nền ồn S001 -34 dBFS, S002 -49 dBFS
+  # (2026-09-27). Ngưỡng cố định -40 biến cả bản thu của S001 thành một đoạn nói. Đo trên 18 bản:
+  # cộng 8 dB -> S001 345 đoạn, 237 nằm trọn lúc bot nói; 10 -> 204/119; 12 -> 112/30; 14 -> 102/21.
+  # S002 gần như không đổi (225-232 đoạn). Chọn 12.
+  vad_margin_db: 12.0
   # Heldner & Edlund (2010) §2.1: gộp khoảng lặng dưới 180 ms, bỏ đoạn nói dưới 90 ms.
   ipu_merge_ms: 180
   ipu_min_ms: 90

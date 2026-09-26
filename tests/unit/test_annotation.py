@@ -37,6 +37,15 @@ def test_a_gap_longer_than_the_merge_window_splits(config: AnnotationConfig) -> 
     assert annotation.ipus(x, RATE, config) == [(0.5, 1.0), (1.3, 1.6)]
 
 
+def test_the_floor_follows_the_recording_noise(config: AnnotationConfig) -> None:
+    """Nền ồn -36 dBFS trên một micro kém: ngưỡng cố định -40 sẽ coi cả bản là một đoạn nói."""
+    x = (
+        signal((1.0, 1.5))
+        + np.random.default_rng(1).standard_normal(RATE * 3).astype(np.float32) * 0.015
+    )
+    assert annotation.ipus(x, RATE, config) == [(1.0, 1.5)]
+
+
 def test_textgrid_round_trips_including_vietnamese_and_quotes(tmp_path: Path) -> None:
     path = tmp_path / "a.TextGrid"
     annotation.write_textgrid(path, 2.0, {"caller_words": [(0.5, 1.0, 'dạ "vâng"')], "x": []})
