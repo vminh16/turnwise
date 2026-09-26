@@ -27,6 +27,7 @@ from typing import Protocol, runtime_checkable
 import numpy as np
 import soundfile as sf
 
+from turnwise.audio.features import NoiseFloor
 from turnwise.config import AudioConfig
 from turnwise.types import FeatureFrame
 
@@ -101,6 +102,8 @@ class WavFrameSource:
         self._samples.flags.writeable = False
         self._frame_samples = audio.sample_rate_hz * audio.feature_frame_ms // 1000
         self._duration_s = audio.feature_frame_ms / 1000
+        self._noise_frames = max(1, round(audio.noise_window_s * 1000 / audio.feature_frame_ms))
+        self._noise_percentile = audio.noise_percentile
         self._bot_frames = self._frames_with_bot(
             bot_intervals or (), audio.sample_rate_hz, len(self._samples)
         )
@@ -155,8 +158,10 @@ class WavFrameSource:
         thứ `.claude/rules/audio.md` đòi, còn năng lượng thì phải tính trên phần thật.
         """
         size = self._frame_samples
+        noise = NoiseFloor(self._noise_frames, self._noise_percentile)
         for index, start in enumerate(range(0, len(self._samples), size)):
             chunk = self._samples[start : start + size]
+            noise_floor = noise.update(chunk)
             padded_samples = size - len(chunk)
             if padded_samples:
                 padded = np.zeros(size, dtype=np.float32)
@@ -170,4 +175,5 @@ class WavFrameSource:
                 samples=chunk,
                 padded_samples=padded_samples,
                 bot_speaking=index in self._bot_frames,
+                noise_floor_dbfs=noise_floor,
             )

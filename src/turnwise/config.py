@@ -63,6 +63,8 @@ class AudioConfig(_Section):
     capture_frame_ms: int = Field(gt=0)
     feature_frame_ms: int = Field(gt=0)
     ring_buffer_ms: int = Field(gt=0)
+    noise_window_s: float = Field(gt=0)
+    noise_percentile: float = Field(gt=0, lt=100)
     preferred_host_api: str
     input_device: int | str | None = None
     output_device: int | str | None = None

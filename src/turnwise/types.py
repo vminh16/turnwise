@@ -124,6 +124,12 @@ class FeatureFrame:
     Giai đoạn 0) để `False`.
     """
 
+    noise_floor_dbfs: float | None = None
+    """Nền ồn của kênh khách ở khung này, do tầng `audio` ước lượng; `None` khi nguồn không tính.
+
+    Là thuộc tính của micro, không của lượt nói, nên không bao giờ bị xoá ở ranh giới lượt.
+    """
+
     f0_hz: float | None = None
     """Tần số cơ bản, hoặc `None` khi khung vô thanh hay không ước lượng được.
 

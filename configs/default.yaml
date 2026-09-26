@@ -34,6 +34,13 @@ audio:
   # nhìn lại ngữ cảnh mà không giữ audio lâu — SPEC §6 cấm ghi audio ra đĩa lúc chạy.
   ring_buffer_ms: 3000
 
+  # Nền ồn: phân vị 10 của năng lượng khung trong 5 giây gần nhất (audio/features.py). Micro
+  # của hai người thu đầu tiên lệch nhau 15 dB nền ồn (S001 -34, S002 -49 dBFS, 2026-09-27),
+  # nên mọi cổng có tiếng cần biết nền ồn của chính kênh đang nghe. Lựa chọn thiết kế: 5 giây
+  # gần như luôn chứa một khoảng lặng, và đủ ngắn để theo kịp khi đổi phòng.
+  noise_window_s: 5.0
+  noise_percentile: 10.0
+
   # Windows: chọn thiết bị thuộc host API này. MME và DirectSound thêm hàng chục ms
   # đệm mà không unit test nào thấy được. Bỏ qua trên nền tảng khác.
   preferred_host_api: WASAPI
