@@ -526,14 +526,21 @@ uv run python -m evaluation.run_system configs/proposed/draft.yaml --ablation   
 | Chấm theo từng đoạn nói đã gán nhãn | `evaluation/golden.py`, `run_system.py` | chạy được; 0 đoạn được chấm vì chưa có nhãn |
 | B1 | `deciders/silence_threshold.py` | xong từ GĐ 0 |
 | B2 | `deciders/acoustic_onnx.py` | xong, mô hình đã tải |
-| B3 | `deciders/semantic_onnx.py` | code xong; **chưa tải trọng số Namo** |
+| B3 | `deciders/semantic_onnx.py` | xong, trọng số đã tải; tokenizer khớp bản gốc trên 6/6 câu |
 | Hệ đề xuất | `deciders/fused.py`, `fusion.py`, `scorers/` | khung: `silence`, `smart_turn`, `final_rise`, `short_ipu`; số khởi điểm chưa hiệu chỉnh |
 | Nền ồn theo khung | `audio/features.py` | xong, cổng của hệ đề xuất dùng nó |
 
-**Một điều làm lệch phép so sánh, chưa quyết:** B1, B2 và B3 dùng cổng năng lượng cố định
--45 dBFS. Nền ồn micro của S001 là -34 dBFS, nên với S001 mọi khung đều "có tiếng", ba baseline
-không bao giờ thấy im lặng và không bao giờ nhận lượt. Hệ đề xuất thì dùng cổng theo nền ồn. Để
-nguyên thì hệ đề xuất thắng vì micro, không vì phương pháp.
+**Cổng chung (đã quyết 2026-09-27).** Trước đó B1, B2, B3 dùng -45 dBFS cố định trong khi nền ồn
+micro của S001 là -34 dBFS, nên với S001 không baseline nào thấy được im lặng. Giờ cả bốn hệ dùng
+`turn/gate.py`: ngưỡng = max(-45, nền ồn + 12 dB). Đường cong B1 trên kịch bản GĐ 0 không đổi.
+
+**B3 đo trên 18 bản thu thử, i5-11400H, chạy từ file (2026-09-27):** một lần hỏi (faster-whisper
+small, beam 5, rồi Namo) mất trung vị **1 750 ms**, lâu nhất 35 882 ms. Gần như toàn bộ là ASR. B2
+cùng việc đó mất 22 ms. Đọc chữ đắt hơn nghe âm thanh gần 80 lần trên máy này.
+
+Namo chấm các câu trả lời ngắn trọn vẹn là **chưa xong**: "Sáng mai." 0,001, "dạ" 0,000, "Cho tôi
+gặp nhân viên luôn đi" 0,000 (cùng kết quả với tokenizer gốc của transformers). Nếu nhãn xác nhận,
+B3 sẽ hỏng đúng ở hành vi "trả lời ngắn" của SPEC §4.3.
 
 ### 7.3 Còn trống — đường chạy sống (GĐ 4)
 
