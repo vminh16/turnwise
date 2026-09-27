@@ -177,3 +177,85 @@ class WavFrameSource:
                 bot_speaking=index in self._bot_frames,
                 noise_floor_dbfs=noise_floor,
             )
+
+
+class LiveFrameSource:
+    """Adapter sống: đọc micro và tiếng bot từ `DuplexAudio`, khử vọng, phát khung đặc trưng.
+
+    Chạy trên luồng tiêu thụ. Mỗi khung đặc trưng gộp đúng `feature_frame_ms / capture_frame_ms`
+    khung capture, mỗi khung capture qua AEC một lần. Cờ `bot_speaking` bật khi khối bot của
+    khung có tiếng hoặc bộ phát còn tiếng chờ: trong một chỗ ngắt hơi giữa câu, bot vẫn giữ lượt.
+    """
+
+    def __init__(self, duplex: DuplexLike, canceller: CancellerLike, audio: AudioConfig) -> None:
+        self._duplex = duplex
+        self._canceller = canceller
+        self._block = audio.sample_rate_hz * audio.capture_frame_ms // 1000
+        self._blocks_per_frame = audio.feature_frame_ms // audio.capture_frame_ms
+        self._duration_s = audio.feature_frame_ms / 1000
+        self._wait_s = audio.capture_frame_ms / 2000
+        self._noise = NoiseFloor(
+            max(1, round(audio.noise_window_s * 1000 / audio.feature_frame_ms)),
+            audio.noise_percentile,
+        )
+        self._running = True
+
+    def stop(self) -> None:
+        self._running = False
+
+    def __iter__(self) -> Iterator[FeatureFrame]:
+        import time
+
+        near = np.zeros(self._block, dtype=np.float32)
+        far = np.zeros(self._block, dtype=np.float32)
+        index = 0
+        while self._running:
+            parts: list[np.ndarray] = []
+            bot = False
+            while len(parts) < self._blocks_per_frame and self._running:
+                if (
+                    self._duplex.mic.available < self._block
+                    or self._duplex.far.available < self._block
+                ):
+                    time.sleep(self._wait_s)
+                    continue
+                self._duplex.mic.read_into(near)
+                self._duplex.far.read_into(far)
+                bot = bot or bool(np.any(far)) or self._duplex.bot_speaking
+                parts.append(self._canceller.process(near, far).copy())
+            if len(parts) < self._blocks_per_frame:
+                return
+            samples = np.concatenate(parts)
+            yield FeatureFrame(
+                index=index,
+                start_s=index * self._duration_s,
+                duration_s=self._duration_s,
+                samples=samples,
+                bot_speaking=bot,
+                noise_floor_dbfs=self._noise.update(samples),
+            )
+            index += 1
+
+
+class _Ring(Protocol):
+    @property
+    def available(self) -> int: ...
+
+    def read_into(self, out: np.ndarray) -> bool: ...
+
+
+class DuplexLike(Protocol):
+    """Phần của `capture.DuplexAudio` mà nguồn sống cần; test dùng bản giả."""
+
+    @property
+    def mic(self) -> _Ring: ...
+
+    @property
+    def far(self) -> _Ring: ...
+
+    @property
+    def bot_speaking(self) -> bool: ...
+
+
+class CancellerLike(Protocol):
+    def process(self, near: np.ndarray, far: np.ndarray) -> np.ndarray: ...

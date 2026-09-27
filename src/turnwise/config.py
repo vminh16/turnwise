@@ -65,6 +65,7 @@ class AudioConfig(_Section):
     ring_buffer_ms: int = Field(gt=0)
     noise_window_s: float = Field(gt=0)
     noise_percentile: float = Field(gt=0, lt=100)
+    playback_buffer_s: int = Field(gt=0)
     preferred_host_api: str
     input_device: int | str | None = None
     output_device: int | str | None = None

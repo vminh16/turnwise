@@ -121,3 +121,23 @@ def test_the_whole_offline_path_runs_faster_than_real_time(
     elapsed = time.perf_counter() - start
 
     assert elapsed < seconds, f"phát lại {seconds}s audio tốn {elapsed:.3f}s"
+
+
+def test_echo_cancellation_fits_the_capture_frame_budget(
+    audio: AudioConfig, latency: LatencyConfig
+) -> None:
+    """AEC chạy một lần mỗi khung capture trên luồng tiêu thụ, trước mọi decider."""
+    from turnwise.audio.aec import EchoCanceller
+
+    settings = load_settings()
+    canceller = EchoCanceller(audio, settings.echo_cancellation)
+    n = audio.sample_rate_hz * audio.capture_frame_ms // 1000
+    rng = np.random.default_rng(0)
+    near = (rng.standard_normal(n) * 0.1).astype(np.float32)
+    far = (rng.standard_normal(n) * 0.1).astype(np.float32)
+    durations = []
+    for _ in range(300):
+        start = time.perf_counter()
+        canceller.process(near, far)
+        durations.append(time.perf_counter() - start)
+    assert median_ms(durations) < latency.budget_per_frame_ms

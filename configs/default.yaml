@@ -41,6 +41,10 @@ audio:
   noise_window_s: 5.0
   noise_percentile: 10.0
 
+  # Chỗ cho tiếng bot chờ phát, cấp phát sẵn. Câu bot dài nhất của kịch bản đóng vai dưới 20
+  # giây (roleplay/); dư ra ba lần. Lựa chọn thiết kế.
+  playback_buffer_s: 60
+
   # Windows: chọn thiết bị thuộc host API này. MME và DirectSound thêm hàng chục ms
   # đệm mà không unit test nào thấy được. Bỏ qua trên nền tảng khác.
   preferred_host_api: WASAPI
