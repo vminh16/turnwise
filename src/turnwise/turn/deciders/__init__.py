@@ -22,22 +22,21 @@ from turnwise.turn.deciders.silence_threshold import SilenceThresholdDecider
 
 
 def _build_silence_threshold(turn: TurnConfig) -> TurnDecider:
-    if turn.silence_threshold_ms is None or turn.silence_floor_dbfs is None:
+    if turn.silence_threshold_ms is None or turn.gate is None:
         raise ValueError(
-            "B1 cần turn.silence_threshold_ms và turn.silence_floor_dbfs; "
+            "B1 cần turn.silence_threshold_ms và turn.gate; "
             "xem configs/baseline/silence-threshold.yaml"
         )
-    return SilenceThresholdDecider(turn.silence_threshold_ms, turn.silence_floor_dbfs)
+    return SilenceThresholdDecider(turn.silence_threshold_ms, turn.gate)
 
 
 def _build_acoustic_onnx(turn: TurnConfig) -> TurnDecider:
-    if turn.acoustic_onnx is None or turn.silence_floor_dbfs is None:
+    if turn.acoustic_onnx is None or turn.gate is None:
         raise ValueError(
-            "B2 cần turn.acoustic_onnx và turn.silence_floor_dbfs; "
-            "xem configs/baseline/acoustic-onnx.yaml"
+            "B2 cần turn.acoustic_onnx và turn.gate; xem configs/baseline/acoustic-onnx.yaml"
         )
     model = SmartTurnModel(turn.acoustic_onnx)
-    return AcousticOnnxDecider(model, turn.silence_floor_dbfs, turn.acoustic_onnx)
+    return AcousticOnnxDecider(model, turn.gate, turn.acoustic_onnx)
 
 
 def _build_fused(turn: TurnConfig) -> TurnDecider:
@@ -53,14 +52,13 @@ def _build_fused(turn: TurnConfig) -> TurnDecider:
 
 
 def _build_semantic_onnx(turn: TurnConfig) -> TurnDecider:
-    if turn.semantic_onnx is None or turn.silence_floor_dbfs is None:
+    if turn.semantic_onnx is None or turn.gate is None:
         raise ValueError(
-            "B3 cần turn.semantic_onnx và turn.silence_floor_dbfs; "
-            "xem configs/baseline/semantic-onnx.yaml"
+            "B3 cần turn.semantic_onnx và turn.gate; xem configs/baseline/semantic-onnx.yaml"
         )
     from turnwise.turn.deciders.semantic_onnx import build_semantic
 
-    return build_semantic(turn.semantic_onnx, turn.silence_floor_dbfs)
+    return build_semantic(turn.semantic_onnx, turn.gate)
 
 
 BUILDERS: dict[str, Callable[[TurnConfig], TurnDecider]] = {

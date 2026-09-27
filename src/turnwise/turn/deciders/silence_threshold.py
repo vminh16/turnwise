@@ -8,8 +8,9 @@ cho có.
 
 Vì vậy nó cố tình đơn giản đúng bằng cách cũ:
 
-- Cổng **năng lượng**, không phải VAD học máy. Một baseline chạy VAD mạng nơ-ron sẽ
-  không còn là baseline của cách cũ nữa, và phép so sánh ở R8 mất nghĩa.
+- Cổng **năng lượng** (`turn/gate.py`, dùng chung cho cả bốn hệ), không phải VAD học máy.
+  Một baseline chạy VAD mạng nơ-ron sẽ không còn là baseline của cách cũ nữa, và phép
+  so sánh ở R8 mất nghĩa.
 - **Không bao giờ** trả `BACKCHANNEL`. B1 không có cách nào phân biệt "dạ" tiếng đệm
   với "Dạ." trọn lượt. Đó là chỗ nó hỏng SPEC R4, và là kết quả cần đo — không phải
   thiếu sót cần vá.
@@ -25,22 +26,14 @@ riêng**, cho một điểm trên đường cong đánh đổi (SPEC §9.3 quy t
 from __future__ import annotations
 
 import logging
-import math
 
-import numpy as np
-from numpy.typing import NDArray
-
+from turnwise.config import GateConfig
+from turnwise.turn.gate import is_speech, rms_dbfs
 from turnwise.types import FeatureFrame, TurnDecision, TurnOutcome
 
 logger = logging.getLogger(__name__)
 
-
-def rms_dbfs(samples: NDArray[np.float32]) -> float:
-    """Mức năng lượng của khung, tính bằng dBFS. Khung toàn không cho `-inf`."""
-    rms = float(np.sqrt(np.mean(np.square(samples), dtype=np.float64)))
-    if rms <= 0.0:
-        return -math.inf
-    return 20.0 * math.log10(rms)
+__all__ = ["SilenceThresholdDecider", "rms_dbfs"]
 
 
 class SilenceThresholdDecider:
@@ -52,11 +45,11 @@ class SilenceThresholdDecider:
     _heard_speech: bool
     _taken: bool
 
-    def __init__(self, silence_threshold_ms: int, silence_floor_dbfs: float) -> None:
+    def __init__(self, silence_threshold_ms: int, gate: GateConfig) -> None:
         if silence_threshold_ms <= 0:
             raise ValueError(f"silence_threshold_ms phải dương, nhận {silence_threshold_ms}")
         self._threshold_ms = silence_threshold_ms
-        self._floor_dbfs = silence_floor_dbfs
+        self._gate = gate
         self.reset()
 
     def decide(self, frame: FeatureFrame) -> TurnDecision:
@@ -70,10 +63,7 @@ class SilenceThresholdDecider:
         bằng chứng của một lượt đã xong (`.claude/rules/turn.md`).
         """
         if not self._taken:
-            # Bỏ phần đệm của khung cuối: đệm không kéo RMS xuống 15 dB và biến một
-            # đuôi phát ngôn nhỏ tiếng thành im lặng (`types.py`, `padded_samples`).
-            samples = frame.samples[: len(frame.samples) - frame.padded_samples]
-            if len(samples) and rms_dbfs(samples) > self._floor_dbfs:
+            if is_speech(frame, self._gate):
                 self._heard_speech = True
                 self._silence_ms = 0
             else:

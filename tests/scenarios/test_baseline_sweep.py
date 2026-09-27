@@ -17,8 +17,7 @@ BASELINE_CONFIG = "configs/baseline/silence-threshold.yaml"
 def test_the_sweep_produces_one_point_per_threshold(tmp_path: Path) -> None:
     settings = load_settings(BASELINE_CONFIG)
     sweep = settings.turn.silence_threshold_sweep_ms
-    floor_dbfs = settings.turn.silence_floor_dbfs
-    assert sweep is not None and floor_dbfs is not None
+    assert sweep is not None and settings.turn.gate is not None
 
     scenarios = load_all()
     points = []
@@ -46,8 +45,7 @@ def test_no_threshold_wins_both_axes(tmp_path: Path) -> None:
     """
     settings = load_settings(BASELINE_CONFIG)
     sweep = settings.turn.silence_threshold_sweep_ms
-    floor_dbfs = settings.turn.silence_floor_dbfs
-    assert sweep is not None and floor_dbfs is not None
+    assert sweep is not None and settings.turn.gate is not None
 
     scenarios = load_all()
     points = []
@@ -75,8 +73,7 @@ def test_b1_mistakes_the_backchannel_at_every_threshold(tmp_path: Path) -> None:
     """Không ngưỡng nào cứu được R4: cổng năng lượng không có trục để phân biệt."""
     settings = load_settings(BASELINE_CONFIG)
     sweep = settings.turn.silence_threshold_sweep_ms
-    floor_dbfs = settings.turn.silence_floor_dbfs
-    assert sweep is not None and floor_dbfs is not None
+    assert sweep is not None and settings.turn.gate is not None
 
     backchannel = next(s for s in load_all() if s.truth.expected == "backchannel")
     for threshold_ms in sweep:

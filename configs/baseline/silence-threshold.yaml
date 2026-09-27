@@ -18,17 +18,21 @@ turn:
   # Baseline không chấm điểm gì, nên không có scorer nào để tắt hay bật.
   scorers: []
 
-  # Ngưỡng năng lượng phân biệt có tiếng với im lặng, tính bằng dBFS trên khung.
-  # Đây là LỰA CHỌN THIẾT KẾ, không phải số đo: -45 dBFS là mức sàn ồn thường thấy
-  # của micro laptop trong phòng yên, đủ thấp để không cắt mất phần đuôi nhỏ tiếng
-  # của một phát ngôn, đủ cao để tiếng quạt không bị tính là tiếng nói.
-  #
-  # B1 dùng cổng năng lượng chứ không dùng VAD học máy, vì đó đúng là thứ tổng đài
-  # hiện hành làm (SPEC §1). Một baseline mạnh hơn cách cũ thật sẽ không còn là
-  # baseline của cách cũ nữa.
+  # Cổng có tiếng / im lặng dùng chung cho cả bốn hệ (src/turnwise/turn/gate.py), để phép so
+  # sánh đo phương pháp chứ không đo micro. Ngưỡng = max(floor_dbfs, nền ồn + margin_db).
+  # B1 vẫn dùng cổng năng lượng chứ không dùng VAD học máy, vì đó đúng là thứ tổng đài hiện
+  # hành làm (SPEC §1); nó chỉ được biết thêm nền ồn, như VAD thương mại nào cũng biết.
+  # `merge_ms` không áp cho B1: B1 đếm im lặng liên tục, không gộp đoạn nói.
   #
   # Ghi chú kỹ thuật: `aec_audio_processing.AudioProcessor.has_voice()` không dùng
   # được — bản WebRTC APM này đã bỏ module voice_detection, hàm còn tên nhưng trả
   # False cho mọi đầu vào (đo ngày 2026-09-10: 0/60 khung trên tín hiệu giống tiếng
   # nói ở 16 kHz, mọi mức aggressiveness).
-  silence_floor_dbfs: -45.0
+  gate:
+    # Sàn tuyệt đối: -45 dBFS là mức sàn ồn thường thấy của micro laptop trong phòng yên
+    # (lựa chọn thiết kế từ GĐ 0).
+    floor_dbfs: -45.0
+    # Đo trên 18 bản thu thử, 2026-09-27 (configs/default.yaml, mục annotation): 12 dB.
+    margin_db: 12.0
+    # Heldner & Edlund (2010) §2.1.
+    merge_ms: 180

@@ -48,9 +48,8 @@ def main() -> int:
 
     settings = load_settings(BASELINE_CONFIG)
     sweep = settings.turn.silence_threshold_sweep_ms
-    floor_dbfs = settings.turn.silence_floor_dbfs
-    if sweep is None or floor_dbfs is None:
-        raise SystemExit(f"{BASELINE_CONFIG} has no sweep or no energy floor")
+    if sweep is None or settings.turn.gate is None:
+        raise SystemExit(f"{BASELINE_CONFIG} has no sweep or no speech gate")
 
     scenarios = load_all()
     logger.info("sweeping %d thresholds over %d scenarios", len(sweep), len(scenarios))

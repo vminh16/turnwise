@@ -16,8 +16,8 @@ from turnwise.turn.deciders.semantic_onnx import (
 from turnwise.types import FeatureFrame, TurnOutcome
 
 TURN = load_settings("configs/baseline/semantic-onnx.yaml").turn
-assert TURN.semantic_onnx is not None and TURN.silence_floor_dbfs is not None
-CONFIG, FLOOR = TURN.semantic_onnx, TURN.silence_floor_dbfs
+assert TURN.semantic_onnx is not None and TURN.gate is not None
+CONFIG, FLOOR = TURN.semantic_onnx, TURN.gate
 
 
 def frames(pattern: str) -> list[FeatureFrame]:

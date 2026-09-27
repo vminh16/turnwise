@@ -14,10 +14,16 @@ turn:
   decider: acoustic_onnx
   scorers: []
 
-  # Cổng có tiếng / im lặng: dùng chung với B1 để hai baseline khác nhau ở đúng một chỗ —
-  # có mô hình hay không. Pipecat dùng Silero VAD ở đây; khác biệt này là CÓ CHỦ Ý và phải
-  # ghi cạnh số liệu của B2.
-  silence_floor_dbfs: -45.0
+  # Cổng có tiếng / im lặng dùng chung cho cả bốn hệ (src/turnwise/turn/gate.py), để phép so
+  # sánh đo phương pháp chứ không đo micro. Ngưỡng = max(floor_dbfs, nền ồn + margin_db).
+  gate:
+    # Sàn tuyệt đối: -45 dBFS là mức sàn ồn thường thấy của micro laptop trong phòng yên
+    # (lựa chọn thiết kế từ GĐ 0).
+    floor_dbfs: -45.0
+    # Đo trên 18 bản thu thử, 2026-09-27 (configs/default.yaml, mục annotation): 12 dB.
+    margin_db: 12.0
+    # Heldner & Edlund (2010) §2.1.
+    merge_ms: 180
 
   acoustic_onnx:
     model_path: models/smart-turn-v3.2/smart-turn-v3.2-cpu.onnx

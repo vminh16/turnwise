@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from turnwise.config import AcousticOnnxConfig, load_settings
+from turnwise.config import AcousticOnnxConfig, GateConfig, load_settings
 from turnwise.turn.base import TurnDecider
 from turnwise.turn.deciders import build
 from turnwise.turn.deciders.acoustic_onnx import SCORE_KEY, AcousticOnnxDecider
@@ -44,23 +44,23 @@ class FakeModel:
 
 
 @pytest.fixture(scope="module")
-def config() -> tuple[AcousticOnnxConfig, float]:
+def config() -> tuple[AcousticOnnxConfig, GateConfig]:
     turn = load_settings("configs/baseline/acoustic-onnx.yaml").turn
-    assert turn.acoustic_onnx is not None and turn.silence_floor_dbfs is not None
-    return turn.acoustic_onnx, turn.silence_floor_dbfs
+    assert turn.acoustic_onnx is not None and turn.gate is not None
+    return turn.acoustic_onnx, turn.gate
 
 
-def run(model: FakeModel, config: tuple[AcousticOnnxConfig, float], pattern: str) -> list[str]:
+def run(model: FakeModel, config: tuple[AcousticOnnxConfig, GateConfig], pattern: str) -> list[str]:
     decider = AcousticOnnxDecider(model, config[1], config[0])
     return ["T" if decider.decide(f).outcome == TurnOutcome.TAKE else "H" for f in frames(pattern)]
 
 
-def test_b2_fits_the_seam(config: tuple[AcousticOnnxConfig, float]) -> None:
+def test_b2_fits_the_seam(config: tuple[AcousticOnnxConfig, GateConfig]) -> None:
     assert isinstance(AcousticOnnxDecider(FakeModel(), config[1], config[0]), TurnDecider)
 
 
 def test_the_model_is_asked_after_200_ms_of_silence_and_takes_when_it_says_done(
-    config: tuple[AcousticOnnxConfig, float],
+    config: tuple[AcousticOnnxConfig, GateConfig],
 ) -> None:
     model = FakeModel(0.9)
     out = run(model, config, "s" * 10 + "." * 15)
@@ -69,7 +69,7 @@ def test_the_model_is_asked_after_200_ms_of_silence_and_takes_when_it_says_done(
 
 
 def test_a_not_done_answer_holds_until_the_3_s_fallback(
-    config: tuple[AcousticOnnxConfig, float],
+    config: tuple[AcousticOnnxConfig, GateConfig],
 ) -> None:
     model = FakeModel(0.1)
     out = run(model, config, "s" * 10 + "." * 160)
@@ -78,7 +78,7 @@ def test_a_not_done_answer_holds_until_the_3_s_fallback(
 
 
 def test_speech_after_a_not_done_answer_asks_again_at_the_next_pause(
-    config: tuple[AcousticOnnxConfig, float],
+    config: tuple[AcousticOnnxConfig, GateConfig],
 ) -> None:
     model = FakeModel(0.1, 0.9)
     out = run(model, config, "s" * 10 + "." * 12 + "s" * 5 + "." * 12)
@@ -86,13 +86,15 @@ def test_speech_after_a_not_done_answer_asks_again_at_the_next_pause(
     assert model.heard[1] > model.heard[0]  # lần hai nghe cả phần nói thêm
 
 
-def test_the_threshold_is_strictly_greater_than(config: tuple[AcousticOnnxConfig, float]) -> None:
+def test_the_threshold_is_strictly_greater_than(
+    config: tuple[AcousticOnnxConfig, GateConfig],
+) -> None:
     """inference.py: `1 if probability > 0.5 else 0`."""
     assert "T" not in run(FakeModel(0.5), config, "s" * 5 + "." * 12)
 
 
 def test_silence_before_any_speech_is_never_a_finished_turn(
-    config: tuple[AcousticOnnxConfig, float],
+    config: tuple[AcousticOnnxConfig, GateConfig],
 ) -> None:
     model = FakeModel()
     assert "T" not in run(model, config, "." * 200)
@@ -100,7 +102,7 @@ def test_silence_before_any_speech_is_never_a_finished_turn(
 
 
 def test_the_score_is_recorded_only_on_the_frame_the_model_ran(
-    config: tuple[AcousticOnnxConfig, float],
+    config: tuple[AcousticOnnxConfig, GateConfig],
 ) -> None:
     decider = AcousticOnnxDecider(FakeModel(0.3), config[1], config[0])
     decisions = [decider.decide(f) for f in frames("s" * 5 + "." * 12)]
@@ -108,7 +110,7 @@ def test_the_score_is_recorded_only_on_the_frame_the_model_ran(
 
 
 def test_reset_gives_identical_output_for_identical_input(
-    config: tuple[AcousticOnnxConfig, float],
+    config: tuple[AcousticOnnxConfig, GateConfig],
 ) -> None:
     model = FakeModel(0.9, 0.9)
     decider = AcousticOnnxDecider(model, config[1], config[0])
@@ -120,7 +122,7 @@ def test_reset_gives_identical_output_for_identical_input(
 
 
 def test_the_model_hears_at_most_the_pre_speech_before_speech_began(
-    config: tuple[AcousticOnnxConfig, float],
+    config: tuple[AcousticOnnxConfig, GateConfig],
 ) -> None:
     model = FakeModel(0.9)
     run(model, config, "." * 100 + "s" * 10 + "." * 10)
@@ -128,7 +130,7 @@ def test_the_model_hears_at_most_the_pre_speech_before_speech_began(
     assert model.heard == [pre + (10 + 10) * SAMPLES]
 
 
-def test_frames_at_another_rate_are_refused(config: tuple[AcousticOnnxConfig, float]) -> None:
+def test_frames_at_another_rate_are_refused(config: tuple[AcousticOnnxConfig, GateConfig]) -> None:
     decider = AcousticOnnxDecider(FakeModel(), config[1], config[0])
     frame = FeatureFrame(index=0, start_s=0, duration_s=FRAME_S, samples=np.zeros(960, np.float32))
     with pytest.raises(ValueError, match="16000"):

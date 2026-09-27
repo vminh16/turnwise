@@ -12,7 +12,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from turnwise.config import GateConfig
-from turnwise.turn.deciders.silence_threshold import rms_dbfs
+from turnwise.turn.gate import is_speech, real_samples
 from turnwise.types import FeatureFrame
 
 
@@ -38,13 +38,9 @@ class SpeechTracker:
         self.ipu_end: int | None = None  # khung có tiếng cuối cùng của đoạn nói gần nhất
 
     def push(self, frame: FeatureFrame) -> None:
-        samples = frame.samples[: len(frame.samples) - frame.padded_samples]
+        samples = real_samples(frame)
         frame_ms = round(frame.duration_s * 1000)
-        level = rms_dbfs(samples) if len(samples) else -np.inf
-        floor = self._gate.floor_dbfs
-        if frame.noise_floor_dbfs is not None:
-            floor = max(floor, frame.noise_floor_dbfs + self._gate.margin_db)
-        loud = level > floor
+        loud = is_speech(frame, self._gate)
 
         self._frames.append((frame.index, samples.copy()))  # khung có thể trỏ vào ring buffer
         while len(self._frames) * frame_ms > self._keep_s * 1000:

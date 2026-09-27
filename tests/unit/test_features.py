@@ -18,7 +18,7 @@ def test_the_floor_is_the_quiet_part_even_while_speech_dominates() -> None:
     floor = NoiseFloor(window_frames=100, percentile=10)
     for i in range(100):
         last = floor.update(noise(-34.0) if i % 5 == 0 else noise(-10.0))
-    assert abs(last - -34.0) < 1.5
+    assert last is not None and abs(last - -34.0) < 1.5
 
 
 def test_the_floor_follows_a_quieter_room() -> None:
@@ -27,4 +27,11 @@ def test_the_floor_follows_a_quieter_room() -> None:
         floor.update(noise(-34.0))
     for _ in range(50):
         last = floor.update(noise(-50.0))
-    assert abs(last - -50.0) < 1.5
+    assert last is not None and abs(last - -50.0) < 1.5
+
+
+def test_nothing_is_reported_before_a_whole_window() -> None:
+    """Một kênh mở ra bằng tiếng nói không được lấy tiếng nói làm nền ồn."""
+    floor = NoiseFloor(window_frames=10, percentile=10)
+    early = [floor.update(noise(-14.0)) for _ in range(9)]
+    assert early == [None] * 9 and floor.update(noise(-14.0)) is not None

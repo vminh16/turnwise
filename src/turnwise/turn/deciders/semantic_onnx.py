@@ -18,7 +18,7 @@ from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
 
-from turnwise.config import SemanticOnnxConfig
+from turnwise.config import GateConfig, SemanticOnnxConfig
 from turnwise.turn.deciders.pause_triggered import PauseTriggeredDecider, Predictor
 
 logger = logging.getLogger(__name__)
@@ -92,13 +92,11 @@ def semantic_predictor(transcribe: Transcriber, classify: Classifier) -> Predict
 
 
 class SemanticOnnxDecider(PauseTriggeredDecider):
-    def __init__(
-        self, predict: Predictor, silence_floor_dbfs: float, config: SemanticOnnxConfig
-    ) -> None:
-        super().__init__(predict, silence_floor_dbfs, config, "semantic_onnx", SCORE_KEY)
+    def __init__(self, predict: Predictor, gate: GateConfig, config: SemanticOnnxConfig) -> None:
+        super().__init__(predict, gate, config, "semantic_onnx", SCORE_KEY)
 
 
-def build_semantic(config: SemanticOnnxConfig, silence_floor_dbfs: float) -> SemanticOnnxDecider:
+def build_semantic(config: SemanticOnnxConfig, gate: GateConfig) -> SemanticOnnxDecider:
     for path in (config.model_dir / "model_quant.onnx", config.asr_model_dir / "model.bin"):
         if not path.exists():
             raise FileNotFoundError(f"{path} is missing; see configs/baseline/semantic-onnx.yaml")
@@ -106,4 +104,4 @@ def build_semantic(config: SemanticOnnxConfig, silence_floor_dbfs: float) -> Sem
         WhisperTranscriber(str(config.asr_model_dir), config.asr_beam_size),
         NamoClassifier(str(config.model_dir)),
     )
-    return SemanticOnnxDecider(predict, silence_floor_dbfs, config)
+    return SemanticOnnxDecider(predict, gate, config)

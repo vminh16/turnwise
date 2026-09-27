@@ -5,7 +5,8 @@ VAD thấy khách im `trigger_silence_ms` thì hỏi, mô hình nói xong thì n
 `fallback_silence_ms` thì nhận lượt dù mô hình nói chưa xong. B2 và B3 khác nhau **chỉ** ở mô
 hình được hỏi — nghe âm thanh hay đọc chữ — nên phép so sánh giữa chúng đo đúng khác biệt đó.
 
-Cổng có tiếng / im lặng là cổng năng lượng cố định của B1 (`silence_floor_dbfs`).
+Cổng có tiếng / im lặng là cổng chung của mọi decider (`turn/gate.py`), thay cho Silero VAD
+của pipecat.
 """
 
 from __future__ import annotations
@@ -18,8 +19,8 @@ from collections.abc import Callable
 import numpy as np
 from numpy.typing import NDArray
 
-from turnwise.config import PauseTriggerConfig
-from turnwise.turn.deciders.silence_threshold import rms_dbfs
+from turnwise.config import GateConfig, PauseTriggerConfig
+from turnwise.turn.gate import is_speech, real_samples
 from turnwise.types import FeatureFrame, TurnDecision, TurnOutcome
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class PauseTriggeredDecider:
     def __init__(
         self,
         predict: Predictor,
-        silence_floor_dbfs: float,
+        gate: GateConfig,
         config: PauseTriggerConfig,
         name: str,
         score_key: str,
@@ -52,7 +53,7 @@ class PauseTriggeredDecider:
         self.predict_ms: list[float] = []
         """Thời gian mỗi lần hỏi mô hình. Đo đạc, không phải trạng thái lượt: `reset` không xoá."""
         self._predict = predict
-        self._floor_dbfs = silence_floor_dbfs
+        self._gate = gate
         self._config = config
         self._frames: deque[tuple[int, NDArray[np.float32]]] = deque()
         self.reset()
@@ -60,10 +61,10 @@ class PauseTriggeredDecider:
     def decide(self, frame: FeatureFrame) -> TurnDecision:
         scores: dict[str, float | None] = {}
         if not self._taken:
-            samples = frame.samples[: len(frame.samples) - frame.padded_samples]
+            samples = real_samples(frame)
             self._check_rate(frame)
             self._remember(frame, samples)
-            if len(samples) and rms_dbfs(samples) > self._floor_dbfs:
+            if is_speech(frame, self._gate):
                 if self._speech_start is None:
                     self._speech_start = frame.index
                 self._silence_ms = 0

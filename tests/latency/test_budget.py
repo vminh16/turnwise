@@ -22,8 +22,10 @@ import numpy as np
 import pytest
 
 from turnwise.audio.source import WavFrameSource
-from turnwise.config import AudioConfig, LatencyConfig, load_settings
+from turnwise.config import AudioConfig, GateConfig, LatencyConfig, load_settings
 from turnwise.turn.deciders.silence_threshold import SilenceThresholdDecider
+
+GATE = GateConfig(floor_dbfs=-45.0, margin_db=12.0, merge_ms=180)
 
 pytestmark = pytest.mark.latency
 
@@ -60,7 +62,7 @@ def test_b1_decides_inside_the_per_frame_budget(
     tmp_path: Path, audio: AudioConfig, latency: LatencyConfig, write_wav: WavWriter
 ) -> None:
     """`decide()` chạy mỗi khung trên thread tiêu thụ; chi phí của nó nằm trong ngân sách."""
-    decider = SilenceThresholdDecider(500, -45.0)
+    decider = SilenceThresholdDecider(500, GATE)
     frames = list(
         WavFrameSource(
             write_wav(tmp_path / "a.wav", audio.sample_rate_hz * 10, amplitude=0.2), audio
@@ -110,7 +112,7 @@ def test_the_whole_offline_path_runs_faster_than_real_time(
     thì đường chạy sống chắc chắn không kịp.
     """
     seconds = 10.0
-    decider = SilenceThresholdDecider(500, -45.0)
+    decider = SilenceThresholdDecider(500, GATE)
     path = write_wav(tmp_path / "a.wav", int(audio.sample_rate_hz * seconds), amplitude=0.2)
 
     start = time.perf_counter()

@@ -15,6 +15,7 @@ turn:
     take_threshold: 0.5
     backchannel_threshold: 0.5
 
+  # Cùng cổng với ba baseline (src/turnwise/turn/gate.py).
   gate:
     # Sàn tuyệt đối, như B1. Ngưỡng thật = max(sàn, nền ồn + margin_db).
     floor_dbfs: -45.0

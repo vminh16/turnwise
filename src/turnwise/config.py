@@ -207,9 +207,6 @@ class TurnConfig(_Section):
     """Chỉ overlay B1 đặt khoá này. Mỗi giá trị là một lần chạy riêng, cho một điểm
     trên đường cong đánh đổi (SPEC §9.3 quy tắc 2)."""
 
-    silence_floor_dbfs: float | None = None
-    """Cũng chỉ overlay B1 đặt. Ngưỡng năng lượng chia có tiếng với im lặng."""
-
     silence_threshold_ms: int | None = None
     """Ngưỡng im lặng của **một** lần chạy B1.
 
@@ -225,7 +222,7 @@ class TurnConfig(_Section):
     """Chỉ overlay B3 đặt."""
 
     gate: GateConfig | None = None
-    """Cổng có tiếng của hệ đề xuất. B1 và B2 dùng `silence_floor_dbfs` cố định."""
+    """Cổng có tiếng / im lặng, dùng chung cho mọi decider (`turn/gate.py`)."""
 
     scorer_settings: ScorerSettings = ScorerSettings()
 

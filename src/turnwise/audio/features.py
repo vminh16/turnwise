@@ -26,16 +26,23 @@ def level_dbfs(samples: NDArray[np.float32]) -> float:
 
 
 class NoiseFloor:
-    """Phân vị thấp của năng lượng khung trong một cửa sổ trượt, cấp phát sẵn một lần."""
+    """Phân vị thấp của năng lượng khung trong một cửa sổ trượt, cấp phát sẵn một lần.
+
+    Chưa đủ một cửa sổ thì chưa báo gì (`None`), và cổng dùng sàn cố định. Nếu báo sớm, một
+    kênh mở ra bằng tiếng nói sẽ có "nền ồn" bằng chính tiếng nói, và đoạn nói đầu tiên bị bỏ
+    qua: đo được trên kịch bản ngập ngừng của GĐ 0, ngưỡng lên tới -2 dBFS.
+    """
 
     def __init__(self, window_frames: int, percentile: float) -> None:
         if window_frames <= 0:
             raise ValueError(f"window_frames must be positive, got {window_frames}")
         self._levels = np.full(window_frames, np.nan)
         self._next = 0
+        self._filled = False
         self._percentile = percentile
 
-    def update(self, samples: NDArray[np.float32]) -> float:
+    def update(self, samples: NDArray[np.float32]) -> float | None:
         self._levels[self._next] = level_dbfs(samples)
         self._next = (self._next + 1) % len(self._levels)
-        return float(np.nanpercentile(self._levels, self._percentile))
+        self._filled = self._filled or self._next == 0
+        return float(np.percentile(self._levels, self._percentile)) if self._filled else None

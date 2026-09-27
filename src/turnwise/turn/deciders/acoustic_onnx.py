@@ -22,7 +22,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from turnwise.config import AcousticOnnxConfig
+from turnwise.config import AcousticOnnxConfig, GateConfig
 from turnwise.turn.deciders.pause_triggered import MODEL_RATE_HZ, PauseTriggeredDecider, Predictor
 
 # Hợp đồng đầu vào của mô hình, không phải tham số để chỉnh: smart-turn học trên đặc trưng
@@ -77,10 +77,8 @@ class SmartTurnModel:
 
 
 class AcousticOnnxDecider(PauseTriggeredDecider):
-    def __init__(
-        self, predict: Predictor, silence_floor_dbfs: float, config: AcousticOnnxConfig
-    ) -> None:
-        super().__init__(predict, silence_floor_dbfs, config, "acoustic_onnx", SCORE_KEY)
+    def __init__(self, predict: Predictor, gate: GateConfig, config: AcousticOnnxConfig) -> None:
+        super().__init__(predict, gate, config, "acoustic_onnx", SCORE_KEY)
 
 
 __all__ = ["MODEL_RATE_HZ", "SCORE_KEY", "AcousticOnnxDecider", "Predictor", "SmartTurnModel"]

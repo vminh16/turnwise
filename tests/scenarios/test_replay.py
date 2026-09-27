@@ -25,8 +25,8 @@ def scenarios() -> list[Scenario]:
 def b1() -> SilenceThresholdDecider:
     turn = load_settings("configs/baseline/silence-threshold.yaml").turn
     assert turn.silence_threshold_sweep_ms is not None
-    assert turn.silence_floor_dbfs is not None
-    return SilenceThresholdDecider(turn.silence_threshold_sweep_ms[0], turn.silence_floor_dbfs)
+    assert turn.gate is not None
+    return SilenceThresholdDecider(turn.silence_threshold_sweep_ms[0], turn.gate)
 
 
 def test_all_five_spec_tests_have_a_scenario(scenarios: list[Scenario]) -> None:
