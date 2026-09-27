@@ -40,6 +40,9 @@ class NamoClassifier:
 
         self._tokenizer = Tokenizer.from_file(f"{model_dir}/tokenizer.json")
         self._tokenizer.enable_truncation(MAX_TOKENS)
+        # tokenizer.json mang sẵn cấu hình đệm tới 128 token; mã mẫu của model card gọi
+        # tokenizer không đệm. Để nguyên thì mã token khác bản gốc.
+        self._tokenizer.no_padding()
         self._session = ort.InferenceSession(
             f"{model_dir}/model_quant.onnx", providers=["CPUExecutionProvider"]
         )
