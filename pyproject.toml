@@ -23,7 +23,7 @@ dependencies = [
 [project.optional-dependencies]
 # Not installed by default. Add with: uv sync --extra <name>
 asr = ["faster-whisper>=1.1"]          # CTranslate2 backend, no torch
-tts = ["piper-tts>=1.2"]               # local ONNX VITS, has a vi_VN voice
+tts = ["vieneu>=3.8"]                 # VieNeu-TTS v3 Turbo, ONNX on CPU, Apache-2.0 (docs/progress.md 6.8); pulls gradio
 transport = ["aiortc>=1.9"]            # WebRTC client at localhost:8080
 research = [                            # offline only: training/, evaluation/, notebooks/
     "torch>=2.5",
@@ -96,7 +96,7 @@ check_untyped_defs = true
 [[tool.mypy.overrides]]
 module = [
     "sounddevice.*", "soundfile.*", "parselmouth.*", "aec_audio_processing.*", "onnxruntime.*", "scipy.*",
-    "faster_whisper.*",
+    "faster_whisper.*", "vieneu.*",
 ]
 ignore_missing_imports = true
 
