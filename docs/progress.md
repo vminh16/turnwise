@@ -542,8 +542,26 @@ Namo chấm các câu trả lời ngắn trọn vẹn là **chưa xong**: "Sáng
 gặp nhân viên luôn đi" 0,000 (cùng kết quả với tokenizer gốc của transformers). Nếu nhãn xác nhận,
 B3 sẽ hỏng đúng ở hành vi "trả lời ngắn" của SPEC §4.3.
 
-### 7.3 Còn trống — đường chạy sống (GĐ 4)
+### 7.3 Đường chạy sống (GĐ 4) — khung đã nối, 2026-09-27
 
-`audio/ring_buffer.py`, `capture.py`, `aec.py`; `dialog/machine.py`, `slots.py`,
-`backend_stub.py`; `transport/wiring.py`, `webrtc.py`; `telemetry/dashboard.py`. Nối TTS vào
-đường chạy sống cần thêm `vieneu` làm phụ thuộc của dự án (hiện chỉ nằm trong `tts-check/`).
+`uv run turnwise dev [--config ...]` chạy một cuộc gọi trên micro và loa của máy, với decider mà
+file cấu hình chọn (mặc định hệ đề xuất).
+
+| Tầng | File | Ghi chú |
+|---|---|---|
+| audio | `ring_buffer.py`, `capture.py`, `aec.py`, `source.py` (`LiveFrameSource`, `LiveAudio`) | AEC 0,10 ms mỗi khung 10 ms, ngân sách 5 ms |
+| dialog | `slots.py`, `templates.py`, `backend_stub.py`, `machine.py` | năm luồng, mọi quy tắc §4.2 có test |
+| transport | `speech.py`, `wiring.py` | ASR, dialog, TTS chạy ở luồng phụ |
+| telemetry | `dashboard.py` | bảng trong terminal, vẽ lại năm lần mỗi giây |
+
+**Chưa thử với micro thật.** Mọi test dùng đồ giả; chưa có ai gọi vào.
+
+**Độ trễ đáp đo được là khoảng 4 giây — nối đúng, nhưng chưa dùng được.** Lần gọi đầu, không phát
+theo luồng: TTS 2,38 s để sinh câu chào dài 2,96 s; ASR (whisper-small, beam 5) 1,98 s cho cùng câu,
+và chép "Tổng đài NetCo" thành "Tổng đại nét con". Câu cố định giờ được nhớ sau lần sinh đầu. Việc
+kế tiếp về độ trễ: phát TTS theo luồng (TTFA đo ở §6.8 là 168–334 ms), và ASR nhanh hơn — beam
+nhỏ, mô hình nhỏ hơn, hoặc một mô hình CTC chạy theo luồng (ADR-0006 mục 5).
+
+**Cố ý để rỗng:** `transport/webrtc.py` (cắt theo `docs/roadmap.md` §8, dùng micro và loa tại
+máy); `scripts/collect_session.py` (web thu `collector/` đã thay); `training/` (chưa có lý do đo được
+để huấn luyện, `docs/progress.md` §6.1).

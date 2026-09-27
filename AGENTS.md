@@ -28,7 +28,7 @@ the project `.venv`, so these work identically on Windows, macOS and Linux.
 uv sync                          # create .venv and install dependencies (setup)
 uv run pre-commit install        # install git hooks, once per clone
 
-uv run turnwise dev              # run the agent locally; WebRTC client at localhost:8080
+uv run turnwise dev              # one call on this machine's mic and speaker (--config picks the decider)
 uv run pytest                    # full test suite
 uv run pytest -m latency         # latency budget check on the live path (bench)
 uv run pytest -m scenario        # replay scenarios/*.yaml, no microphone needed (sim)
@@ -36,7 +36,7 @@ uv run pytest -m scenario        # replay scenarios/*.yaml, no microphone needed
 uv run ruff check . && uv run ruff format --check . && uv run mypy   # lint
 
 uv run python evaluation/run_baseline.py   # sweep the three baselines of SPEC R8
-uv run python evaluation/run_system.py     # score the system, regenerate reports/
+uv run python -m evaluation.run_system configs/proposed/draft.yaml   # score a decider on the golden set
 ```
 
 Optional dependency groups are declared in `pyproject.toml` and installed on demand:
