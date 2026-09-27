@@ -89,10 +89,27 @@ telemetry:
   # Mọi TurnDecision được ghi ở đúng một chỗ (ADR-0003). Thư mục này nằm ngoài git.
   dir: reports/telemetry
   enabled: true
+  # Bảng theo dõi vẽ lại mỗi chừng này khung (20 ms), tức năm lần một giây: đủ để đọc,
+  # không đủ để tranh CPU với vòng lặp khung.
+  dashboard_refresh_frames: 10
 
 logging:
   # AGENTS.md: ghi log qua logging.getLogger(__name__), không bao giờ print().
   level: INFO
+
+speech:
+  # ASR để hiểu lời khách. Cùng mô hình asr-check/ và B3 dùng; chọn cuối cùng ở GĐ 2 theo số đo
+  # (ADR-0006 mục 5).
+  asr_model_dir: asr-check/models/faster-whisper-small
+  asr_beam_size: 5
+  # Giọng bot đã chốt ở docs/progress.md §6.8: VieNeu-TTS v3 Turbo, "Minh Quân Pro", int8.
+  # Đổi giọng là đổi kênh 1 của mọi bản thu GĐ 1, nên đây là hằng số.
+  tts_model: v3turbo
+  tts_voice: "Minh Quân Pro"
+  tts_precision: int8
+  tts_cache_dir: tts-check/models
+  # Whisper nhận tối đa 30 giây; lời khách dài hơn thì giữ phần cuối.
+  asr_max_turn_s: 30
 
 dialog:
   # SPEC §4.2: cùng một trường mà hỏi lại quá ba lần thì chuyển sang N5.

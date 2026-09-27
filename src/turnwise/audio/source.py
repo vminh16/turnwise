@@ -26,9 +26,10 @@ from typing import Protocol, runtime_checkable
 
 import numpy as np
 import soundfile as sf
+from numpy.typing import NDArray
 
 from turnwise.audio.features import NoiseFloor
-from turnwise.config import AudioConfig
+from turnwise.config import AudioConfig, Settings
 from turnwise.types import FeatureFrame
 
 logger = logging.getLogger(__name__)
@@ -259,3 +260,57 @@ class DuplexLike(Protocol):
 
 class CancellerLike(Protocol):
     def process(self, near: np.ndarray, far: np.ndarray) -> np.ndarray: ...
+
+
+class LiveAudio:
+    """Mặt tiền của đường chạy sống: khung đặc trưng vào, tiếng bot ra, qua cùng một seam.
+
+    `capture.py` và `aec.py` là nội bộ của tầng này (`.claude/rules/audio.md`), nên `transport/`
+    chỉ thấy lớp này: `frames()` là nguồn khung, `play`/`stop` là bộ phát.
+    """
+
+    def __init__(self, settings: Settings) -> None:
+        from turnwise.audio.aec import EchoCanceller
+        from turnwise.audio.capture import DuplexAudio
+
+        self._duplex = DuplexAudio(settings.audio)
+        self._source = LiveFrameSource(
+            self._duplex, EchoCanceller(settings.audio, settings.echo_cancellation), settings.audio
+        )
+        self._queued = 0
+
+    def start(self) -> None:
+        self._duplex.start()
+
+    def close(self) -> None:
+        self._source.stop()
+        self._duplex.close()
+
+    def frames(self) -> Iterator[FeatureFrame]:
+        return iter(self._source)
+
+    @property
+    def overruns(self) -> int:
+        return self._duplex.mic.overruns + self._duplex.far.overruns + self._duplex.speaker.overruns
+
+    # --- bộ phát ------------------------------------------------------------------------
+
+    def play(self, audio: NDArray[np.float32]) -> None:
+        if not self._duplex.speaker.write(audio):
+            logger.warning("bot line of %d samples dropped: playback buffer full", len(audio))
+            return
+        self._queued = self._duplex.speaker.available
+
+    def stop(self) -> None:
+        self._duplex.stop_bot()
+
+    @property
+    def speaking(self) -> bool:
+        return self._duplex.bot_speaking
+
+    @property
+    def played_fraction(self) -> float:
+        """Phần câu bot đã phát, để dialog biết bị ngắt ở đâu (R11)."""
+        if self._queued == 0:
+            return 1.0
+        return 1.0 - self._duplex.speaker.available / self._queued

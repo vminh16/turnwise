@@ -26,7 +26,7 @@ def decision(index: int, **overrides: object) -> TurnDecision:
 
 @pytest.fixture
 def config(tmp_path: Path) -> TelemetryConfig:
-    return TelemetryConfig(dir=tmp_path, enabled=True)
+    return TelemetryConfig(dir=tmp_path, enabled=True, dashboard_refresh_frames=10)
 
 
 def test_one_decision_is_one_line(config: TelemetryConfig) -> None:
@@ -84,7 +84,7 @@ def test_an_abstaining_scorer_stays_distinguishable_from_a_low_score(
 
 
 def test_disabled_telemetry_writes_nothing(tmp_path: Path) -> None:
-    config = TelemetryConfig(dir=tmp_path, enabled=False)
+    config = TelemetryConfig(dir=tmp_path, enabled=False, dashboard_refresh_frames=10)
     with TelemetryCollector(config, "silence_threshold", "200ms") as collector:
         collector.record(decision(0))
 

@@ -12,8 +12,12 @@ def test_help_does_not_crash() -> None:
     assert exc.value.code == 0
 
 
-def test_dev_reports_not_wired_instead_of_importerror() -> None:
-    assert main(["dev"]) == 1
+def test_dev_runs_the_proposed_system_unless_told_otherwise() -> None:
+    """Không gọi `main(["dev"])` ở đây: nó nạp ASR, TTS và mở micro thật."""
+    args = build_parser().parse_args(["dev"])
+    assert args.config == "configs/proposed/draft.yaml"
+    other = build_parser().parse_args(["dev", "--config", "configs/baseline/acoustic-onnx.yaml"])
+    assert other.config.endswith("acoustic-onnx.yaml")
 
 
 def test_unknown_command_is_rejected() -> None:

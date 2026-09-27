@@ -87,7 +87,7 @@ def test_replay_writes_one_telemetry_line_per_frame(
     scenarios: list[Scenario], b1: SilenceThresholdDecider, tmp_path: Path
 ) -> None:
     audio = load_settings().audio
-    config = TelemetryConfig(dir=tmp_path / "telemetry", enabled=True)
+    config = TelemetryConfig(dir=tmp_path / "telemetry", enabled=True, dashboard_refresh_frames=10)
 
     for scenario in scenarios:
         with TelemetryCollector(config, "silence_threshold", scenario.name) as collector:

@@ -231,6 +231,7 @@ class TurnConfig(_Section):
 class TelemetryConfig(_Section):
     dir: Path
     enabled: bool
+    dashboard_refresh_frames: int = Field(gt=0)
 
 
 class LoggingConfig(_Section):
@@ -258,6 +259,26 @@ class AnnotationConfig(_Section):
         return _resolve(path)
 
 
+class SpeechConfig(_Section):
+    """ASR và TTS của đường chạy sống: hằng số của thí nghiệm (SPEC R8), không phải biến."""
+
+    asr_model_dir: Path
+    asr_beam_size: int = Field(gt=0)
+    tts_model: str
+    tts_voice: str
+    tts_precision: Literal["int8", "fp32"]
+    tts_cache_dir: Path
+    """Nơi VieNeu tải mô hình về (HF_HOME). Trỏ vào bản đã tải cho tts-check/ để khỏi tải lại."""
+
+    asr_max_turn_s: int = Field(gt=0)
+    """Lời khách giữ lại cho ASR, tính từ cuối. Whisper nhận tối đa 30 giây."""
+
+    @field_validator("asr_model_dir", "tts_cache_dir")
+    @classmethod
+    def _from_repo_root(cls, path: Path) -> Path:
+        return _resolve(path)
+
+
 class DialogConfig(_Section):
     max_retries: int = Field(gt=0)
     """Hỏi lại một trường quá chừng này lần thì chuyển người (SPEC §4.2: "quá ba lần")."""
@@ -276,6 +297,7 @@ class Settings(BaseSettings):
     logging: LoggingConfig
     annotation: AnnotationConfig
     dialog: DialogConfig
+    speech: SpeechConfig
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
@@ -334,3 +356,12 @@ def load_settings(config_path: str | Path | None = None) -> Settings:
     _apply_env_overrides(data, env)
 
     return Settings(**data)
+
+
+def export_model_cache(speech: SpeechConfig) -> None:
+    """Chỉ chỗ tải mô hình TTS cho thư viện Hugging Face (biến HF_HOME).
+
+    Đặt ở đây vì đây là module duy nhất được đụng tới biến môi trường (`AGENTS.md`). Không ghi
+    đè nếu người chạy đã tự đặt.
+    """
+    os.environ.setdefault("HF_HOME", str(speech.tts_cache_dir))

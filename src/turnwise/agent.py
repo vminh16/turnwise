@@ -46,21 +46,88 @@ def build_parser() -> argparse.ArgumentParser:
         help="Logging verbosity (default: INFO).",
     )
     subcommands = parser.add_subparsers(dest="command", required=True)
-    subcommands.add_parser("dev", help="Run the agent locally; WebRTC client at localhost:8080.")
+    dev = subcommands.add_parser(
+        "dev", help="Run a call on this machine's microphone and speaker (wired headset advised)."
+    )
+    dev.add_argument(
+        "--config",
+        default="configs/proposed/draft.yaml",
+        help="Overlay that picks the decider (default: the proposed system).",
+    )
     return parser
 
 
-def run_dev() -> int:
-    # Đường ống chưa được nối. Báo rõ còn thiếu gì, để lệnh ghi trong README luôn
-    # giải thích được trạng thái thật của repo thay vì văng lỗi import ở chỗ khác.
-    logger.error(
-        "Not wired up yet. The offline path works: "
-        "`uv run pytest -m scenario` replays the five SPEC 10 scenarios and "
-        "`uv run python evaluation/run_baseline.py` sweeps the B1 baseline. "
-        "A live call still needs microphone capture, ASR, TTS, dialog/ and "
-        "transport/ wiring, which is phase 4 in docs/roadmap.md."
+def run_dev(config: str) -> int:
+    """Một cuộc gọi trên micro và loa của máy này. Mọi phần nặng được nạp trước khi mở luồng."""
+    from datetime import datetime
+
+    from turnwise.audio.source import LiveAudio
+    from turnwise.config import load_settings
+    from turnwise.dialog.backend_stub import NetCoBackend
+    from turnwise.dialog.machine import Dialog
+    from turnwise.telemetry.collector import TelemetryCollector
+    from turnwise.telemetry.dashboard import Dashboard
+    from turnwise.transport.speech import VieneuTts, load_asr
+    from turnwise.transport.wiring import Call, CallStats
+    from turnwise.turn.deciders import build
+    from turnwise.types import TurnDecision
+
+    settings = load_settings(config)
+    logger.info("loading decider %s, ASR and TTS", settings.turn.decider)
+    decider = build(settings.turn)
+    asr = load_asr(settings.speech)
+    tts = VieneuTts(settings.speech, settings.audio.sample_rate_hz)
+    audio = LiveAudio(settings)
+    max_turn_frames = settings.speech.asr_max_turn_s * 1000 // settings.audio.feature_frame_ms
+    run_name = datetime.now().strftime("%Y%m%dT%H%M%S")
+
+    with (
+        TelemetryCollector(settings.telemetry, decider.name, "live", run_name) as telemetry,
+        Dashboard(settings.telemetry.dashboard_refresh_frames) as dashboard,
+    ):
+
+        def show(stats: CallStats, decision: TurnDecision) -> None:
+            last = stats.transcripts[-1] if stats.transcripts else ("", "")
+            dashboard.update(
+                {
+                    "frames": stats.frames,
+                    "turns taken": stats.takes,
+                    "barge-ins": stats.barge_ins,
+                    "backchannels": stats.backchannels,
+                    "last reply ms": round(stats.reply_ms[-1]) if stats.reply_ms else "-",
+                    "buffer overruns": audio.overruns,
+                    "caller said": last[0],
+                    "bot said": last[1],
+                },
+                decision,
+            )
+
+        audio.start()
+        try:
+            call = Call(
+                audio.frames(),
+                decider,
+                Dialog(NetCoBackend(), settings.dialog),
+                asr,
+                tts,
+                audio,
+                telemetry.record,
+                max_turn_frames,
+                on_frame=show,
+            )
+            stats = call.run()
+        except KeyboardInterrupt:
+            logger.info("call stopped by the operator")
+            return 0
+        finally:
+            audio.close()
+    logger.info(
+        "call over: %d turns taken, %d barge-ins, telemetry in %s",
+        stats.takes,
+        stats.barge_ins,
+        telemetry.path,
     )
-    return 1
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -71,7 +138,7 @@ def main(argv: list[str] | None = None) -> int:
         format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
     )
     if args.command == "dev":
-        return run_dev()
+        return run_dev(args.config)
     # argparse đã chặn mọi giá trị khác; nhánh này chỉ để mypy thấy hàm luôn trả về int.
     raise AssertionError(f"unhandled command: {args.command}")
 
