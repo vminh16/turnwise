@@ -94,6 +94,10 @@ logging:
   # AGENTS.md: ghi log qua logging.getLogger(__name__), không bao giờ print().
   level: INFO
 
+dialog:
+  # SPEC §4.2: cùng một trường mà hỏi lại quá ba lần thì chuyển sang N5.
+  max_retries: 3
+
 annotation:
   # Bản nháp cho người gán nhãn (pha 1.6). Chỉ evaluation/annotation.py đọc; người gán sửa lại
   # ranh giới, nên các giá trị này quyết định công sửa, không quyết định nhãn.

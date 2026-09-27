@@ -258,6 +258,11 @@ class AnnotationConfig(_Section):
         return _resolve(path)
 
 
+class DialogConfig(_Section):
+    max_retries: int = Field(gt=0)
+    """Hỏi lại một trường quá chừng này lần thì chuyển người (SPEC §4.2: "quá ba lần")."""
+
+
 class Settings(BaseSettings):
     """Toàn bộ cấu hình của một lần chạy, đã gộp đủ ba lớp."""
 
@@ -270,6 +275,7 @@ class Settings(BaseSettings):
     telemetry: TelemetryConfig
     logging: LoggingConfig
     annotation: AnnotationConfig
+    dialog: DialogConfig
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
