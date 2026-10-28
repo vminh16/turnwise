@@ -11,6 +11,25 @@ chỗ nào hai bên lệch nhau thì hai tài liệu kia đúng.
 
 Chưa gộp vào `main`, chưa đẩy lên GitHub. 102 commit, 2026-09-10 → 2026-09-27.
 
+### Dữ liệu — đổi hướng (2026-10-28)
+
+**Đổi**
+
+- Dữ liệu tách thành **bộ phân tích** (hội thoại tiếng Việt tự nhiên giữa hai người, ba miền, từ
+  corpus đã công bố hoặc nguồn công khai) và **bộ kiểm thử sản phẩm** (đóng vai NetCo). Chỉ số
+  chính §9.1 được đo trên bộ phân tích. Không tự thu thêm. ADR-0007; sửa `SPEC.md` §6 và §9.1,
+  `AGENTS.md`, `README.md`, `docs/roadmap.md`, `.claude/rules/evaluation.md`.
+
+**Thêm**
+
+- `docs/research/analysis-corpus.md`: nguồn ứng viên theo ba tầng, quy tắc lấy mẫu để không thiên
+  lệch, ước lượng cỡ mẫu, và bốn việc chặn trước khi gán nhãn.
+
+**Đã biết**
+
+- Chưa gán nhãn được bộ phân tích: còn chờ quyền truy cập LDC, hướng dẫn gán nhãn mới, chế độ
+  người với người cho `evaluation/golden.py`, và một pilot.
+
 ### GĐ 4 — Bot chạy thật: khung đã nối (2026-09-27)
 
 **Thêm**

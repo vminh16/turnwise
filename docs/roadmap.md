@@ -85,9 +85,11 @@ Với khung ứng dụng, thứ tự ưu tiên khi chọn nghiêng hẳn về ph
 cái đã có** trước, **tự dựng từ đầu** sau, và chỉ khi số đo cho thấy cái đã có không cứu
 được.
 
-Ràng buộc đã biết: **không có corpus hội thoại hai kênh tiếng Việt công khai**. VIVOS,
-VLSP, BUD500 đều đơn kênh. Nếu chọn hướng VAP thì bắt buộc tự thu — đó là ràng buộc
-thật, không phải một lựa chọn còn để ngỏ.
+Ràng buộc đã biết: **không có corpus hội thoại hai kênh tiếng Việt tải miễn phí**. VIVOS,
+VLSP, BUD500 đều đơn kênh. Hai corpus hội thoại thật có chép lời nằm ở LDC và phải trả phí:
+CALLFRIEND Vietnamese (~25 giờ, hai kênh) và Babel Vietnamese (~201 giờ, số kênh chưa rõ)
+(`docs/research/data-and-method.md` §4.2). Không cái nào đủ để huấn luyện VAP từ đầu; cả hai
+đủ để **phân tích và benchmark** (ADR-0007).
 
 ---
 
@@ -96,7 +98,7 @@ thật, không phải một lựa chọn còn để ngỏ.
 | GĐ | Tên | Xong khi |
 |---|---|---|
 | 0 | Đường đo | `pytest -m scenario` xanh; `run_baseline.py` vẽ được đường cong B1 |
-| 1 | Dữ liệu đóng vai | Manifest có checksum và nhãn; chia theo người nói; holdout khoá |
+| 1 | Dữ liệu: bộ phân tích + bộ kiểm thử sản phẩm | Bộ phân tích có manifest, nhãn và ba miền; mỗi bộ chia theo người nói và có holdout khoá |
 | 2 | Đo cái có sẵn, chốt hướng | Có số thật cho B1, B2, B3; biết mô hình có sẵn hỏng ở đâu; ADR chốt hướng |
 | 3 | Thích ứng cho tiếng Việt | Ablation cho thấy phần thêm vào đóng góp bao nhiêu, ở thanh điệu nào |
 | 4 | **Trợ lý CSKH chạy được** | Năm phép thử §10 chạy với người chưa từng dùng hệ thống |
@@ -118,17 +120,28 @@ hơn nhiều so với biết sau khi đã viết fusion.
 
 Chưa mô hình nào. Chưa micro. Chưa dữ liệu thật.
 
-### GĐ 1 — Dữ liệu đóng vai
+### GĐ 1 — Dữ liệu: hai bộ, hai vai trò
 
 Đường găng của cả dự án, và tốn thời gian thật chứ không tốn code.
 
 Mục tiêu **không phải** xây một corpus để phát hành. Mục tiêu là đủ dữ liệu để (a) đo
 được ba baseline một cách trung thực, (b) vá được chỗ hỏng tìm thấy ở GĐ 2, và (c) chạy
-được năm phép thử ở GĐ 4. Thu vừa đủ, đừng thu để cho oai.
+được năm phép thử ở GĐ 4.
 
-Việc phải làm: kịch bản đóng vai cho năm luồng nghiệp vụ, thu **hai kênh** có đồng ý,
-viết `docs/annotation-guide.md`, gán nhãn, sinh manifest kèm sha256, chia tập **theo
-người nói** chứ không theo phát ngôn, khoá holdout.
+Ban đầu GĐ 1 dồn cả ba mục đích vào một bộ đóng vai tự thu. Sau một tháng, bộ đó có hai
+người nói, và kịch bản ép tần suất hành vi nên không đo được ngữ điệu tự nhiên. ADR-0007
+tách thành hai bộ:
+
+- **Bộ phân tích** phục vụ (a) và (b): hội thoại tiếng Việt tự nhiên giữa hai người, phủ ba
+  miền, lấy từ corpus đã công bố hoặc nguồn công khai, **không tự thu**. Gán nhãn mọi điểm
+  ngừng trong các cửa sổ chọn ngẫu nhiên, khoảng 4–6 giờ và 30 người nói trở lên
+  (`docs/research/analysis-corpus.md` §5–§6).
+- **Bộ kiểm thử sản phẩm** phục vụ (c): các cuộc gọi đóng vai NetCo đã thu, cộng
+  `scenarios/` và phép thử sống.
+
+Việc phải làm cho bộ phân tích: chọn nguồn (LDC hay tầng 3 miễn phí), viết hướng dẫn gán nhãn
+cho hội thoại người với người, thêm chế độ người với người cho `evaluation/golden.py`, pilot
+khoảng 1 giờ, rồi gán nhãn, sinh manifest kèm sha256, chia tập **theo người nói**, khoá holdout.
 
 Chia theo phát ngôn làm mọi con số về sau lạc quan hơn thực tế, và sai lầm đó không để
 lại dấu vết nào trong chỉ số — bạn sẽ tưởng sản phẩm tốt hơn thực tế đúng vào lúc đem đi
@@ -138,9 +151,10 @@ demo.
 
 Giai đoạn quyết định phần lớn công sức của GĐ 3.
 
-Chạy B1 quét cả dải, B2 và B3 giữ nguyên trọng số, trên tập validation. Phân tích lỗi
-tách theo thanh điệu và theo bốn hành vi ở §4.3 (ngập ngừng, tiếng đệm, nói đè, trả lời
-ngắn). Đặt ba đường cong cạnh nhau, rồi chốt hướng §7 bằng một ADR.
+Chạy B1 quét cả dải, B2 và B3 giữ nguyên trọng số, trên tập dev của **bộ phân tích**.
+Phân tích lỗi tách theo thanh điệu, theo miền và theo bốn hành vi ở §4.3 (ngập ngừng,
+tiếng đệm, nói đè, trả lời ngắn). Bộ kiểm thử sản phẩm cho biết các lỗi đó có xuất hiện lại
+trong cuộc gọi NetCo không. Đặt ba đường cong cạnh nhau, rồi chốt hướng §7 bằng một ADR.
 
 Ba kết cục, và cả ba đều là kết quả hợp lệ:
 
@@ -162,7 +176,8 @@ Vá đúng chỗ GĐ 2 chỉ ra. Theo thứ tự rẻ trước:
 
 1. Thêm scorer nhắm đúng chỗ hỏng, hợp nhất với điểm của mô hình có sẵn — ví dụ một
    scorer thanh điệu, hoặc một scorer phân biệt "dạ" tiếng đệm với "Dạ." trọn lượt.
-2. Tinh chỉnh mô hình có sẵn trên dữ liệu đóng vai đã thu.
+2. Tinh chỉnh mô hình có sẵn trên phần train của bộ phân tích, không bao giờ trên holdout
+   hay bộ kiểm thử sản phẩm (ADR-0007).
 3. Dựng hướng mới từ đầu — chỉ khi hai cách trên không cứu được.
 
 Cả ba đều không phá `SPEC.md` R8: baseline vẫn là **trọng số nguyên bản**, còn bản đã
@@ -209,7 +224,9 @@ Làm cho sản phẩm rời được khỏi máy của bạn, và kèm theo bằ
 - **Lắp vào doanh nghiệp thật, đấu nối tổng đài viễn thông.** Ranh giới dừng ở WebRTC.
   Cần SIP thì để nó là một adapter *chưa cài đặt* sau seam của `transport/`, có tài liệu,
   không có code.
-- **Dữ liệu khách hàng thật.** Chỉ hội thoại đóng vai có đồng ý, mãi mãi.
+- **Dữ liệu khách hàng thật.** Không bao giờ dùng ghi âm cuộc gọi khách hàng của bất kỳ
+  công ty nào. Bộ phân tích là hội thoại nghiên cứu hoặc công khai, có điều khoản cho phép
+  nghiên cứu (ADR-0007), không phải cuộc gọi khách hàng.
 - **Sinh câu trả lời tự do bằng LLM.** Đề tài trả lời câu hỏi *khi nào* nói. Thay máy
   trạng thái bằng LLM là đổi sang một sản phẩm khác, và làm hỏng phép so sánh với ba
   baseline vì độ trễ sinh câu trộn vào độ trễ chuyển lượt.
@@ -222,8 +239,10 @@ Nghiệp vụ thứ sáu vẫn là scope creep ở giai đoạn này, y như ở
 
 ## 7. Bốn chỗ dễ chết
 
-**GĐ 1 chặn GĐ 2, 3 và 4.** Không có dữ liệu hai kênh thì cả ba đứng im. Bắt đầu viết
-kịch bản đóng vai sớm, song song với GĐ 0.
+**GĐ 1 chặn GĐ 2 và 3.** Không có bộ phân tích đã gán nhãn thì không có số nào cho chỉ số
+chính. Cái bẫy đã gặp một lần: tối ưu việc thu dữ liệu theo app, rồi kẹt ở khâu tuyển người
+(ADR-0007). Dữ liệu cho câu hỏi về tiếng Việt lấy từ hội thoại tự nhiên; dữ liệu của app chỉ
+dùng để kiểm thử app.
 
 **Nhảy sang GĐ 4 quá sớm.** Làm `dialog/` cho cảm giác tiến triển rõ ràng hơn nhiều so
 với đo baseline, và năm luồng nghiệp vụ là phần dễ hình dung nhất. Nhưng nếu tầng `turn`

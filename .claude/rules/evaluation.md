@@ -10,6 +10,21 @@ paths:
 The only place allowed to read `data/holdout/`, and only when producing the final report. Open
 it once. Every intermediate decision uses the validation split instead.
 
+## Two datasets, never pooled
+
+ADR-0007 splits the data by the question it answers:
+
+- **Analysis set** — natural two-person Vietnamese conversation (`docs/research/analysis-corpus.md`).
+  The headline metric and the tone- and region-split benchmark of every decider are computed here.
+  Label every pause inside each sampled window; never select "interesting" moments. Normalise F0
+  per speaker. Report by speaker-clustered statistics (mixed-effects model or bootstrap over
+  speakers), not pooled counts.
+- **Product test set** — the NetCo role-play calls, `scenarios/`, and the live tests of SPEC §10.
+  Behaviour of the assistant: §4.3, R3, R5.
+
+Never pool the two into one number, and never carry a conclusion from one set to the other without
+saying so. Each set has its own holdout, split by speaker.
+
 ## Reporting rules, from SPEC §9.3
 
 1. **Never report interruption rate without latency, or latency without interruption rate.**

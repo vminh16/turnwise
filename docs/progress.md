@@ -8,7 +8,7 @@ Quyết định kỹ thuật ghi thẳng ở đây thay vì tách thành ADR ri�
 một file là nắm được trạng thái. ADR dành cho quyết định kiến trúc lớn của các giai đoạn
 sau.
 
-Cập nhật lần cuối: 2026-09-14. Nhánh `feat/repo-setup`.
+Cập nhật lần cuối: 2026-10-28. Nhánh `feat/repo-setup`.
 
 ---
 
@@ -565,3 +565,41 @@ nhỏ, mô hình nhỏ hơn, hoặc một mô hình CTC chạy theo luồng (ADR
 **Cố ý để rỗng:** `transport/webrtc.py` (cắt theo `docs/roadmap.md` §8, dùng micro và loa tại
 máy); `scripts/collect_session.py` (web thu `collector/` đã thay); `training/` (chưa có lý do đo được
 để huấn luyện, `docs/progress.md` §6.1).
+
+---
+
+## 8. Đổi hướng dữ liệu — 2026-10-28
+
+**Quyết định:** ADR-0007. Dữ liệu tách thành hai bộ:
+
+- **Bộ phân tích**: hội thoại tiếng Việt tự nhiên giữa hai người, phủ ba miền, lấy từ corpus đã
+  công bố hoặc nguồn công khai. Chỉ số chính §9.1 và benchmark B1, B2, B3, hệ đề xuất được tính ở
+  đây.
+- **Bộ kiểm thử sản phẩm**: các cuộc gọi đóng vai đã thu, `scenarios/`, phép thử sống.
+
+**Lý do, bằng số:** sau pha 1.4–1.6, bộ đóng vai có khoảng hai cuộc hội thoại dùng được, cả hai
+người nói đều là tác giả kịch bản và không bao giờ vào holdout (`evaluation/dataset.py`,
+`AUTHORS`). Mức cần cho phân tích theo thanh điệu là khoảng 30 người nói trở lên, mỗi miền khoảng
+10 người (`docs/research/analysis-corpus.md` §6).
+
+**Không đổi:** mục tiêu GĐ 4 (trợ lý NetCo chạy được), `collector/`, `roleplay/`, mọi code dưới
+`src/`.
+
+**Nguồn ứng viên** (`docs/research/analysis-corpus.md` §3):
+
+| Tầng | Nguồn | Trạng thái |
+|---|---|---|
+| 1 | Babel Vietnamese `LDC2017S01`: ~201 giờ, 2012, bốn vùng phương ngữ | chưa rõ số kênh và phí |
+| 1 | CALLFRIEND Vietnamese `LDC96S60`: ~25 giờ, hai kênh, 1996 | chưa rõ phí và nhãn vùng |
+| 3 | UCI *Viet Stories*: phỏng vấn lịch sử truyền khẩu, được dùng cho nghiên cứu | chưa kiểm độ phủ vùng |
+| 3 | Podcast trò chuyện dài | chỉ là ứng viên cho pilot |
+| đối chứng | Easy-Turn, MagicData-RAMC (Quan Thoại); TurnBench | dùng nhãn có sẵn |
+
+**Gán nhãn bộ vàng: chưa bắt đầu được.** Bốn việc chặn, theo thứ tự (`analysis-corpus.md` §7):
+
+1. Quyền truy cập LDC, và số kênh của Babel.
+2. Hướng dẫn gán nhãn cho hội thoại người với người. `docs/annotation-guide.md` v1.2 chỉ phủ bộ
+   kiểm thử sản phẩm.
+3. Chế độ người với người cho `evaluation/golden.py`.
+4. Pilot khoảng 1 giờ trên nguồn tầng 3, đo số giờ gán nhãn cho mỗi giờ audio, lỗi tách người nói,
+   và tần suất từng thanh ở cuối lượt.

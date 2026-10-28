@@ -92,7 +92,7 @@ audio  →  turn  →  dialog
 
 - **IMPORTANT: `data/holdout/` is a locked evaluation set. No training, tuning, or hyperparameter-selection script may read it.** Only `evaluation/` may read it, and only when producing the final report. CI enforces this.
 - Never write audio to disk on the runtime path. Only the offline collection pipeline writes files.
-- Never use real customer call recordings from any company. All data is consented role-play, per `docs/annotation-guide.md`.
+- Never use real customer call recordings from any company. Data comes in two sets that never mix (`SPEC.md` §6, ADR-0007): the **product test set** is consented role-play (`docs/annotation-guide.md`); the **analysis set** is natural two-person Vietnamese conversation from published research corpora or public sources whose terms allow research (`docs/research/analysis-corpus.md`). Never redistribute analysis-set audio; commit only source IDs, timestamps, labels and manifests.
 - Do not add dependencies without asking. This must run on a laptop, not a GPU cluster.
 - Do not add a sixth business flow beyond the five in `SPEC.md` §4.1.
 

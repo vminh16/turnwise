@@ -90,8 +90,17 @@ five business flows. `telemetry` records every decision and never feeds back int
 
 ## Data and evaluation
 
-All data is consented role-play. No real customer recordings from any company are used, and NetCo
-is a fictional operator invented as business context.
+Two datasets with separate roles (`SPEC.md` §6, `docs/adr/0007`):
+
+- **Analysis set** — natural two-person Vietnamese conversation across the three dialect regions,
+  from published research corpora or public sources whose terms allow research. It carries the
+  headline metric: turn-taking error split by the lexical tone of the final syllable. Its audio is
+  never redistributed.
+- **Product test set** — consented role-play of the NetCo calls. It checks the assistant's
+  behaviour, not Vietnamese prosody.
+
+No real customer recordings from any company are used, and NetCo is a fictional operator invented
+as business context.
 
 `data/holdout/` is locked: no training or tuning script may read it, and CI enforces this. Results
 are reported as a trade-off curve against three baselines (`SPEC.md` R8, `docs/adr/0002`) — an

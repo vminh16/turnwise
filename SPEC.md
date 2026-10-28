@@ -124,9 +124,13 @@ Phát biểu theo điều **phải đúng**, không theo cách cài đặt.
 - **Thời gian thực.** Suy luận phải theo kịp luồng audio trên máy tính xách tay thông thường, không phải máy có GPU. Ngân sách cụ thể ghi trong `configs/`, kiểm tra bằng `uv run pytest -m latency`.
 - **Ngắt lời phải nhanh hơn ngưỡng cảm nhận của con người**, nếu không tính năng mất ý nghĩa.
 - **Không phụ thuộc dịch vụ đám mây trong đường chạy chính.** Phụ thuộc mạng làm hỏng phép đo độ trễ và làm demo mong manh.
-- **Dữ liệu.** Chỉ dùng hội thoại đóng vai theo kịch bản, có đồng ý. Không dùng ghi âm cuộc gọi thật của khách hàng bất kỳ công ty nào. NetCo là công ty giả định.
+- **Dữ liệu.** Hai bộ, hai vai trò, không trộn (ADR-0007):
+  - **Bộ kiểm thử sản phẩm** — hội thoại đóng vai theo kịch bản NetCo, có đồng ý. Dùng cho hành vi §4.3 và phép thử §10.
+  - **Bộ phân tích** — hội thoại tiếng Việt tự nhiên giữa hai người, phủ ba miền, lấy từ corpus nghiên cứu đã công bố hoặc nguồn công khai có điều khoản cho phép nghiên cứu. Dùng cho chỉ số chính §9.1 và benchmark các decider. Không tự thu, không ép hành vi bằng kịch bản, không phát hành lại âm thanh.
+
+  Không bao giờ dùng ghi âm cuộc gọi thật của khách hàng của bất kỳ công ty nào. NetCo là công ty giả định.
 - **Không ghi audio ra đĩa trong runtime.**
-- **Tập kiểm thử khoá.** Không dùng để huấn luyện hay chọn siêu tham số. Mở đúng một lần khi báo cáo cuối.
+- **Tập kiểm thử khoá.** Mỗi bộ dữ liệu có holdout riêng, chia theo người nói. Không dùng để huấn luyện hay chọn siêu tham số. Mở đúng một lần khi báo cáo cuối.
 
 ## 7. Hướng tiếp cận — đang cân nhắc, chưa chốt
 
@@ -166,7 +170,7 @@ Ngưỡng cụ thể đặt ở `configs/`. Baseline đo ở Giai đoạn 0, kh�
 - Tỉ lệ tiếng đệm bị nhận nhầm thành giành lượt
 - Thời gian từ lúc khách nói đè đến lúc bot im
 - Tỉ lệ bot tự nhận nhầm tiếng của mình là ngắt lời
-- Chênh lệch tỉ lệ lỗi giữa các thanh điệu của âm tiết cuối — *kết quả khoa học chính*
+- Chênh lệch tỉ lệ lỗi giữa các thanh điệu của âm tiết cuối — *kết quả khoa học chính*. Đo trên **bộ phân tích** (§6), tách thêm theo miền; không đo trên cuộc gọi đóng vai, vì kịch bản ép tần suất hành vi.
 
 ### 9.2 Chỉ số nghiệp vụ
 

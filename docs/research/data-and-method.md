@@ -13,6 +13,11 @@ chính dự án đó. Không lấy từ blog, bài tóm tắt hay bảng so sán
 gì. Chỗ nào bằng chứng ngoài mạng mâu thuẫn với tài liệu trong repo thì §7 nói rõ cả hai phía và
 nêu tài liệu nào phải sửa — việc sửa là một ADR, không phải một lần sửa chữ.
 
+**Cập nhật 2026-10-28:** câu 1–3 ở §10 đã được quyết bởi ADR-0007. §6 của `SPEC.md` được đọc theo
+lối (a); corpus nghiên cứu hội thoại thật làm **bộ phân tích**, tách khỏi dữ liệu đóng vai; không tự
+thu thêm. Nguồn và cách lấy mẫu ở `docs/research/analysis-corpus.md`. Phần còn lại của tài liệu này
+giữ nguyên làm bằng chứng tại thời điểm tra.
+
 Tài liệu này **xây tiếp** `docs/research/reuse-audit.md` (tra ngày 2026-09-10). Nó không lặp lại
 bảng phán quyết kế thừa ở đó. Nó trả lời bốn câu hỏi còn treo ở §10 của tài liệu đó (câu 1, 2, 8,
 9), và sửa ba chỗ trong chính tài liệu đó.
