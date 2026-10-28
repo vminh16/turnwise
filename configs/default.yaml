@@ -135,3 +135,23 @@ annotation:
   # Mô hình của asr-check/ (faster-whisper-small, MIT, revision khoá trong asr-check/transcribe.py).
   # Chỉ sinh lớp chép lời nháp; không phải ASR của sản phẩm, không phải B3.
   asr_model_dir: asr-check/models/faster-whisper-small
+
+analysis_sample:
+  # Bốc mẫu cho bộ phân tích (ADR-0007, docs/annotation-guide-conversation.md §3). Chỉ
+  # evaluation/analysis_sample.py đọc. Hạt giống được commit: đổi nó là bốc lại từ đầu, và phải
+  # ghi lý do vào CHANGELOG.
+  seed: 20261028
+  catalog: data/manifests/analysis-catalog.csv
+  sample: data/manifests/analysis-sample.csv
+  # Audio tải tay về đây, mỗi nguồn một thư mục: data/raw/analysis/<source>/<item_id>.mp3. Không
+  # nằm trong git (data/ bị gitignore, trừ manifests/).
+  audio_dir: data/raw/analysis
+  # GIẢ ĐỊNH cho pilot, thay bằng số đo sau pilot (analysis-corpus.md §7 mục 4): 4 cửa sổ x
+  # 3 vùng x 5 phút = 1 giờ audio.
+  windows_per_region: 4
+  window_s: 300.0
+  # Bỏ phần chào hỏi, giới thiệu, xin đồng ý ở đầu buổi phỏng vấn, và phần cảm ơn ở cuối.
+  skip_head_s: 120.0
+  skip_tail_s: 60.0
+  # Nghe được, không gán nhãn: nhãn mở đầu của đoạn nói đầu tiên cần biết cái gì xảy ra trước nó.
+  context_s: 20.0

@@ -259,6 +259,28 @@ class AnnotationConfig(_Section):
         return _resolve(path)
 
 
+class AnalysisSampleConfig(_Section):
+    """Bốc mẫu cho bộ phân tích (ADR-0007, `docs/annotation-guide-conversation.md` §3).
+
+    Chỉ `evaluation/analysis_sample.py` dùng; đường chạy chính không đọc section này.
+    """
+
+    seed: int
+    catalog: Path
+    sample: Path
+    audio_dir: Path
+    windows_per_region: int = Field(gt=0)
+    window_s: float = Field(gt=0)
+    skip_head_s: float = Field(ge=0)
+    skip_tail_s: float = Field(ge=0)
+    context_s: float = Field(ge=0)
+
+    @field_validator("catalog", "sample", "audio_dir")
+    @classmethod
+    def _from_repo_root(cls, path: Path) -> Path:
+        return _resolve(path)
+
+
 class SpeechConfig(_Section):
     """ASR và TTS của đường chạy sống: hằng số của thí nghiệm (SPEC R8), không phải biến."""
 
@@ -296,6 +318,7 @@ class Settings(BaseSettings):
     telemetry: TelemetryConfig
     logging: LoggingConfig
     annotation: AnnotationConfig
+    analysis_sample: AnalysisSampleConfig
     dialog: DialogConfig
     speech: SpeechConfig
 
