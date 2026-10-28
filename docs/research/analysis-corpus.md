@@ -176,12 +176,16 @@ khoảng 10 người**. Đây là ước lượng. Pilot ở §7 thay nó bằng
 
 1. **Quyền truy cập LDC**: trường có tư cách thành viên LDC không; phí của `LDC2017S01` và
    `LDC96S60`; Babel có mấy kênh (U1). Câu trả lời quyết định chọn phương án A hay B.
-2. **Hướng dẫn gán nhãn cho hội thoại người với người.** `docs/annotation-guide.md` v1.2 viết cho
-   cuộc gọi đóng vai với bot; nó cần định nghĩa lại điểm ngừng và bỏ khái niệm "track bot".
+2. ~~**Hướng dẫn gán nhãn cho hội thoại người với người.**~~ Xong 2026-10-28:
+   `docs/annotation-guide-conversation.md` v2.0, bộ nhãn chuyển lượt của Gravano & Hirschberg
+   (2011). Công cụ bốc mẫu: `evaluation/analysis_sample.py`.
 3. **Adapter đánh giá**: `evaluation/golden.py` chia lượt theo `bot_speaking`. Hội thoại người với
    người cần một chế độ mà lần lượt mỗi người đóng vai "khách", người kia là bên nghe.
 4. **Pilot khoảng 1 giờ** trên một nguồn tầng 3 (miễn phí), để đo: số giờ gán nhãn cho mỗi giờ
-   audio, tỉ lệ lỗi tách người nói, tần suất từng thanh ở cuối lượt.
+   audio, tỉ lệ lỗi tách người nói, tần suất từng thanh ở cuối lượt. Nguồn đã chọn (2026-10-28):
+   UCI *Viet Stories*, vì là kho của thư viện đại học, có điều khoản cho nghiên cứu, và metadata
+   ghi nơi sinh của người kể. Việc 2 và 3 không chặn pilot: pilot dùng hướng dẫn v2.0 và
+   `analysis_sample.endings` thay cho chế độ người với người của `golden.py`.
 
 ---
 

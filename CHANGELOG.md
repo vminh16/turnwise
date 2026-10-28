@@ -11,6 +11,16 @@ chỗ nào hai bên lệch nhau thì hai tài liệu kia đúng.
 
 Chưa gộp vào `main`, chưa đẩy lên GitHub. 102 commit, 2026-09-10 → 2026-09-27.
 
+### Bộ phân tích — hướng dẫn v2.0 và bốc mẫu (2026-10-28)
+
+- **Thêm** `docs/annotation-guide-conversation.md` v2.0: gán nhãn hội thoại hai người. Mỗi IPU
+  mang một nhãn mở đầu theo Gravano & Hirschberg (2011): `H S O PI I BI BC BC_O X`. Kết thúc lượt
+  được suy ra, không gán tay. Miền lấy từ nơi sinh trong metadata, không từ tai người gán.
+- **Thêm** `evaluation/analysis_sample.py` (`rank`, `prepare`, `status`) và section
+  `analysis_sample` trong `configs/default.yaml`. Thứ hạng là `sha256(seed:source:item_id)`;
+  mỗi hội thoại một cửa sổ, vị trí tái lập được.
+- **Thêm** `data/manifests/analysis-catalog.template.csv`. Nguồn pilot: UCI *Viet Stories*.
+
 ### Dữ liệu — đổi hướng (2026-10-28)
 
 **Đổi**

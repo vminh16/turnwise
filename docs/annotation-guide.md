@@ -8,8 +8,8 @@ người tham gia phải ký trước khi thu.
 
 **Phạm vi (từ 2026-10-28, ADR-0007):** hướng dẫn này chỉ áp dụng cho **bộ kiểm thử sản phẩm**,
 tức các cuộc gọi đóng vai NetCo có track bot. **Bộ phân tích** là hội thoại tự nhiên giữa hai
-người, không có bot, và cần hướng dẫn riêng (`docs/research/analysis-corpus.md` §7). Hướng dẫn đó
-chưa viết; đừng dùng tài liệu này để gán nhãn bộ phân tích.
+người, không có bot, và dùng hướng dẫn riêng: `docs/annotation-guide-conversation.md` (v2.0).
+Đừng dùng tài liệu này để gán nhãn bộ phân tích.
 
 Phiên bản hướng dẫn: **1.2** (2026-09-15). Mỗi file nhãn ghi phiên bản hướng dẫn đã dùng để
 gán; đổi quy tắc là tăng phiên bản (§6.4).
